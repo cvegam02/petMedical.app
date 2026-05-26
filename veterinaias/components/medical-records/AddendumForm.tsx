@@ -18,16 +18,20 @@ export function AddendumForm({ recordId, onAdded }: AddendumFormProps) {
   })
 
   const onSubmit = async (values: AddendumFormValues) => {
-    const res = await fetch(`/api/medical-records/${recordId}/addendums`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    })
-    const json = await res.json()
-    if (!res.ok) { alert(json.error); return }
-    onAdded(json.data)
-    reset()
-    setOpen(false)
+    try {
+      const res = await fetch(`/api/medical-records/${recordId}/addendums`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const json = await res.json()
+      if (!res.ok) { alert(json.error); return }
+      onAdded(json.data)
+      reset()
+      setOpen(false)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al guardar la adenda')
+    }
   }
 
   if (!open) {
