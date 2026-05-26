@@ -36,64 +36,70 @@ export default async function RecordDetailPage({
   })
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Link href={`/dashboard/pets/${petId}`} className="text-sm text-slate-500 hover:text-slate-700 mb-2 block">
+    <div>
+      <Link
+        href={`/dashboard/pets/${petId}`}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
         ← {pet?.name}
       </Link>
 
-      <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
-        <div className="flex items-start justify-between mb-4">
+      <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">
+        <div className="flex items-start justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">{record.reason}</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              {date} · {createdBy?.full_name ?? 'Veterinario'}
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Consulta</p>
+            <h1 className="text-xl font-semibold tracking-tight text-foreground">{record.reason}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {date}{createdBy?.full_name ? ` · Dr. ${createdBy.full_name}` : ''}
             </p>
           </div>
-          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">Inmutable</span>
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+            Registro inmutable
+          </span>
         </div>
 
         {record.diagnosis && (
           <div className="mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Diagnóstico</p>
-            <p className="text-slate-700">{record.diagnosis}</p>
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Diagnóstico</p>
+            <p className="text-sm text-foreground">{record.diagnosis}</p>
           </div>
         )}
 
         {record.treatment && (
           <div className="mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Tratamiento</p>
-            <p className="text-slate-700">{record.treatment}</p>
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Tratamiento</p>
+            <p className="text-sm text-foreground">{record.treatment}</p>
           </div>
         )}
 
         {(record.weight_kg || record.temperature_celsius || record.heart_rate_bpm || record.respiratory_rate_bpm) && (
           <div className="mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Signos Vitales</p>
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-2">Signos vitales</p>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              {record.weight_kg && <span className="text-slate-600">Peso: <strong>{record.weight_kg} kg</strong></span>}
-              {record.temperature_celsius && <span className="text-slate-600">Temperatura: <strong>{record.temperature_celsius} °C</strong></span>}
-              {record.heart_rate_bpm && <span className="text-slate-600">F. Cardíaca: <strong>{record.heart_rate_bpm} lpm</strong></span>}
-              {record.respiratory_rate_bpm && <span className="text-slate-600">F. Respiratoria: <strong>{record.respiratory_rate_bpm} rpm</strong></span>}
+              {record.weight_kg && <span className="text-muted-foreground">Peso: <strong className="text-foreground">{record.weight_kg} kg</strong></span>}
+              {record.temperature_celsius && <span className="text-muted-foreground">Temperatura: <strong className="text-foreground">{record.temperature_celsius} °C</strong></span>}
+              {record.heart_rate_bpm && <span className="text-muted-foreground">F. Cardíaca: <strong className="text-foreground">{record.heart_rate_bpm} lpm</strong></span>}
+              {record.respiratory_rate_bpm && <span className="text-muted-foreground">F. Respiratoria: <strong className="text-foreground">{record.respiratory_rate_bpm} rpm</strong></span>}
             </div>
           </div>
         )}
 
         {record.notes && (
           <div className="mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Notas</p>
-            <p className="text-slate-600 text-sm italic">{record.notes}</p>
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Notas</p>
+            <p className="text-sm text-muted-foreground italic">{record.notes}</p>
           </div>
         )}
 
         {(record.prescriptions as any[]).length > 0 && (
           <div className="mb-4">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Recetas</p>
+            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-2">Recetas</p>
             <div className="space-y-2">
               {(record.prescriptions as any[]).map((p: any) => (
-                <div key={p.id} className="bg-slate-50 rounded p-3 text-sm">
-                  <p className="font-medium">{p.medication_name} — {p.dosage}</p>
-                  <p className="text-slate-500">{p.frequency} por {p.duration}</p>
-                  {p.notes && <p className="text-slate-500 italic">{p.notes}</p>}
+                <div key={p.id} className="bg-secondary rounded-lg p-3 text-sm border border-border">
+                  <p className="font-medium text-foreground">{p.medication_name} — {p.dosage}</p>
+                  <p className="text-muted-foreground">{p.frequency} por {p.duration}</p>
+                  {p.notes && <p className="text-muted-foreground italic mt-0.5">{p.notes}</p>}
                 </div>
               ))}
             </div>

@@ -18,14 +18,12 @@ export default async function NewRecordPage({ params }: { params: Promise<{ petI
     <div className="max-w-3xl mx-auto">
       <Link
         href={`/dashboard/pets/${petId}`}
-        className="text-sm text-slate-500 hover:text-slate-700 mb-2 block"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
-        &larr; {pet.name}
+        ← {pet.name}
       </Link>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Nuevo Expediente Clínico</h1>
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 text-sm text-amber-800">
-        Este expediente será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
-      </div>
+      <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1">Nueva consulta</h1>
+      <p className="text-sm text-muted-foreground mb-6">Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.</p>
       <MedicalRecordForm petId={petId} />
     </div>
   )

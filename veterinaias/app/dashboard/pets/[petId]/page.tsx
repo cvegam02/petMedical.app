@@ -108,9 +108,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
       {/* Clinical history section */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-0.5">Historial clínico</p>
+          <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-0.5">Expediente médico</p>
           <h2 className="text-base font-semibold text-foreground">
-            Expedientes
+            Consultas
             {records.length > 0 && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">({records.length})</span>
             )}
@@ -121,14 +121,14 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           className={buttonVariants({ size: 'sm' })}
         >
           <Plus size={14} className="mr-1.5" />
-          Nuevo expediente
+          Nueva consulta
         </Link>
       </div>
 
       {records.length === 0 ? (
         <div className="text-center py-12 rounded-xl border border-dashed border-border">
-          <p className="font-medium text-foreground mb-1">Sin expedientes clínicos</p>
-          <p className="text-sm text-muted-foreground">Agrega el primer registro de consulta.</p>
+          <p className="font-medium text-foreground mb-1">Sin consultas registradas</p>
+          <p className="text-sm text-muted-foreground">Registra la primera consulta de esta mascota.</p>
         </div>
       ) : (
         <div className="space-y-3">
