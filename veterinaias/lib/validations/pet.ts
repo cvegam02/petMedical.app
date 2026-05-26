@@ -6,7 +6,7 @@ export const petSchema = z.object({
   species_id: z.string().uuid('Especie es requerida'),
   breed_id: z.string().uuid().optional(),
   sex: z.enum(['male', 'female', 'unknown']),
-  date_of_birth: z.string().optional(),
+  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha debe tener formato YYYY-MM-DD').optional(),
   color: z.string().optional(),
   microchip: z.string().optional(),
   notes: z.string().optional(),

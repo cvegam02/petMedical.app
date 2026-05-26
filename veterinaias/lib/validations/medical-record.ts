@@ -14,10 +14,10 @@ export const medicalRecordSchema = z.object({
   diagnosis: z.string().optional(),
   treatment: z.string().optional(),
   notes: z.string().optional(),
-  weight_kg: z.coerce.number().positive().optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
-  temperature_celsius: z.coerce.number().positive().optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
-  heart_rate_bpm: z.coerce.number().int().positive().optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
-  respiratory_rate_bpm: z.coerce.number().int().positive().optional().or(z.literal('')).transform(v => v === '' ? undefined : v),
+  weight_kg: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().positive().optional()),
+  temperature_celsius: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().positive().optional()),
+  heart_rate_bpm: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().int().positive().optional()),
+  respiratory_rate_bpm: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().int().positive().optional()),
   prescriptions: z.array(prescriptionSchema).default([]),
 })
 
