@@ -1,0 +1,17 @@
+import { z } from 'zod'
+
+export const petSchema = z.object({
+  name: z.string().min(1, 'Nombre es requerido'),
+  owner_id: z.string().uuid('Dueño es requerido'),
+  species_id: z.string().uuid('Especie es requerida'),
+  breed_id: z.string().uuid().optional(),
+  sex: z.enum(['male', 'female', 'unknown']),
+  date_of_birth: z.string().optional(),
+  color: z.string().optional(),
+  microchip: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export const updatePetSchema = petSchema.omit({ owner_id: true }).partial()
+
+export type PetFormValues = z.infer<typeof petSchema>
