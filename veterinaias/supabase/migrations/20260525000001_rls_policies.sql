@@ -14,17 +14,17 @@ ALTER TABLE share_tokens ENABLE ROW LEVEL SECURITY;
 -- Helper functions (SECURITY DEFINER para acceder a auth.uid() sin recursion)
 CREATE OR REPLACE FUNCTION auth_tenant_id()
 RETURNS UUID AS $$
-  SELECT tenant_id FROM user_profiles WHERE id = auth.uid()
+  SELECT tenant_id FROM user_profiles WHERE id = (SELECT auth.uid())
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 CREATE OR REPLACE FUNCTION auth_role()
 RETURNS user_role AS $$
-  SELECT role FROM user_profiles WHERE id = auth.uid()
+  SELECT role FROM user_profiles WHERE id = (SELECT auth.uid())
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 CREATE OR REPLACE FUNCTION is_super_admin()
 RETURNS BOOLEAN AS $$
-  SELECT COALESCE(is_super_admin, FALSE) FROM user_profiles WHERE id = auth.uid()
+  SELECT COALESCE(is_super_admin, FALSE) FROM user_profiles WHERE id = (SELECT auth.uid())
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
 -- TENANTS
@@ -48,7 +48,7 @@ CREATE POLICY "users_update_own_profile" ON user_profiles
   FOR UPDATE USING (id = auth.uid());
 
 CREATE POLICY "system_insert_profile" ON user_profiles
-  FOR INSERT WITH CHECK (TRUE);
+  FOR INSERT WITH CHECK (id = auth.uid() AND is_super_admin = FALSE);
 
 -- INVITATIONS
 CREATE POLICY "admins_manage_invitations" ON invitations
@@ -100,8 +100,13 @@ CREATE POLICY "same_tenant_insert_prescriptions" ON prescriptions
 CREATE POLICY "authenticated_read_attachments" ON attachments
   FOR SELECT USING (auth.uid() IS NOT NULL);
 
-CREATE POLICY "authenticated_insert_attachments" ON attachments
-  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "same_tenant_insert_attachments" ON attachments
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM medical_records mr
+      WHERE mr.id = medical_record_id AND mr.tenant_id = auth_tenant_id()
+    )
+  );
 
 -- ADDENDUMS
 CREATE POLICY "authenticated_read_addendums" ON addendums
@@ -114,8 +119,6 @@ CREATE POLICY "authenticated_insert_addendums" ON addendums
 CREATE POLICY "super_admin_all_appointments" ON appointments
   FOR ALL USING (is_super_admin());
 
-CREATE POLICY "tenant_read_appointments" ON appointments
-  FOR SELECT USING (tenant_id = auth_tenant_id());
 
 CREATE POLICY "tenant_manage_appointments" ON appointments
   FOR ALL USING (tenant_id = auth_tenant_id());
