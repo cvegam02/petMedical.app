@@ -75,7 +75,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         <p className="text-slate-500 text-sm">No hay expedientes registrados para esta mascota.</p>
       ) : (
         <div className="space-y-3">
-          {records.map((record: any) => (
+          {records.map((record) => (
             <MedicalRecordCard key={record.id} record={record} petId={petId} />
           ))}
         </div>
