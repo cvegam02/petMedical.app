@@ -1,17 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Home, Users, Calendar, Settings2, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
-
-const NAV_ITEMS = [
-  { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
-  { href: '/dashboard/owners', icon: Users, label: 'Dueños y Mascotas' },
-  { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
-]
-
-const ADMIN_NAV_ITEMS = [
-  { href: '/dashboard/settings/team', icon: Settings2, label: 'Equipo' },
-]
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -63,10 +53,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          <SidebarNav items={NAV_ITEMS} />
-          {profile?.role === 'admin' && (
-            <SidebarNav items={ADMIN_NAV_ITEMS} label="Administración" />
-          )}
+          <SidebarNav role={profile?.role ?? ''} />
         </nav>
 
         {/* User Footer */}

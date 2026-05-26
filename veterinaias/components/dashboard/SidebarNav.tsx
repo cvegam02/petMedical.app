@@ -1,24 +1,26 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { LucideIcon } from 'lucide-react'
+import { Home, Users, Calendar, Settings2 } from 'lucide-react'
 
-interface NavItem {
-  href: string
-  icon: LucideIcon
-  label: string
-  exact?: boolean
-}
+const NAV_ITEMS = [
+  { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
+  { href: '/dashboard/owners', icon: Users, label: 'Dueños y Mascotas' },
+  { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
+]
+
+const ADMIN_NAV_ITEMS = [
+  { href: '/dashboard/settings/team', icon: Settings2, label: 'Equipo' },
+]
 
 interface SidebarNavProps {
-  items: NavItem[]
-  label?: string
+  role: string
 }
 
-export function SidebarNav({ items, label }: SidebarNavProps) {
+export function SidebarNav({ role }: SidebarNavProps) {
   const pathname = usePathname()
 
-  return (
+  const renderItems = (items: typeof NAV_ITEMS, label?: string) => (
     <div>
       {label && (
         <div className="pt-3 pb-1 px-3">
@@ -50,5 +52,12 @@ export function SidebarNav({ items, label }: SidebarNavProps) {
         )
       })}
     </div>
+  )
+
+  return (
+    <>
+      {renderItems(NAV_ITEMS)}
+      {role === 'admin' && renderItems(ADMIN_NAV_ITEMS, 'Administración')}
+    </>
   )
 }
