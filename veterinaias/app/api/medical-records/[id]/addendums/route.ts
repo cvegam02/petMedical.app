@@ -22,6 +22,14 @@ export async function POST(
   const result = addendumSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
+  const { data: record, error: recordError } = await supabase
+    .from('medical_records')
+    .select('id')
+    .eq('id', id)
+    .single()
+
+  if (recordError || !record) return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })
+
   const { data, error } = await supabase
     .from('addendums')
     .insert({ medical_record_id: id, content: result.data.content, created_by: user.id })

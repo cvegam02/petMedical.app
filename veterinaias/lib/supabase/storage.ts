@@ -22,10 +22,11 @@ export async function uploadAttachment(
 
 export async function getAttachmentUrl(path: string): Promise<string> {
   const supabase = createClient()
-  const { data } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(path, 60 * 60)
 
+  if (error) throw new Error(error.message)
   if (!data?.signedUrl) throw new Error('No se pudo generar la URL del archivo')
   return data.signedUrl
 }

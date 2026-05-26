@@ -3,9 +3,9 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const attachmentSchema = z.object({
-  storage_path: z.string().min(1),
-  file_name: z.string().min(1),
-  file_type: z.string().min(1),
+  storage_path: z.string().min(1).max(500),
+  file_name: z.string().min(1).max(255),
+  file_type: z.string().min(1).max(100),
   medical_record_id: z.string().uuid(),
 })
 
@@ -14,11 +14,9 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  let body: unknown
-  try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
-
+  const body = await req.json().catch(() => ({}))
   const result = attachmentSchema.safeParse(body)
-  if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
+  if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 })
 
   const { data, error } = await supabase
     .from('attachments')
