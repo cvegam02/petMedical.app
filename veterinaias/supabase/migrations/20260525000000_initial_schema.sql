@@ -215,3 +215,30 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- Indexes on foreign key columns (PostgreSQL does not create these automatically)
+CREATE INDEX idx_user_profiles_tenant_id ON user_profiles(tenant_id);
+CREATE INDEX idx_invitations_tenant_id ON invitations(tenant_id);
+CREATE INDEX idx_invitations_invited_by ON invitations(invited_by);
+CREATE INDEX idx_breeds_species_id ON breeds(species_id);
+CREATE INDEX idx_pets_owner_id ON pets(owner_id);
+CREATE INDEX idx_pets_species_id ON pets(species_id);
+CREATE INDEX idx_pets_breed_id ON pets(breed_id);
+CREATE INDEX idx_medical_records_pet_id ON medical_records(pet_id);
+CREATE INDEX idx_medical_records_tenant_id ON medical_records(tenant_id);
+CREATE INDEX idx_medical_records_created_by ON medical_records(created_by);
+CREATE INDEX idx_medical_records_appointment_id ON medical_records(appointment_id);
+CREATE INDEX idx_prescriptions_medical_record_id ON prescriptions(medical_record_id);
+CREATE INDEX idx_attachments_medical_record_id ON attachments(medical_record_id);
+CREATE INDEX idx_attachments_created_by ON attachments(created_by);
+CREATE INDEX idx_addendums_medical_record_id ON addendums(medical_record_id);
+CREATE INDEX idx_addendums_created_by ON addendums(created_by);
+CREATE INDEX idx_appointments_tenant_id ON appointments(tenant_id);
+CREATE INDEX idx_appointments_pet_id ON appointments(pet_id);
+CREATE INDEX idx_appointments_owner_id ON appointments(owner_id);
+CREATE INDEX idx_appointments_assigned_to ON appointments(assigned_to);
+CREATE INDEX idx_appointments_medical_record_id ON appointments(medical_record_id);
+CREATE INDEX idx_appointments_origin_record_id ON appointments(origin_record_id);
+CREATE INDEX idx_appointments_created_by ON appointments(created_by);
+CREATE INDEX idx_share_tokens_pet_id ON share_tokens(pet_id);
+CREATE INDEX idx_share_tokens_created_by ON share_tokens(created_by);
