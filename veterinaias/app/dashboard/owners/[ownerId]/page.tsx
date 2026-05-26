@@ -3,6 +3,11 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PetCard } from '@/components/pets/PetCard'
 import { buttonVariants } from '@/components/ui/button'
+import { ChevronLeft, Phone, Mail, MapPin, Plus } from 'lucide-react'
+
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+}
 
 export default async function OwnerDetailPage({ params }: { params: Promise<{ ownerId: string }> }) {
   const { ownerId } = await params
@@ -22,28 +27,92 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
 
   if (error || !owner) notFound()
 
+  const pets = (owner.pets as any[]) ?? []
+  const initials = getInitials(owner.full_name)
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <Link href="/dashboard/owners" className="text-sm text-slate-500 hover:text-slate-700 mb-2 block">← Dueños</Link>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{owner.full_name}</h1>
-          <p className="text-muted-foreground">{owner.phone}{owner.email ? ` · ${owner.email}` : ''}</p>
-          {owner.address && <p className="text-muted-foreground text-sm">{owner.address}</p>}
+    <div>
+      {/* Breadcrumb */}
+      <Link
+        href="/dashboard/owners"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
+        <ChevronLeft size={14} />
+        Dueños
+      </Link>
+
+      {/* Owner header card */}
+      <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            {/* Avatar */}
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-lg font-semibold text-primary">{initials}</span>
+            </div>
+
+            {/* Details */}
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">{owner.full_name}</h1>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                {owner.phone && (
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Phone size={12} className="text-muted-foreground/50" />
+                    {owner.phone}
+                  </span>
+                )}
+                {owner.email && (
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Mail size={12} className="text-muted-foreground/50" />
+                    {owner.email}
+                  </span>
+                )}
+                {owner.address && (
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin size={12} className="text-muted-foreground/50" />
+                    {owner.address}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href={`/dashboard/owners/${ownerId}/edit`}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          >
+            Editar
+          </Link>
         </div>
-        <Link href={`/dashboard/owners/${ownerId}/edit`} className={buttonVariants({ variant: 'outline' })}>Editar</Link>
       </div>
 
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold text-foreground">Mascotas</h2>
-        <Link href={`/dashboard/owners/${ownerId}/pets/new`} className={buttonVariants({ size: 'sm' })}>+ Agregar mascota</Link>
+      {/* Pets section */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-0.5">Pacientes</p>
+          <h2 className="text-base font-semibold text-foreground">
+            Mascotas
+            {pets.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">({pets.length})</span>
+            )}
+          </h2>
+        </div>
+        <Link
+          href={`/dashboard/owners/${ownerId}/pets/new`}
+          className={buttonVariants({ size: 'sm' })}
+        >
+          <Plus size={14} className="mr-1.5" />
+          Agregar mascota
+        </Link>
       </div>
 
-      {(owner.pets as any[]).length === 0 ? (
-        <p className="text-muted-foreground text-sm">Este dueño no tiene mascotas registradas.</p>
+      {pets.length === 0 ? (
+        <div className="text-center py-12 rounded-xl border border-dashed border-border">
+          <p className="font-medium text-foreground mb-1">Sin mascotas registradas</p>
+          <p className="text-sm text-muted-foreground">Este dueño no tiene mascotas aún.</p>
+        </div>
       ) : (
         <div className="space-y-2">
-          {(owner.pets as any[]).map((pet: any) => <PetCard key={pet.id} pet={pet} />)}
+          {pets.map((pet: any) => <PetCard key={pet.id} pet={pet} />)}
         </div>
       )}
     </div>
