@@ -38,14 +38,22 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check tenant and super admin status
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('tenant_id, is_super_admin')
     .eq('id', user.id)
     .single()
 
+  // Profile not found or error (e.g., trigger delay after signup) — redirect to onboarding
+  if (profileError || !profile) {
+    if (pathname !== ONBOARDING_ROUTE) {
+      return NextResponse.redirect(new URL(ONBOARDING_ROUTE, request.url))
+    }
+    return response
+  }
+
   // Super admin: only /super-admin routes
-  if (profile?.is_super_admin) {
+  if (profile.is_super_admin) {
     if (!SUPER_ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
       return NextResponse.redirect(new URL('/super-admin', request.url))
     }
@@ -53,12 +61,12 @@ export async function middleware(request: NextRequest) {
   }
 
   // No tenant: force onboarding
-  if (!profile?.tenant_id && pathname !== ONBOARDING_ROUTE) {
+  if (!profile.tenant_id && pathname !== ONBOARDING_ROUTE) {
     return NextResponse.redirect(new URL(ONBOARDING_ROUTE, request.url))
   }
 
   // Has tenant but on onboarding: redirect to dashboard
-  if (profile?.tenant_id && pathname === ONBOARDING_ROUTE) {
+  if (profile.tenant_id && pathname === ONBOARDING_ROUTE) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
