@@ -57,6 +57,17 @@ describe('POST /api/owners', () => {
 })
 
 describe('GET /api/owners', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('returns 401 when not authenticated', async () => {
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: new Error('no auth') }) },
+    } as any)
+    const req = new NextRequest('http://localhost/api/owners')
+    const res = await GET(req)
+    expect(res.status).toBe(401)
+  })
+
   it('returns owners list when authenticated', async () => {
     const mockOwners = [{ id: 'owner-1', full_name: 'Ana García', phone: '555', email: null }]
     vi.mocked(createClient).mockResolvedValue({
@@ -70,6 +81,26 @@ describe('GET /api/owners', () => {
     const req = new NextRequest('http://localhost/api/owners')
     const res = await GET(req)
     expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.data).toHaveLength(1)
+  })
+
+  it('filters owners when ?q= param is provided', async () => {
+    const mockOwners = [{ id: 'owner-2', full_name: 'Carlos López', phone: '5559999', email: null }]
+    const mockOr = vi.fn().mockResolvedValue({ data: mockOwners, error: null })
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }) },
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        or: mockOr,
+      }),
+    } as any)
+    const req = new NextRequest('http://localhost/api/owners?q=Carlos')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    expect(mockOr).toHaveBeenCalledWith(expect.stringContaining('Carlos'))
     const body = await res.json()
     expect(body.data).toHaveLength(1)
   })
