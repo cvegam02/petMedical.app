@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export async function GET(
@@ -6,6 +7,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const { success: validId } = z.string().uuid().safeParse(id)
+  if (!validId) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
   const supabase = await createServerClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })

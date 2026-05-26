@@ -7,12 +7,13 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('tenant_id')
     .eq('id', user.id)
     .single()
 
+  if (profileError) return NextResponse.json({ error: 'Error al verificar el perfil' }, { status: 500 })
   if (!profile?.tenant_id) return NextResponse.json({ error: 'No hay clínica asociada a tu cuenta' }, { status: 403 })
 
   let body: unknown
@@ -39,6 +40,8 @@ export async function POST(req: NextRequest) {
 
   if (recordError) return NextResponse.json({ error: recordError.message }, { status: 500 })
 
+  // MVP: no transaction — if prescriptions fail, the record remains without prescriptions.
+  // Production fix: wrap in a Supabase RPC for atomicity.
   if (prescriptions && prescriptions.length > 0) {
     const { error: presError } = await supabase
       .from('prescriptions')
