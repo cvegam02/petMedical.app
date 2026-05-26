@@ -30,12 +30,18 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
   const selectedSpeciesId = watch('species_id')
 
   useEffect(() => {
-    fetch('/api/species').then(r => r.json()).then(j => setSpecies(j.data ?? []))
+    fetch('/api/species')
+      .then(r => r.json())
+      .then(j => setSpecies(j.data ?? []))
+      .catch(() => setSpecies([]))
   }, [])
 
   useEffect(() => {
     if (!selectedSpeciesId) return
-    fetch(`/api/species/${selectedSpeciesId}/breeds`).then(r => r.json()).then(j => setBreeds(j.data ?? []))
+    fetch(`/api/species/${selectedSpeciesId}/breeds`)
+      .then(r => r.json())
+      .then(j => setBreeds(j.data ?? []))
+      .catch(() => setBreeds([]))
   }, [selectedSpeciesId])
 
   const onSubmit = async (values: PetFormValues) => {

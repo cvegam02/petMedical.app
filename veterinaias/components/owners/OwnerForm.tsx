@@ -49,6 +49,7 @@ export function OwnerForm({ defaultValues, ownerId }: OwnerFormProps) {
       <div>
         <Label htmlFor="address">Dirección</Label>
         <Input id="address" {...register('address')} />
+        {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>}
       </div>
       <div className="flex gap-2">
         <Button type="submit" disabled={isSubmitting}>
