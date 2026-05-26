@@ -1,16 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Home, Users, Calendar, Settings2, LogOut } from 'lucide-react'
+import { SidebarNav } from '@/components/dashboard/SidebarNav'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', icon: Home, label: 'Inicio' },
+  { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
   { href: '/dashboard/owners', icon: Users, label: 'Dueños y Mascotas' },
   { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
-] as const
+]
 
 const ADMIN_NAV_ITEMS = [
   { href: '/dashboard/settings/team', icon: Settings2, label: 'Equipo' },
-] as const
+]
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -62,33 +63,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="group flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <Icon size={15} className="shrink-0 text-muted-foreground/60 group-hover:text-foreground/70 transition-colors" />
-              {label}
-            </Link>
-          ))}
-
+          <SidebarNav items={NAV_ITEMS} />
           {profile?.role === 'admin' && (
-            <>
-              <div className="pt-3 pb-1 px-3">
-                <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider">Administración</p>
-              </div>
-              {ADMIN_NAV_ITEMS.map(({ href, icon: Icon, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="group flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Icon size={15} className="shrink-0 text-muted-foreground/60 group-hover:text-foreground/70 transition-colors" />
-                  {label}
-                </Link>
-              ))}
-            </>
+            <SidebarNav items={ADMIN_NAV_ITEMS} label="Administración" />
           )}
         </nav>
 
