@@ -14,17 +14,17 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Bienvenido, {profile?.full_name}</h1>
-      <p className="text-slate-500 mb-8">{tenant?.name}</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground mb-1">Bienvenido, {profile?.full_name}</h1>
+      <p className="text-muted-foreground mb-8">{tenant?.name}</p>
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Dueños y Mascotas', href: '/dashboard/owners', desc: 'Gestionar dueños y mascotas' },
           { label: 'Citas', href: '/dashboard/appointments', desc: 'Ver y agendar citas (próximamente)' },
           { label: 'Equipo', href: '/dashboard/settings/team', desc: 'Gestionar miembros del equipo' },
         ].map(({ label, href, desc }) => (
-          <a key={href} href={href} className="block p-6 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
-            <h2 className="font-semibold mb-1">{label}</h2>
-            <p className="text-sm text-slate-500">{desc}</p>
+          <a key={href} href={href} className="block p-6 bg-card rounded-lg border border-border hover:border-primary/40 hover:shadow-sm transition-all">
+            <h2 className="font-medium text-foreground mb-1">{label}</h2>
+            <p className="text-sm text-muted-foreground">{desc}</p>
           </a>
         ))}
       </div>

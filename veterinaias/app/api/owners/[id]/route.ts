@@ -48,8 +48,7 @@ export async function PATCH(
   const update: Record<string, unknown> = { ...rest }
   if (email !== undefined) update.email = email || null
 
-  const { data, error } = await supabase
-    .from('owners')
+  const { data, error } = await (supabase.from('owners') as any)
     .update(update)
     .eq('id', id)
     .select()

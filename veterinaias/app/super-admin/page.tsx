@@ -4,8 +4,7 @@ import { Badge } from '@/components/ui/badge'
 export default async function SuperAdminPage() {
   const admin = createAdminClient()
 
-  const { data: tenants } = await admin
-    .from('tenants')
+  const { data: tenants } = await (admin.from('tenants') as any)
     .select('id, name, type, subscription_status, created_at')
     .order('created_at', { ascending: false })
 
@@ -22,7 +21,7 @@ export default async function SuperAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {tenants?.map(t => (
+            {tenants?.map((t: any) => (
               <tr key={t.id} className="border-b last:border-0 hover:bg-slate-50">
                 <td className="px-4 py-3 font-medium">{t.name}</td>
                 <td className="px-4 py-3"><Badge variant="outline">{t.type}</Badge></td>

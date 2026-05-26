@@ -21,7 +21,7 @@ export default function OwnersPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Dueños y Mascotas</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Dueños y Mascotas</h1>
         <Link href="/dashboard/owners/new" className={buttonVariants()}>+ Nuevo dueño</Link>
       </div>
       <div className="mb-4">
@@ -30,9 +30,9 @@ export default function OwnersPage() {
       {fetchError ? (
         <p className="text-red-500 text-sm">{fetchError}</p>
       ) : loading ? (
-        <p className="text-slate-500 text-sm">Cargando...</p>
+        <p className="text-muted-foreground text-sm">Cargando...</p>
       ) : owners.length === 0 ? (
-        <p className="text-slate-500 text-sm">No se encontraron dueños.</p>
+        <p className="text-muted-foreground text-sm">No se encontraron dueños.</p>
       ) : (
         <div className="space-y-2">
           {owners.map(owner => <OwnerCard key={owner.id} owner={owner} />)}

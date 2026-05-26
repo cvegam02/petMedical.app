@@ -6,8 +6,7 @@ export default async function EditPetPage({ params }: { params: Promise<{ petId:
   const { petId } = await params
   const supabase = await createClient()
 
-  const { data: pet, error } = await supabase
-    .from('pets')
+  const { data: pet, error } = await (supabase.from('pets') as any)
     .select('id, name, owner_id, species_id, breed_id, sex, date_of_birth, color, microchip, notes')
     .eq('id', petId)
     .single()

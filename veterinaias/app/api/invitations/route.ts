@@ -6,7 +6,7 @@ import { z } from 'zod'
 const inviteSchema = z.object({
   email: z.string().email('Email invalido'),
   role: z.enum(['staff', 'doctor', 'assistant'], {
-    errorMap: () => ({ message: 'Rol invalido' }),
+    error: () => ({ message: 'Rol invalido' }),
   }),
 })
 

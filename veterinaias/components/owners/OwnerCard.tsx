@@ -13,13 +13,13 @@ export function OwnerCard({ owner }: OwnerCardProps) {
   return (
     <Link
       href={`/dashboard/owners/${owner.id}`}
-      className="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-400 transition-colors"
+      className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:border-primary/40 hover:shadow-sm transition-all"
     >
       <div>
-        <p className="font-medium text-slate-900">{owner.full_name}</p>
-        <p className="text-sm text-slate-500">{owner.phone}{owner.email ? ` · ${owner.email}` : ''}</p>
+        <p className="font-medium text-foreground">{owner.full_name}</p>
+        <p className="text-sm text-muted-foreground">{owner.phone}{owner.email ? ` · ${owner.email}` : ''}</p>
       </div>
-      <span className="text-slate-400 text-sm">Ver →</span>
+      <span className="text-muted-foreground text-sm">Ver →</span>
     </Link>
   )
 }

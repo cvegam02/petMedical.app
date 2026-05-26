@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const tenantSchema = z.object({
   name: z.string().min(2, 'Nombre debe tener al menos 2 caracteres'),
   type: z.enum(['individual', 'enterprise'], {
-    errorMap: () => ({ message: 'Tipo debe ser individual o enterprise' }),
+    error: () => ({ message: 'Tipo debe ser individual o enterprise' }),
   }),
 })
 

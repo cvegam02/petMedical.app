@@ -6,8 +6,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
+  const { data: profile } = await (supabase.from('user_profiles') as any)
     .select('is_super_admin, full_name')
     .eq('id', user!.id)
     .single()

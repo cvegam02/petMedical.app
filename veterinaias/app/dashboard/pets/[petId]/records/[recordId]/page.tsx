@@ -13,8 +13,7 @@ export default async function RecordDetailPage({
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: record, error } = await supabase
-    .from('medical_records')
+  const { data: record, error } = await (supabase.from('medical_records') as any)
     .select(`
       id, reason, diagnosis, treatment, notes,
       weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,

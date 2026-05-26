@@ -7,8 +7,7 @@ export default async function NewRecordPage({ params }: { params: Promise<{ petI
   const { petId } = await params
   const supabase = await createClient()
 
-  const { data: pet, error } = await supabase
-    .from('pets')
+  const { data: pet, error } = await (supabase.from('pets') as any)
     .select('id, name, owner_id')
     .eq('id', petId)
     .single()

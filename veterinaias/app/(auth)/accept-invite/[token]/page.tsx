@@ -31,31 +31,33 @@ export default async function AcceptInvitePage({ params }: { params: Promise<{ t
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    await admin.from('user_profiles')
-      .update({ tenant_id: invitation.tenant_id, role: invitation.role })
+    const inv = invitation as any
+    await (admin.from('user_profiles') as any)
+      .update({ tenant_id: inv.tenant_id, role: inv.role })
       .eq('id', user.id)
-    await admin.from('invitations')
+    await (admin.from('invitations') as any)
       .update({ accepted_at: new Date().toISOString() })
-      .eq('id', invitation.id)
+      .eq('id', inv.id)
     redirect('/dashboard')
   }
 
-  const tenantName = (invitation as any).tenants?.name ?? 'la clinica'
+  const inv = invitation as any
+  const tenantName = inv.tenants?.name ?? 'la clinica'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Invitacion a {tenantName}</CardTitle>
           <CardDescription>
-            Fuiste invitado como <strong>{invitation.role}</strong>. Crea tu cuenta para aceptar.
+            Fuiste invitado como <strong>{inv.role}</strong>. Crea tu cuenta para aceptar.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600 mb-4">
-            Registrate con el email <strong>{invitation.email}</strong> para unirte.
+          <p className="text-sm text-muted-foreground mb-4">
+            Registrate con el email <strong>{inv.email}</strong> para unirte.
           </p>
-          <a href={`/register?invite=${token}`} className="block w-full text-center bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700">
+          <a href={`/register?invite=${token}`} className="block w-full text-center bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90">
             Crear cuenta
           </a>
         </CardContent>

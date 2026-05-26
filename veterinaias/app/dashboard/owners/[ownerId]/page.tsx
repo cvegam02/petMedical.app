@@ -8,8 +8,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
   const { ownerId } = await params
   const supabase = await createClient()
 
-  const { data: owner, error } = await supabase
-    .from('owners')
+  const { data: owner, error } = await (supabase.from('owners') as any)
     .select(`
       id, full_name, email, phone, address, created_at,
       pets(
@@ -28,20 +27,20 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
       <div className="flex items-start justify-between mb-6">
         <div>
           <Link href="/dashboard/owners" className="text-sm text-slate-500 hover:text-slate-700 mb-2 block">← Dueños</Link>
-          <h1 className="text-2xl font-bold text-slate-900">{owner.full_name}</h1>
-          <p className="text-slate-500">{owner.phone}{owner.email ? ` · ${owner.email}` : ''}</p>
-          {owner.address && <p className="text-slate-500 text-sm">{owner.address}</p>}
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{owner.full_name}</h1>
+          <p className="text-muted-foreground">{owner.phone}{owner.email ? ` · ${owner.email}` : ''}</p>
+          {owner.address && <p className="text-muted-foreground text-sm">{owner.address}</p>}
         </div>
         <Link href={`/dashboard/owners/${ownerId}/edit`} className={buttonVariants({ variant: 'outline' })}>Editar</Link>
       </div>
 
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-slate-800">Mascotas</h2>
+        <h2 className="text-base font-semibold text-foreground">Mascotas</h2>
         <Link href={`/dashboard/owners/${ownerId}/pets/new`} className={buttonVariants({ size: 'sm' })}>+ Agregar mascota</Link>
       </div>
 
       {(owner.pets as any[]).length === 0 ? (
-        <p className="text-slate-500 text-sm">Este dueño no tiene mascotas registradas.</p>
+        <p className="text-muted-foreground text-sm">Este dueño no tiene mascotas registradas.</p>
       ) : (
         <div className="space-y-2">
           {(owner.pets as any[]).map((pet: any) => <PetCard key={pet.id} pet={pet} />)}

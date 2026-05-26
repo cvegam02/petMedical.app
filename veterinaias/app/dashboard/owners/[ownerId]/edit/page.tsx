@@ -6,8 +6,7 @@ export default async function EditOwnerPage({ params }: { params: Promise<{ owne
   const { ownerId } = await params
   const supabase = await createClient()
 
-  const { data: owner, error } = await supabase
-    .from('owners')
+  const { data: owner, error } = await (supabase.from('owners') as any)
     .select('id, full_name, email, phone, address')
     .eq('id', ownerId)
     .single()

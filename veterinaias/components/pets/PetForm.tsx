@@ -23,7 +23,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
   const [breeds, setBreeds] = useState<Breed[]>([])
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<PetFormValues>({
-    resolver: zodResolver(petSchema),
+    resolver: zodResolver(petSchema) as any,
     defaultValues: { ...defaultValues, owner_id: ownerId, sex: defaultValues?.sex ?? 'unknown' },
   })
 

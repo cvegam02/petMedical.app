@@ -57,8 +57,7 @@ export async function PATCH(
   if (date_of_birth !== undefined) update.date_of_birth = date_of_birth || null
   if (breed_id !== undefined) update.breed_id = breed_id || null
 
-  const { data, error } = await supabase
-    .from('pets')
+  const { data, error } = await (supabase.from('pets') as any)
     .update(update)
     .eq('id', id)
     .select()

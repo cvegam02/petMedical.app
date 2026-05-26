@@ -20,7 +20,7 @@ export function MedicalRecordForm({ petId }: MedicalRecordFormProps) {
     control,
     formState: { errors, isSubmitting },
   } = useForm<MedicalRecordFormValues>({
-    resolver: zodResolver(medicalRecordSchema),
+    resolver: zodResolver(medicalRecordSchema) as any,
     defaultValues: { pet_id: petId, prescriptions: [] },
   })
 

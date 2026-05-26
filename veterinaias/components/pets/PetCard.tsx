@@ -18,16 +18,16 @@ export function PetCard({ pet }: PetCardProps) {
   return (
     <Link
       href={`/dashboard/pets/${pet.id}`}
-      className="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-400 transition-colors"
+      className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:border-primary/40 hover:shadow-sm transition-all"
     >
       <div>
-        <p className="font-medium text-slate-900">{pet.name}</p>
-        <p className="text-sm text-slate-500">
+        <p className="font-medium text-foreground">{pet.name}</p>
+        <p className="text-sm text-muted-foreground">
           {pet.species?.name ?? ''}{pet.breed ? ` · ${pet.breed.name}` : ''} · {SEX_LABELS[pet.sex] ?? pet.sex}
           {pet.color ? ` · ${pet.color}` : ''}
         </p>
       </div>
-      <span className="text-slate-400 text-sm">Expediente →</span>
+      <span className="text-muted-foreground text-sm">Expediente →</span>
     </Link>
   )
 }

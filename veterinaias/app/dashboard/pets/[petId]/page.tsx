@@ -10,8 +10,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const { petId } = await params
   const supabase = await createClient()
 
-  const { data: pet, error } = await supabase
-    .from('pets')
+  const { data: pet, error } = await (supabase.from('pets') as any)
     .select(`
       id, name, sex, date_of_birth, color, microchip, notes, created_at,
       owner:owner_id(id, full_name),
@@ -42,33 +41,33 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         ← {owner?.full_name}
       </Link>
 
-      <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+      <div className="bg-card rounded-lg border border-border p-6 mb-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">{pet.name}</h1>
-            <p className="text-slate-500 mt-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{pet.name}</h1>
+            <p className="text-muted-foreground mt-1">
               {species?.name}{breed ? ` · ${breed.name}` : ''} · {SEX_LABELS[pet.sex] ?? pet.sex}
               {pet.color ? ` · ${pet.color}` : ''}
             </p>
             {pet.date_of_birth && (
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-muted-foreground text-sm mt-1">
                 Nacimiento: {new Date(pet.date_of_birth).toLocaleDateString('es-MX')}
               </p>
             )}
-            {pet.microchip && <p className="text-slate-500 text-sm">Microchip: {pet.microchip}</p>}
-            {pet.notes && <p className="text-slate-600 text-sm mt-2 italic">{pet.notes}</p>}
+            {pet.microchip && <p className="text-muted-foreground text-sm font-mono">Microchip: {pet.microchip}</p>}
+            {pet.notes && <p className="text-muted-foreground text-sm mt-2 italic">{pet.notes}</p>}
           </div>
           <Link href={`/dashboard/pets/${petId}/edit`} className={buttonVariants({ variant: 'outline', size: 'sm' })}>Editar</Link>
         </div>
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-800">Historial Clínico ({records.length})</h2>
+        <h2 className="text-base font-semibold text-foreground">Historial Clínico ({records.length})</h2>
         <Link href={`/dashboard/pets/${petId}/records/new`} className={buttonVariants()}>+ Nuevo expediente</Link>
       </div>
 
       {records.length === 0 ? (
-        <p className="text-slate-500 text-sm">No hay expedientes registrados para esta mascota.</p>
+        <p className="text-muted-foreground text-sm">No hay expedientes registrados para esta mascota.</p>
       ) : (
         <div className="space-y-3">
           {records.map((record) => (
