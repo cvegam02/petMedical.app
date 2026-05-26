@@ -29,7 +29,7 @@ export default async function OnboardingPage({
       .from('invitations')
       .select('*')
       .eq('token', params.invite)
-      .eq('email', user.email!)
+      .eq('email', user.email ?? '')
       .is('accepted_at', null)
       .gt('expires_at', new Date().toISOString())
       .single()

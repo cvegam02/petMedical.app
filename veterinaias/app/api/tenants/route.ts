@@ -11,7 +11,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  const body = await request.json()
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Cuerpo de la solicitud invalido' }, { status: 400 })
+  }
   const result = tenantSchema.safeParse(body)
 
   if (!result.success) {

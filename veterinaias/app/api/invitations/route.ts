@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Sin permisos para invitar usuarios' }, { status: 403 })
   }
 
-  const body = await request.json()
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Cuerpo de la solicitud invalido' }, { status: 400 })
+  }
   const result = inviteSchema.safeParse(body)
   if (!result.success) {
     return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 })
