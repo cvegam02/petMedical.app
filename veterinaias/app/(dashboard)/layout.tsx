@@ -5,11 +5,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
+  interface DashboardProfile {
+    full_name: string
+    role: string
+    tenant_id: string | null
+    tenants: { name: string } | null
+  }
+
+  const { data: profile } = (await supabase
     .from('user_profiles')
     .select('full_name, role, tenant_id, tenants(name)')
     .eq('id', user!.id)
-    .single() as any
+    .single()) as { data: DashboardProfile | null; error: unknown }
 
   const tenantName = profile?.tenants?.name ?? ''
 
