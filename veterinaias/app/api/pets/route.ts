@@ -9,9 +9,17 @@ export async function GET(req: NextRequest) {
 
   const ownerId = req.nextUrl.searchParams.get('ownerId')
 
+  if (ownerId) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(ownerId)) {
+      return NextResponse.json({ error: 'ownerId inválido' }, { status: 400 })
+    }
+  }
+
   let query = (supabase.from('pets') as any)
     .select('id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name)')
     .order('name')
+    .limit(100)
 
   if (ownerId) {
     query = query.eq('owner_id', ownerId)
