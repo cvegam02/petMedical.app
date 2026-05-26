@@ -14,10 +14,22 @@ export const medicalRecordSchema = z.object({
   diagnosis: z.string().optional(),
   treatment: z.string().optional(),
   notes: z.string().optional(),
-  weight_kg: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().positive().optional()),
-  temperature_celsius: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().positive().optional()),
-  heart_rate_bpm: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().int().positive().optional()),
-  respiratory_rate_bpm: z.preprocess(v => (v === '' || v === null) ? undefined : Number(v), z.number().int().positive().optional()),
+  weight_kg: z.preprocess(
+    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    z.number().positive().optional()
+  ),
+  temperature_celsius: z.preprocess(
+    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    z.number().positive().optional()
+  ),
+  heart_rate_bpm: z.preprocess(
+    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    z.number().int().positive().optional()
+  ),
+  respiratory_rate_bpm: z.preprocess(
+    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    z.number().int().positive().optional()
+  ),
   prescriptions: z.array(prescriptionSchema).default([]),
 })
 
