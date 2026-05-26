@@ -56,4 +56,34 @@ describe('POST /api/pets', () => {
     const res = await POST(req)
     expect(res.status).toBe(201)
   })
+
+  it('returns 400 when body is not valid JSON', async () => {
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }) },
+    } as any)
+    const req = new NextRequest('http://localhost/api/pets', {
+      method: 'POST',
+      body: 'not-json',
+      headers: { 'Content-Type': 'text/plain' },
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('returns 409 when microchip already exists', async () => {
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }) },
+      from: vi.fn().mockReturnValue({
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({ data: null, error: { code: '23505', message: 'duplicate' } }),
+      }),
+    } as any)
+    const req = new NextRequest('http://localhost/api/pets', {
+      method: 'POST',
+      body: JSON.stringify({ ...validPetBody, microchip: 'CHIP-001' }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(409)
+  })
 })
