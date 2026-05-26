@@ -25,18 +25,19 @@ export function MedicalRecordForm({ petId }: MedicalRecordFormProps) {
   })
 
   const onSubmit = async (values: MedicalRecordFormValues) => {
-    const res = await fetch('/api/medical-records', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      alert(json.error)
-      return
+    try {
+      const res = await fetch('/api/medical-records', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+      const json = await res.json()
+      if (!res.ok) { alert(json.error ?? 'Error al guardar el expediente'); return }
+      router.push(`/dashboard/pets/${petId}/records/${json.data.id}`)
+      router.refresh()
+    } catch {
+      alert('Error de red. Intenta de nuevo.')
     }
-    router.push(`/dashboard/pets/${petId}/records/${json.data.id}`)
-    router.refresh()
   }
 
   return (
@@ -77,19 +78,19 @@ export function MedicalRecordForm({ petId }: MedicalRecordFormProps) {
         <div className="grid grid-cols-2 gap-3 mt-2">
           <div>
             <Label htmlFor="weight_kg" className="text-xs">Peso (kg)</Label>
-            <Input id="weight_kg" type="number" step="0.01" {...register('weight_kg')} placeholder="ej. 12.5" />
+            <Input id="weight_kg" type="number" step="0.01" {...register('weight_kg', { valueAsNumber: true })} placeholder="ej. 12.5" />
           </div>
           <div>
             <Label htmlFor="temperature_celsius" className="text-xs">Temperatura (°C)</Label>
-            <Input id="temperature_celsius" type="number" step="0.1" {...register('temperature_celsius')} placeholder="ej. 38.5" />
+            <Input id="temperature_celsius" type="number" step="0.1" {...register('temperature_celsius', { valueAsNumber: true })} placeholder="ej. 38.5" />
           </div>
           <div>
             <Label htmlFor="heart_rate_bpm" className="text-xs">Frecuencia cardíaca (lpm)</Label>
-            <Input id="heart_rate_bpm" type="number" {...register('heart_rate_bpm')} placeholder="ej. 80" />
+            <Input id="heart_rate_bpm" type="number" {...register('heart_rate_bpm', { valueAsNumber: true })} placeholder="ej. 80" />
           </div>
           <div>
             <Label htmlFor="respiratory_rate_bpm" className="text-xs">Frecuencia respiratoria (rpm)</Label>
-            <Input id="respiratory_rate_bpm" type="number" {...register('respiratory_rate_bpm')} placeholder="ej. 20" />
+            <Input id="respiratory_rate_bpm" type="number" {...register('respiratory_rate_bpm', { valueAsNumber: true })} placeholder="ej. 20" />
           </div>
         </div>
       </div>
