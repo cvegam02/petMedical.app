@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
         <nav className="flex-1 p-4 space-y-1">
           <Link href="/dashboard" className="block px-3 py-2 rounded text-sm hover:bg-slate-700">Inicio</Link>
-          <Link href="/dashboard/patients" className="block px-3 py-2 rounded text-sm hover:bg-slate-700">Pacientes</Link>
+          <Link href="/dashboard/owners" className="block px-3 py-2 rounded text-sm hover:bg-slate-700">Dueños y Mascotas</Link>
           <Link href="/dashboard/appointments" className="block px-3 py-2 rounded text-sm hover:bg-slate-700">Citas</Link>
           {profile?.role === 'admin' && (
             <Link href="/dashboard/settings/team" className="block px-3 py-2 rounded text-sm hover:bg-slate-700">Equipo</Link>
