@@ -218,15 +218,21 @@ export type Database = {
         Relationships: []
       }
       owners: {
-        Row: { id: string; full_name: string; email: string | null; phone: string; address: string | null; created_at: string; updated_at: string }
-        Insert: { full_name: string; email?: string | null; phone: string; address?: string | null }
+        Row: { id: string; tenant_id: string; full_name: string; email: string | null; phone: string; address: string | null; created_at: string; updated_at: string }
+        Insert: { tenant_id: string; full_name: string; email?: string | null; phone: string; address?: string | null }
         Update: { full_name?: string; email?: string | null; phone?: string; address?: string | null; updated_at?: string }
         Relationships: []
       }
+      pet_registrations: {
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; registered_at: string; notes: string | null }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; notes?: string | null }
+        Update: { notes?: string | null }
+        Relationships: []
+      }
       pets: {
-        Row: { id: string; owner_id: string; name: string; species_id: string; breed_id: string | null; sex: PetSex; date_of_birth: string | null; color: string | null; microchip: string | null; notes: string | null; created_at: string; updated_at: string }
-        Insert: { owner_id: string; name: string; species_id: string; breed_id?: string | null; sex: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null }
-        Update: { owner_id?: string; name?: string; species_id?: string; breed_id?: string | null; sex?: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null; updated_at?: string }
+        Row: { id: string; name: string; species_id: string; breed_id: string | null; sex: PetSex; date_of_birth: string | null; color: string | null; microchip: string | null; notes: string | null; created_at: string; updated_at: string }
+        Insert: { name: string; species_id: string; breed_id?: string | null; sex: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null }
+        Update: { name?: string; species_id?: string; breed_id?: string | null; sex?: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null; updated_at?: string }
         Relationships: []
       }
       medical_records: {
