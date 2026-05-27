@@ -58,13 +58,24 @@ describe('GET /api/appointments', () => {
 
   it('returns 200 with appointment list for authenticated user', async () => {
     const appointments = [{ id: VALID_APT_ID, status: 'scheduled', scheduled_at: new Date().toISOString() }]
-    // GET route chains: select().order().gte().lt() — lt() resolves the query
-    const chain = makeChain({
-      lt: vi.fn().mockResolvedValue({ data: appointments, error: null }),
+    // GET route:
+    //   1st from() call: user_profiles → single() returns mockProfile
+    //   2nd from() call: appointments → select().eq().order().gte().lt() resolves query
+    let fromCallCount = 0
+    const fromMock = vi.fn().mockImplementation(() => {
+      fromCallCount++
+      if (fromCallCount === 1) {
+        return makeChain({
+          single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+        })
+      }
+      return makeChain({
+        lt: vi.fn().mockResolvedValue({ data: appointments, error: null }),
+      })
     })
     vi.mocked(createClient).mockResolvedValue({
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
-      from: vi.fn().mockReturnValue(chain),
+      from: fromMock,
     } as any)
     const req = new NextRequest('http://localhost/api/appointments')
     const res = await GET(req)
@@ -158,14 +169,24 @@ describe('PATCH /api/appointments/[id]', () => {
 
   it('returns 422 for invalid status transition from completed', async () => {
     // PATCH with status:
-    //   After auth+body parse: appointments.select('status').eq(id).single() → { status: 'completed' }
+    //   1st from() call: user_profiles → single() returns mockProfile
+    //   2nd from() call: appointments.select('status').eq(id).eq(tenant_id).single() → { status: 'completed' }
     //   Then ALLOWED_TRANSITIONS['completed'] is undefined → [] → 422
-    const chain = makeChain({
-      single: vi.fn().mockResolvedValue({ data: { status: 'completed' }, error: null }),
+    let fromCallCount = 0
+    const fromMock = vi.fn().mockImplementation(() => {
+      fromCallCount++
+      if (fromCallCount === 1) {
+        return makeChain({
+          single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+        })
+      }
+      return makeChain({
+        single: vi.fn().mockResolvedValue({ data: { status: 'completed' }, error: null }),
+      })
     })
     vi.mocked(createClient).mockResolvedValue({
       auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
-      from: vi.fn().mockReturnValue(chain),
+      from: fromMock,
     } as any)
     const req = new NextRequest(`http://localhost/api/appointments/${VALID_APT_ID}`, {
       method: 'PATCH',
@@ -180,12 +201,18 @@ describe('PATCH /api/appointments/[id]', () => {
   it('returns 200 for valid scheduled → confirmed transition', async () => {
     const updatedAppointment = { id: VALID_APT_ID, status: 'confirmed' }
     // PATCH with status = 'confirmed':
-    //   1st from() call: appointments.select('status').eq(id).single() → { status: 'scheduled' }
-    //   2nd from() call: appointments.update().eq(id).eq(currentStatus).select().single() → updatedAppointment
+    //   1st from() call: user_profiles → single() returns mockProfile
+    //   2nd from() call: appointments.select('status').eq(id).eq(tenant_id).single() → { status: 'scheduled' }
+    //   3rd from() call: appointments.update().eq(id).eq(tenant_id).eq(currentStatus).select().single() → updatedAppointment
     let fromCallCount = 0
     const fromMock = vi.fn().mockImplementation(() => {
       fromCallCount++
       if (fromCallCount === 1) {
+        return makeChain({
+          single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+        })
+      }
+      if (fromCallCount === 2) {
         return makeChain({
           single: vi.fn().mockResolvedValue({ data: { status: 'scheduled' }, error: null }),
         })

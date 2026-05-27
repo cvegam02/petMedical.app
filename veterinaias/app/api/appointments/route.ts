@@ -10,6 +10,13 @@ export async function GET(req: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   const tab = req.nextUrl.searchParams.get('tab') ?? 'hoy'
   if (!VALID_TABS.includes(tab as typeof VALID_TABS[number])) {
     return NextResponse.json({ error: 'Tab inválido' }, { status: 400 })
@@ -28,6 +35,7 @@ export async function GET(req: NextRequest) {
       owner:owner_id(id, full_name, phone),
       assigned_to_profile:assigned_to(id, full_name)
     `)
+    .eq('tenant_id', profile.tenant_id)
     .order('scheduled_at', { ascending: true })
 
   if (tab === 'hoy') {

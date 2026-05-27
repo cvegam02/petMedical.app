@@ -23,6 +23,13 @@ export async function GET(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   const { data, error } = await (supabase.from('appointments') as any)
     .select(`
       id, status, scheduled_at, duration_minutes, reason, notes, created_at,
@@ -33,6 +40,7 @@ export async function GET(
       medical_record:medical_record_id(id)
     `)
     .eq('id', id)
+    .eq('tenant_id', profile.tenant_id)
     .single()
 
   if (error?.code === 'PGRST116') return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
@@ -51,6 +59,13 @@ export async function PATCH(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
 
@@ -62,6 +77,7 @@ export async function PATCH(
     const { data: current, error: fetchError } = await (supabase.from('appointments') as any)
       .select('status')
       .eq('id', id)
+      .eq('tenant_id', profile.tenant_id)
       .single()
 
     if (fetchError?.code === 'PGRST116') return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
@@ -79,6 +95,7 @@ export async function PATCH(
     const { data, error } = await (supabase.from('appointments') as any)
       .update(result.data)
       .eq('id', id)
+      .eq('tenant_id', profile.tenant_id)
       .eq('status', current.status)
       .select()
       .single()
@@ -92,6 +109,7 @@ export async function PATCH(
   const { data, error } = await (supabase.from('appointments') as any)
     .update(result.data)
     .eq('id', id)
+    .eq('tenant_id', profile.tenant_id)
     .select()
     .single()
 
