@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LogOut } from 'lucide-react'
+import { LogOut, ShieldCheck } from 'lucide-react'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -29,15 +29,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .toUpperCase() ?? '?'
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-zinc-50/50">
       {/* Sidebar */}
-      <aside className="w-56 flex flex-col border-r border-border bg-background shrink-0">
+      <aside className="w-64 flex flex-col border-r border-zinc-200/60 bg-white shrink-0">
 
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-border">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-primary-foreground">
+        <div className="px-6 py-8">
+          <Link href="/dashboard" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-200">
+              <svg width="18" height="18" viewBox="0 0 14 14" fill="none" className="text-white">
                 <path d="M7 1C5.5 1 4.5 2 4.5 3.5C4.5 5 5.5 6 7 6C8.5 6 9.5 5 9.5 3.5C9.5 2 8.5 1 7 1Z" fill="currentColor"/>
                 <path d="M2.5 4C1.7 4 1 4.7 1 5.5C1 6.3 1.7 7 2.5 7C3.3 7 4 6.3 4 5.5C4 4.7 3.3 4 2.5 4Z" fill="currentColor" opacity="0.7"/>
                 <path d="M11.5 4C10.7 4 10 4.7 10 5.5C10 6.3 10.7 7 11.5 7C12.3 7 13 6.3 13 5.5C13 4.7 12.3 4 11.5 4Z" fill="currentColor" opacity="0.7"/>
@@ -45,35 +45,42 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </svg>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground tracking-tight leading-none truncate">VeterinaIAs</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{tenantName}</p>
+              <p className="text-base font-bold text-zinc-950 tracking-tight leading-none">VeterinaIAs</p>
+              <p className="text-[10px] font-mono text-zinc-400 mt-1.5 uppercase tracking-widest truncate">{tenantName}</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <nav className="flex-1 px-4 space-y-1">
           <SidebarNav role={profile?.role ?? ''} />
         </nav>
 
         {/* User Footer */}
-        <div className="px-3 py-3 border-t border-border">
-          <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-accent transition-colors cursor-default">
-            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="text-[11px] font-semibold text-primary">{initials}</span>
+        <div className="p-4">
+          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-zinc-50 border border-zinc-100 group transition-all duration-200">
+            <div className="w-8 h-8 rounded-full bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
+              <span className="text-[10px] font-bold text-zinc-600">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-foreground truncate leading-none">{profile?.full_name}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">{profile?.role}</p>
+              <p className="text-xs font-semibold text-zinc-900 truncate leading-none">{profile?.full_name}</p>
+              <div className="flex items-center gap-1 mt-1">
+                {profile?.role === 'admin' && <ShieldCheck size={10} className="text-primary" />}
+                <p className="text-[9px] font-mono font-medium text-zinc-400 uppercase tracking-tight italic">
+                  {profile?.role}
+                </p>
+              </div>
             </div>
-            <LogOut size={13} className="text-muted-foreground/40 shrink-0" />
+            <button className="p-1.5 rounded-md hover:bg-zinc-200/50 text-zinc-400 hover:text-zinc-600 transition-colors">
+              <LogOut size={14} />
+            </button>
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto px-8 py-8">
+      <main className="flex-1 overflow-auto bg-white/40">
+        <div className="max-w-5xl mx-auto px-10 py-10">
           {children}
         </div>
       </main>

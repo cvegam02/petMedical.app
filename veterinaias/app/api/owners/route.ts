@@ -8,9 +8,15 @@ export async function GET(req: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const q = req.nextUrl.searchParams.get('q')
-  let query = supabase
-    .from('owners')
-    .select('id, full_name, email, phone, created_at')
+  let query = (supabase.from('owners') as any)
+    .select(`
+      id, 
+      full_name, 
+      email, 
+      phone, 
+      created_at,
+      pets(id, name, species:species_id(name))
+    `)
     .order('full_name')
     .limit(50)
 

@@ -21,10 +21,10 @@ export function SidebarNav({ role }: SidebarNavProps) {
   const pathname = usePathname()
 
   const renderItems = (items: typeof NAV_ITEMS, label?: string) => (
-    <div>
+    <div className="space-y-1">
       {label && (
-        <div className="pt-3 pb-1 px-3">
-          <p className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider">{label}</p>
+        <div className="pt-6 pb-2 px-3">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.1em]">{label}</p>
         </div>
       )}
       {items.map(({ href, icon: Icon, label: itemLabel, exact }) => {
@@ -33,21 +33,21 @@ export function SidebarNav({ role }: SidebarNavProps) {
           <Link
             key={href}
             href={href}
-            className={`group flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+            className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 active:scale-[0.97] ${
               isActive
-                ? 'bg-accent text-primary font-medium'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                ? 'bg-primary/5 text-primary font-semibold'
+                : 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50'
             }`}
           >
             <Icon
-              size={15}
-              className={`shrink-0 transition-colors ${
+              size={16}
+              className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                 isActive
                   ? 'text-primary'
-                  : 'text-muted-foreground/60 group-hover:text-foreground/70'
+                  : 'text-zinc-400 group-hover:text-zinc-900'
               }`}
             />
-            {itemLabel}
+            <span className="tracking-tight">{itemLabel}</span>
           </Link>
         )
       })}
@@ -55,9 +55,9 @@ export function SidebarNav({ role }: SidebarNavProps) {
   )
 
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {renderItems(NAV_ITEMS)}
       {role === 'admin' && renderItems(ADMIN_NAV_ITEMS, 'Administración')}
-    </>
+    </div>
   )
 }

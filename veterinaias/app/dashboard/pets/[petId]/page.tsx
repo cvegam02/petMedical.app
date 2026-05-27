@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { MedicalRecordCard } from '@/components/medical-records/MedicalRecordCard'
 import { buttonVariants } from '@/components/ui/button'
-import { ChevronLeft, Plus, Cpu } from 'lucide-react'
+import { ChevronLeft, Plus, Cpu, Cat, Dog, PawPrint, CalendarDays, User, ExternalLink, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 const SEX_LABELS: Record<string, string> = { male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }
 
@@ -45,95 +45,160 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const breed = pet.breed as any
   const records = (pet.medical_records as any[]) ?? []
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
-  const speciesEmoji = species?.name?.toLowerCase() === 'felino' ? '🐱' : '🐾'
+  
+  const speciesName = species?.name?.toLowerCase() || ''
+  const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
 
   return (
-    <div>
-      {/* Breadcrumb */}
-      <Link
-        href={`/dashboard/owners/${owner?.id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} />
-        {owner?.full_name}
-      </Link>
+    <div className="max-w-5xl mx-auto pb-10">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between mb-8">
+        <Link
+          href={`/dashboard/owners/${owner?.id}`}
+          className="group inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-all"
+        >
+          <div className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center group-hover:bg-primary/5 group-hover:border-primary/20 transition-all">
+            <ChevronLeft size={14} />
+          </div>
+          <span>Regresar a <span className="font-semibold text-zinc-900">{owner?.full_name}</span></span>
+        </Link>
+        <Link
+          href={`/dashboard/pets/${petId}/edit`}
+          className={buttonVariants({ variant: 'outline', size: 'sm', className: 'rounded-xl active:scale-[0.97]' })}
+        >
+          Editar Mascota
+        </Link>
+      </div>
 
-      {/* Pet header card */}
-      <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            {/* Species avatar */}
-            <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center shrink-0 text-2xl">
-              {speciesEmoji}
+      {/* Pet Hero Card - Asymmetric Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
+        {/* Main Info (Pasaporte) */}
+        <div className="lg:col-span-8 bg-white rounded-3xl border border-border shadow-xl shadow-primary/5 p-8 flex flex-col md:flex-row gap-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[80px] -mr-24 -mt-24 pointer-events-none" />
+          
+          {/* Avatar Area */}
+          <div className="relative z-10 flex flex-col items-center gap-4">
+            <div className="w-24 h-24 rounded-2xl bg-muted/30 border border-border flex items-center justify-center text-primary shadow-inner">
+              <Icon size={44} strokeWidth={1.5} />
             </div>
-
-            {/* Pet details */}
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl font-semibold tracking-tight text-foreground">{pet.name}</h1>
-                {age && (
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                    {age}
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm text-muted-foreground mt-1">
-                {species?.name}{breed ? ` · ${breed.name}` : ''} · {SEX_LABELS[pet.sex] ?? pet.sex}
-                {pet.color ? ` · ${pet.color}` : ''}
-              </p>
-
-              {pet.microchip && (
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground/70 mt-1.5 font-mono">
-                  <Cpu size={11} className="text-muted-foreground/40" />
-                  {pet.microchip}
-                </p>
-              )}
-
-              {pet.notes && (
-                <p className="text-sm text-muted-foreground mt-2 italic leading-relaxed">{pet.notes}</p>
-              )}
-            </div>
+            <span className={`text-[10px] font-bold px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary tracking-widest uppercase`}>
+              {species?.name || 'Mascota'}
+            </span>
           </div>
 
-          <Link
-            href={`/dashboard/pets/${petId}/edit`}
-            className={buttonVariants({ variant: 'outline', size: 'sm' })}
-          >
-            Editar
-          </Link>
+          {/* Details Area */}
+          <div className="relative z-10 flex-1 space-y-6">
+            <header>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">{pet.name}</h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <span className="font-semibold text-zinc-900">{breed?.name || 'Raza no definida'}</span>
+                </div>
+                <span className="w-1 h-1 rounded-full bg-border shrink-0" />
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  {SEX_LABELS[pet.sex] || pet.sex}
+                </div>
+                {pet.color && (
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-border shrink-0" />
+                    <div className="text-sm text-muted-foreground">{pet.color}</div>
+                  </>
+                )}
+              </div>
+            </header>
+
+            <div className="grid grid-cols-2 gap-8 pt-6 border-t border-zinc-50">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-muted-foreground/60">
+                  <CalendarDays size={13} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Edad</span>
+                </div>
+                <p className="text-sm font-semibold text-zinc-900">{age || '—'}</p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-muted-foreground/60">
+                  <Cpu size={13} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Microchip</span>
+                </div>
+                <p className="text-sm font-mono font-bold text-primary tracking-tight">{pet.microchip || 'SIN REGISTRO'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Info (Duenio / Notas) */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <User size={14} className="text-primary" />
+              <h4 className="text-xs font-bold text-zinc-900 uppercase tracking-widest">Responsable</h4>
+            </div>
+            <Link 
+              href={`/dashboard/owners/${owner?.id}`}
+              className="group flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 hover:bg-primary/5 hover:border-primary/20 transition-all"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-zinc-950 truncate">{owner?.full_name}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 uppercase font-mono tracking-tighter">Dueño Principal</p>
+              </div>
+              <ExternalLink size={14} className="text-muted-foreground/30 group-hover:text-primary transition-colors" />
+            </Link>
+          </div>
+
+          <div className="bg-primary/5 rounded-3xl border border-primary/10 p-6">
+            <h4 className="text-[10px] font-bold text-primary uppercase tracking-widest mb-3">Notas Internas</h4>
+            <p className="text-xs text-zinc-600 leading-relaxed italic">
+              {pet.notes || 'No hay notas adicionales registradas para este paciente.'}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Clinical history section */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-0.5">Expediente médico</p>
-          <h2 className="text-base font-semibold text-foreground">
-            Consultas
-            {records.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-muted-foreground">({records.length})</span>
-            )}
-          </h2>
+      {/* History Section Header */}
+      <div className="flex items-end justify-between mb-8 border-b border-zinc-100 pb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+            <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Expediente Clínico</p>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Consultas Realizadas</h2>
         </div>
         <Link
           href={`/dashboard/pets/${petId}/records/new`}
-          className={buttonVariants({ size: 'sm' })}
+          className={buttonVariants({ size: 'sm', className: 'rounded-xl shadow-lg shadow-primary/10 active:scale-[0.97] transition-all' })}
         >
           <Plus size={14} className="mr-1.5" />
           Nueva consulta
         </Link>
       </div>
 
+      {/* History List */}
       {records.length === 0 ? (
-        <div className="text-center py-12 rounded-xl border border-dashed border-border">
-          <p className="font-medium text-foreground mb-1">Sin consultas registradas</p>
-          <p className="text-sm text-muted-foreground">Registra la primera consulta de esta mascota.</p>
+        <div className="text-center py-20 rounded-3xl border-2 border-dashed border-border/60 bg-muted/10">
+          <div className="w-12 h-12 rounded-full bg-white border border-border flex items-center justify-center mx-auto mb-4">
+            <Plus size={20} className="text-muted-foreground/30" />
+          </div>
+          <p className="font-bold text-foreground text-lg tracking-tight">Sin historial médico</p>
+          <p className="text-sm text-muted-foreground mt-1 max-w-[280px] mx-auto">
+            Esta mascota no tiene consultas registradas todavía. Comienza su expediente ahora.
+          </p>
+          <Link 
+            href={`/dashboard/pets/${petId}/records/new`} 
+            className="mt-6 inline-flex items-center text-sm font-bold text-primary hover:underline"
+          >
+            Registrar primera consulta <ArrowRight size={14} className="ml-1" />
+          </Link>
         </div>
       ) : (
-        <div className="space-y-3">
-          {records.map((record: any) => (
-            <MedicalRecordCard key={record.id} record={record} petId={petId} />
+        <div className="space-y-4">
+          {records.map((record: any, index: number) => (
+            <div 
+              key={record.id}
+              className="animate-in slide-in-from-bottom-2 duration-300 fill-mode-both"
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              <MedicalRecordCard record={record} petId={petId} />
+            </div>
           ))}
         </div>
       )}

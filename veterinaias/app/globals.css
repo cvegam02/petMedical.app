@@ -49,38 +49,61 @@
 }
 
 :root {
-  --background: oklch(0.985 0.003 85);
-  --foreground: oklch(0.135 0.006 85);
+  /* Architectural Order - Strictly Calibrated */
+  --background: oklch(0.99 0.004 260);    /* Paper Blue - Tinted for clarity */
+  --foreground: oklch(0.20 0.03 260);      /* Midnight Indigo - Not black */
+  
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.135 0.006 85);
+  --card-foreground: oklch(0.20 0.03 260);
+  
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.135 0.006 85);
-  --primary: oklch(0.44 0.115 152);
-  --primary-foreground: oklch(0.985 0.003 85);
-  --secondary: oklch(0.97 0.012 152);
-  --secondary-foreground: oklch(0.135 0.006 85);
-  --muted: oklch(0.960 0.004 85);
-  --muted-foreground: oklch(0.540 0.010 85);
-  --accent: oklch(0.97 0.012 152);
-  --accent-foreground: oklch(0.135 0.006 85);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.900 0.005 85);
-  --input: oklch(0.780 0.008 85);
-  --ring: oklch(0.44 0.115 152);
-  --chart-1: oklch(0.44 0.115 152);
-  --chart-2: oklch(0.55 0.10 152);
-  --chart-3: oklch(0.68 0.08 152);
-  --chart-4: oklch(0.82 0.05 152);
-  --chart-5: oklch(0.37 0.105 152);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.003 85);
-  --sidebar-foreground: oklch(0.135 0.006 85);
-  --sidebar-primary: oklch(0.44 0.115 152);
-  --sidebar-primary-foreground: oklch(0.985 0.003 85);
-  --sidebar-accent: oklch(0.97 0.012 152);
-  --sidebar-accent-foreground: oklch(0.135 0.006 85);
-  --sidebar-border: oklch(0.900 0.005 85);
-  --sidebar-ring: oklch(0.44 0.115 152);
+  --popover-foreground: oklch(0.20 0.03 260);
+  
+  /* The Signature Indigo - Professional & Deep */
+  --primary: oklch(0.50 0.15 260);        /* High-density Trust Blue */
+  --primary-foreground: oklch(0.99 0.004 260);
+  
+  --secondary: oklch(0.96 0.01 260);       /* Soft clinical tint */
+  --secondary-foreground: oklch(0.20 0.03 260);
+  
+  --muted: oklch(0.97 0.008 260);          /* Neutral Technical */
+  --muted-foreground: oklch(0.45 0.04 260);
+  
+  --accent: oklch(0.30 0.05 260);          /* Deep accent for high-tension states */
+  --accent-foreground: oklch(0.99 0.004 260);
+  
+  --destructive: oklch(0.58 0.20 25);      /* Clinical Signal Red */
+  
+  --border: oklch(0.93 0.015 260);         /* Hairline borders */
+  --input: oklch(0.90 0.02 260);
+  --ring: oklch(0.50 0.15 260);
+  
+  --radius: 0.5rem;                        /* Precision 8px radius */
+}
+
+@theme inline {
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.dark {
+  --background: oklch(0.18 0.02 260);
+  --foreground: oklch(0.98 0.005 260);
+  --card: oklch(0.22 0.02 260);
+  --card-foreground: oklch(0.98 0.005 260);
+  --primary: oklch(0.65 0.12 260);
+  --primary-foreground: oklch(0.18 0.02 260);
+  --border: oklch(0.30 0.02 260);
+}
+
+.dark {
+  --background: oklch(0.15 0.02 240);      /* Deep Petroleum Canvas */
+  --foreground: oklch(0.98 0.005 240);
+  --card: oklch(0.18 0.02 240);
+  --card-foreground: oklch(0.98 0.005 240);
+  --primary: oklch(0.65 0.15 45);
+  --primary-foreground: oklch(0.15 0.02 240);
+  --border: oklch(0.28 0.03 240);
 }
 
 .dark {

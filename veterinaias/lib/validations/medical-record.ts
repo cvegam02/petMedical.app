@@ -31,6 +31,7 @@ export const medicalRecordSchema = z.object({
     z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),
+  appointment_id: z.string().uuid().optional(),
 })
 
 export const addendumSchema = z.object({
