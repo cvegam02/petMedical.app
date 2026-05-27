@@ -188,6 +188,10 @@ INSERT INTO auth.users (
   instance_id, id, aud, role, email,
   encrypted_password, email_confirmed_at,
   raw_app_meta_data, raw_user_meta_data,
+  -- GoTrue requiere strings vacíos (no NULL) en estos campos
+  confirmation_token, recovery_token,
+  email_change_token_new, email_change, email_change_token_current,
+  phone_change, phone_change_token, reauthentication_token,
   created_at, updated_at
 )
 VALUES
@@ -201,6 +205,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Super Admin Test"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   ),
   -- 2. Admin — Clínica San Mateo (individual)
@@ -213,6 +218,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Ana López"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   ),
   -- 3. Staff — Clínica San Mateo (individual)
@@ -225,6 +231,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Marco Torres"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   ),
   -- 4. Admin — Hospital Veterinario Paws (enterprise)
@@ -237,6 +244,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Dra. Sofía Hernández"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   ),
   -- 5. Doctor — Hospital Veterinario Paws (enterprise)
@@ -249,6 +257,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Dr. Rodrigo Méndez"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   ),
   -- 6. Assistant — Hospital Veterinario Paws (enterprise)
@@ -261,6 +270,7 @@ VALUES
     NOW(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name":"Valentina Cruz"}'::jsonb,
+    '', '', '', '', '', '', '', '',
     NOW(), NOW()
   );
 
