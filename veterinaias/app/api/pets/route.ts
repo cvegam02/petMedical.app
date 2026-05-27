@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const ownerId = req.nextUrl.searchParams.get('ownerId')
+  const q = req.nextUrl.searchParams.get('q')
 
   if (ownerId) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -16,25 +17,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const q = req.nextUrl.searchParams.get('q')
-
-  let query = (supabase.from('pets') as any)
-    .select('id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name), owner:owner_id(id, full_name)')
-    .order('name')
+  let query = (supabase.from('pet_registrations') as any)
+    .select(`
+      owner:owner_id(id, full_name, phone),
+      pet:pet_id(id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name))
+    `)
     .limit(100)
 
   if (ownerId) {
     query = query.eq('owner_id', ownerId)
   }
 
-  if (q && q.trim()) {
-    const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
-    query = query.ilike('name', `%${escaped}%`)
-  }
-
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+
+  let pets = (data ?? []).map((reg: any) => ({ ...reg.pet, owner: reg.owner }))
+
+  if (q?.trim()) {
+    const lower = q.toLowerCase()
+    pets = pets.filter((p: any) => p.name?.toLowerCase().includes(lower))
+  }
+
+  return NextResponse.json({ data: pets })
 }
 
 export async function POST(req: NextRequest) {
@@ -48,14 +52,30 @@ export async function POST(req: NextRequest) {
   const result = petSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
-  const { date_of_birth, breed_id, ...rest } = result.data
-  const { data, error } = await supabase
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant asignado' }, { status: 403 })
+
+  const { owner_id, date_of_birth, breed_id, ...petData } = result.data
+
+  const { data: pet, error: petError } = await supabase
     .from('pets')
-    .insert({ ...rest, date_of_birth: date_of_birth || null, breed_id: breed_id || null })
+    .insert({ ...petData, date_of_birth: date_of_birth || null, breed_id: breed_id || null })
     .select()
     .single()
 
-  if (error?.code === '23505') return NextResponse.json({ error: 'Ya existe una mascota con ese microchip' }, { status: 409 })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data }, { status: 201 })
+  if (petError?.code === '23505') return NextResponse.json({ error: 'Ya existe una mascota con ese microchip' }, { status: 409 })
+  if (petError) return NextResponse.json({ error: petError.message }, { status: 500 })
+
+  const { error: regError } = await supabase
+    .from('pet_registrations')
+    .insert({ tenant_id: profile.tenant_id, pet_id: pet.id, owner_id })
+
+  if (regError) return NextResponse.json({ error: regError.message }, { status: 500 })
+
+  return NextResponse.json({ data: pet }, { status: 201 })
 }
