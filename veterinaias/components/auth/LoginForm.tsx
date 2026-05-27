@@ -38,7 +38,7 @@ export function LoginForm() {
         <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" aria-label="Email" {...register('email')} />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
       </div>
       <div className="space-y-1">
@@ -50,10 +50,10 @@ export function LoginForm() {
           {...register('password')}
         />
         {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
+          <p className="text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
-      {serverError && <p className="text-sm text-red-500">{serverError}</p>}
+      {serverError && <p className="text-sm text-destructive">{serverError}</p>}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Iniciando sesion...' : 'Iniciar sesion'}
       </Button>

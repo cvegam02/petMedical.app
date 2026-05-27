@@ -1,29 +1,27 @@
 import { RegisterForm } from '@/components/auth/RegisterForm'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card'
 import Link from 'next/link'
 
 export default function RegisterPage() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Crear cuenta</CardTitle>
-        <CardDescription>Registra tu veterinaria o clinica en VeterinaIAs</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="w-full max-w-sm">
+      <div className="mb-7 text-center">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <span className="w-5 h-[1.5px] bg-primary/30 rounded-full" />
+          <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">VeterinaIAs</p>
+          <span className="w-5 h-[1.5px] bg-primary/30 rounded-full" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Crear cuenta</h1>
+        <p className="text-sm text-muted-foreground mt-1">Registra tu veterinaria o clinica</p>
+      </div>
+      <div className="bg-card border border-border rounded-xl p-6">
         <RegisterForm />
-        <p className="text-sm text-center mt-4 text-slate-600">
+        <p className="text-sm text-center mt-5 text-muted-foreground">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-primary hover:underline font-medium">
             Inicia sesion
           </Link>
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

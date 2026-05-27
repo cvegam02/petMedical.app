@@ -42,14 +42,14 @@ export function RegisterForm() {
         <Label htmlFor="full_name">Nombre completo</Label>
         <Input id="full_name" aria-label="Nombre completo" {...register('full_name')} />
         {errors.full_name && (
-          <p className="text-sm text-red-500">{errors.full_name.message}</p>
+          <p className="text-sm text-destructive">{errors.full_name.message}</p>
         )}
       </div>
       <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" aria-label="Email" {...register('email')} />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
       </div>
       <div className="space-y-1">
@@ -61,10 +61,10 @@ export function RegisterForm() {
           {...register('password')}
         />
         {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
+          <p className="text-sm text-destructive">{errors.password.message}</p>
         )}
       </div>
-      {serverError && <p className="text-sm text-red-500">{serverError}</p>}
+      {serverError && <p className="text-sm text-destructive">{serverError}</p>}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
       </Button>
