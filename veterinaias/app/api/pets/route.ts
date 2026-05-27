@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Error al obtener mascotas' }, { status: 500 })
 
   let pets = (data ?? []).map((reg: any) => ({ ...reg.pet, owner: reg.owner }))
 
@@ -69,13 +69,16 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (petError?.code === '23505') return NextResponse.json({ error: 'Ya existe una mascota con ese microchip' }, { status: 409 })
-  if (petError) return NextResponse.json({ error: petError.message }, { status: 500 })
+  if (petError) return NextResponse.json({ error: 'Error al guardar la mascota' }, { status: 500 })
 
   const { error: regError } = await supabase
     .from('pet_registrations')
     .insert({ tenant_id: profile.tenant_id, pet_id: pet.id, owner_id })
 
-  if (regError) return NextResponse.json({ error: regError.message }, { status: 500 })
+  if (regError) {
+    await supabase.from('pets').delete().eq('id', pet.id)
+    return NextResponse.json({ error: 'Error al registrar la mascota' }, { status: 500 })
+  }
 
   return NextResponse.json({ data: pet }, { status: 201 })
 }
