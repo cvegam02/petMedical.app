@@ -15,7 +15,9 @@ export default async function AppointmentsPage({
 }: {
   searchParams: Promise<{ tab?: string }>
 }) {
-  const { tab = 'hoy' } = await searchParams
+  const { tab: rawTab = 'hoy' } = await searchParams
+  const VALID_TABS = ['hoy', 'proximas', 'confirmar'] as const
+  const tab = (VALID_TABS as readonly string[]).includes(rawTab) ? rawTab : 'hoy'
   const supabase = await createClient()
 
   const now = new Date()
