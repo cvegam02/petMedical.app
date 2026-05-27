@@ -9,6 +9,7 @@
 --   Usuarios:    b2b2b2b2-0002-4000-a000-0000000000XX
 --   Dueños:      c3c3c3c3-0003-4000-a000-0000000000XX
 --   Mascotas:    d4d4d4d4-0004-4000-a000-0000000000XX
+--   Registros:   g7g7g7g7-0008-4000-a000-0000000000XX
 --   Expedientes: e5e5e5e5-0005-4000-a000-0000000000XX
 --   Citas:       f6f6f6f6-0006-4000-a000-0000000000XX
 --   Recetas:     a7a7a7a7-0007-4000-a000-0000000000XX
@@ -95,6 +96,19 @@ DELETE FROM share_tokens WHERE pet_id IN (
   'd4d4d4d4-0004-4000-a000-000000000008',
   'd4d4d4d4-0004-4000-a000-000000000009',
   'd4d4d4d4-0004-4000-a000-000000000010'
+);
+
+DELETE FROM pet_registrations WHERE id IN (
+  'g7g7g7g7-0008-4000-a000-000000000001',
+  'g7g7g7g7-0008-4000-a000-000000000002',
+  'g7g7g7g7-0008-4000-a000-000000000003',
+  'g7g7g7g7-0008-4000-a000-000000000004',
+  'g7g7g7g7-0008-4000-a000-000000000005',
+  'g7g7g7g7-0008-4000-a000-000000000006',
+  'g7g7g7g7-0008-4000-a000-000000000007',
+  'g7g7g7g7-0008-4000-a000-000000000008',
+  'g7g7g7g7-0008-4000-a000-000000000009',
+  'g7g7g7g7-0008-4000-a000-000000000010'
 );
 
 DELETE FROM medical_records WHERE id IN (
@@ -341,108 +355,103 @@ WHERE id = 'b2b2b2b2-0002-4000-a000-000000000006';
 
 
 -- ============================================================
--- DUEÑOS (nivel plataforma, sin tenant_id)
+-- DUEÑOS (tenant-scoped: clientes privados por clínica)
+-- 001-003 → Clínica San Mateo | 004-006 → Hospital Paws
 -- ============================================================
-INSERT INTO owners (id, full_name, email, phone, address) VALUES
-  ('c3c3c3c3-0003-4000-a000-000000000001', 'Carlos Ramírez',   'carlos.ramirez@example.com',  '555-0101', 'Av. Insurgentes Sur 123, CDMX'),
-  ('c3c3c3c3-0003-4000-a000-000000000002', 'María González',   'maria.gonzalez@example.com',  '555-0202', 'Calle Madero 456, Guadalajara'),
-  ('c3c3c3c3-0003-4000-a000-000000000003', 'Roberto Jiménez',  'roberto.jimenez@example.com', '555-0303', 'Blvd. Kukulcán 789, Cancún'),
-  ('c3c3c3c3-0003-4000-a000-000000000004', 'Lucía Morales',    'lucia.morales@example.com',   '555-0404', 'Av. Juárez 321, Monterrey'),
-  ('c3c3c3c3-0003-4000-a000-000000000005', 'Fernando Ruiz',    'fernando.ruiz@example.com',   '555-0505', 'Calle Hidalgo 654, Puebla'),
-  ('c3c3c3c3-0003-4000-a000-000000000006', 'Patricia Vega',    'patricia.vega@example.com',   '555-0606', 'Av. Reforma 987, CDMX');
+INSERT INTO owners (id, full_name, email, phone, address, tenant_id) VALUES
+  ('c3c3c3c3-0003-4000-a000-000000000001', 'Carlos Ramírez',  'carlos.ramirez@example.com',  '555-0101', 'Av. Insurgentes Sur 123, CDMX',   'a1a1a1a1-0001-4000-a000-000000000001'),
+  ('c3c3c3c3-0003-4000-a000-000000000002', 'María González',  'maria.gonzalez@example.com',  '555-0202', 'Calle Madero 456, Guadalajara',   'a1a1a1a1-0001-4000-a000-000000000001'),
+  ('c3c3c3c3-0003-4000-a000-000000000003', 'Roberto Jiménez', 'roberto.jimenez@example.com', '555-0303', 'Blvd. Kukulcán 789, Cancún',      'a1a1a1a1-0001-4000-a000-000000000001'),
+  ('c3c3c3c3-0003-4000-a000-000000000004', 'Lucía Morales',   'lucia.morales@example.com',   '555-0404', 'Av. Juárez 321, Monterrey',       'a1a1a1a1-0001-4000-a000-000000000002'),
+  ('c3c3c3c3-0003-4000-a000-000000000005', 'Fernando Ruiz',   'fernando.ruiz@example.com',   '555-0505', 'Calle Hidalgo 654, Puebla',       'a1a1a1a1-0001-4000-a000-000000000002'),
+  ('c3c3c3c3-0003-4000-a000-000000000006', 'Patricia Vega',   'patricia.vega@example.com',   '555-0606', 'Av. Reforma 987, CDMX',           'a1a1a1a1-0001-4000-a000-000000000002');
 
 
 -- ============================================================
--- MASCOTAS (nivel plataforma)
--- Nota: breed_id via subquery por nombre (nullable si no existe)
+-- MASCOTAS (plataforma — sin tenant_id ni owner_id)
+-- Relación con dueño es via pet_registrations (tenant-específica)
 -- ============================================================
-INSERT INTO pets (id, owner_id, name, species_id, breed_id, sex, date_of_birth, color) VALUES
-  -- Carlos Ramírez → 2 mascotas
+INSERT INTO pets (id, name, species_id, breed_id, sex, date_of_birth, color) VALUES
   (
-    'd4d4d4d4-0004-4000-a000-000000000001',
-    'c3c3c3c3-0003-4000-a000-000000000001',
-    'Max',
+    'd4d4d4d4-0004-4000-a000-000000000001', 'Max',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Labrador Retriever' LIMIT 1),
     'male', '2020-03-15', 'Dorado'
   ),
   (
-    'd4d4d4d4-0004-4000-a000-000000000002',
-    'c3c3c3c3-0003-4000-a000-000000000001',
-    'Luna',
+    'd4d4d4d4-0004-4000-a000-000000000002', 'Luna',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Golden Retriever' LIMIT 1),
     'female', '2021-07-20', 'Dorado claro'
   ),
-  -- María González → 2 mascotas
   (
-    'd4d4d4d4-0004-4000-a000-000000000003',
-    'c3c3c3c3-0003-4000-a000-000000000002',
-    'Misifú',
+    'd4d4d4d4-0004-4000-a000-000000000003', 'Misifú',
     (SELECT id FROM species WHERE name = 'Gato'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Gato' AND b.name = 'Persa' LIMIT 1),
     'male', '2019-11-05', 'Blanco'
   ),
   (
-    'd4d4d4d4-0004-4000-a000-000000000009',
-    'c3c3c3c3-0003-4000-a000-000000000002',
-    'Buddy',
+    'd4d4d4d4-0004-4000-a000-000000000009', 'Buddy',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Beagle' LIMIT 1),
     'male', '2022-01-10', 'Tricolor'
   ),
-  -- Roberto Jiménez → 2 mascotas
   (
-    'd4d4d4d4-0004-4000-a000-000000000004',
-    'c3c3c3c3-0003-4000-a000-000000000003',
-    'Tobías',
+    'd4d4d4d4-0004-4000-a000-000000000004', 'Tobías',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Mestizo' LIMIT 1),
     'male', '2018-06-30', 'Café y blanco'
   ),
   (
-    'd4d4d4d4-0004-4000-a000-000000000010',
-    'c3c3c3c3-0003-4000-a000-000000000003',
-    'Lola',
+    'd4d4d4d4-0004-4000-a000-000000000010', 'Lola',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Chihuahua' LIMIT 1),
     'female', '2023-04-18', 'Negro'
   ),
-  -- Lucía Morales → 2 mascotas
   (
-    'd4d4d4d4-0004-4000-a000-000000000005',
-    'c3c3c3c3-0003-4000-a000-000000000004',
-    'Nala',
+    'd4d4d4d4-0004-4000-a000-000000000005', 'Nala',
     (SELECT id FROM species WHERE name = 'Gato'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Gato' AND b.name = 'Siamés' LIMIT 1),
     'female', '2020-09-12', 'Crema y chocolate'
   ),
   (
-    'd4d4d4d4-0004-4000-a000-000000000006',
-    'c3c3c3c3-0003-4000-a000-000000000004',
-    'Copito',
+    'd4d4d4d4-0004-4000-a000-000000000006', 'Copito',
     (SELECT id FROM species WHERE name = 'Conejo'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Conejo' AND b.name = 'Holland Lop' LIMIT 1),
     'male', '2022-12-01', 'Blanco'
   ),
-  -- Fernando Ruiz → 1 mascota
   (
-    'd4d4d4d4-0004-4000-a000-000000000007',
-    'c3c3c3c3-0003-4000-a000-000000000005',
-    'Rocky',
+    'd4d4d4d4-0004-4000-a000-000000000007', 'Rocky',
     (SELECT id FROM species WHERE name = 'Perro'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Perro' AND b.name = 'Pastor Alemán' LIMIT 1),
     'male', '2019-02-28', 'Negro y café'
   ),
-  -- Patricia Vega → 1 mascota
   (
-    'd4d4d4d4-0004-4000-a000-000000000008',
-    'c3c3c3c3-0003-4000-a000-000000000006',
-    'Canela',
+    'd4d4d4d4-0004-4000-a000-000000000008', 'Canela',
     (SELECT id FROM species WHERE name = 'Gato'),
     (SELECT b.id FROM breeds b JOIN species s ON b.species_id = s.id WHERE s.name = 'Gato' AND b.name = 'Maine Coon' LIMIT 1),
     'female', '2021-05-22', 'Anaranjado'
   );
+
+
+-- ============================================================
+-- REGISTROS DE MASCOTAS POR CLÍNICA
+-- Reemplaza la relación directa pets.owner_id
+-- San Mateo: registros 001-005 | Hospital Paws: registros 006-010
+-- ============================================================
+INSERT INTO pet_registrations (id, tenant_id, pet_id, owner_id) VALUES
+  -- Clínica San Mateo
+  ('g7g7g7g7-0008-4000-a000-000000000001', 'a1a1a1a1-0001-4000-a000-000000000001', 'd4d4d4d4-0004-4000-a000-000000000001', 'c3c3c3c3-0003-4000-a000-000000000001'), -- Max / Carlos Ramírez
+  ('g7g7g7g7-0008-4000-a000-000000000002', 'a1a1a1a1-0001-4000-a000-000000000001', 'd4d4d4d4-0004-4000-a000-000000000002', 'c3c3c3c3-0003-4000-a000-000000000001'), -- Luna / Carlos Ramírez
+  ('g7g7g7g7-0008-4000-a000-000000000003', 'a1a1a1a1-0001-4000-a000-000000000001', 'd4d4d4d4-0004-4000-a000-000000000003', 'c3c3c3c3-0003-4000-a000-000000000002'), -- Misifú / María González
+  ('g7g7g7g7-0008-4000-a000-000000000004', 'a1a1a1a1-0001-4000-a000-000000000001', 'd4d4d4d4-0004-4000-a000-000000000004', 'c3c3c3c3-0003-4000-a000-000000000003'), -- Tobías / Roberto Jiménez
+  ('g7g7g7g7-0008-4000-a000-000000000005', 'a1a1a1a1-0001-4000-a000-000000000001', 'd4d4d4d4-0004-4000-a000-000000000009', 'c3c3c3c3-0003-4000-a000-000000000002'), -- Buddy / María González
+  -- Hospital Veterinario Paws
+  ('g7g7g7g7-0008-4000-a000-000000000006', 'a1a1a1a1-0001-4000-a000-000000000002', 'd4d4d4d4-0004-4000-a000-000000000005', 'c3c3c3c3-0003-4000-a000-000000000004'), -- Nala / Lucía Morales
+  ('g7g7g7g7-0008-4000-a000-000000000007', 'a1a1a1a1-0001-4000-a000-000000000002', 'd4d4d4d4-0004-4000-a000-000000000006', 'c3c3c3c3-0003-4000-a000-000000000004'), -- Copito / Lucía Morales
+  ('g7g7g7g7-0008-4000-a000-000000000008', 'a1a1a1a1-0001-4000-a000-000000000002', 'd4d4d4d4-0004-4000-a000-000000000007', 'c3c3c3c3-0003-4000-a000-000000000005'), -- Rocky / Fernando Ruiz
+  ('g7g7g7g7-0008-4000-a000-000000000009', 'a1a1a1a1-0001-4000-a000-000000000002', 'd4d4d4d4-0004-4000-a000-000000000008', 'c3c3c3c3-0003-4000-a000-000000000006'), -- Canela / Patricia Vega
+  ('g7g7g7g7-0008-4000-a000-000000000010', 'a1a1a1a1-0001-4000-a000-000000000002', 'd4d4d4d4-0004-4000-a000-000000000010', 'c3c3c3c3-0003-4000-a000-000000000004'); -- Lola / Lucía Morales (cross-clinic demo)
 
 
 -- ============================================================
@@ -692,7 +701,7 @@ INSERT INTO appointments (
     'f6f6f6f6-0006-4000-a000-000000000010',
     'a1a1a1a1-0001-4000-a000-000000000002',
     'd4d4d4d4-0004-4000-a000-000000000010', -- Lola
-    'c3c3c3c3-0003-4000-a000-000000000003', -- Roberto Jiménez
+    'c3c3c3c3-0003-4000-a000-000000000004', -- Lucía Morales
     'b2b2b2b2-0002-4000-a000-000000000006', -- Valentina (assistant)
     'scheduled',
     NOW() + INTERVAL '15 days',
