@@ -11,29 +11,41 @@ export async function GET(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  const { data, error } = await supabase
-    .from('pets')
-    .select(`
-      id, name, sex, date_of_birth, color, microchip, notes, created_at, updated_at,
-      owner:owner_id(id, full_name, email, phone),
-      species:species_id(id, name),
-      breed:breed_id(id, name),
-      medical_records(
-        id, reason, diagnosis, treatment, notes,
-        weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-        created_at, tenant_id,
-        created_by_profile:created_by(full_name),
-        prescriptions(id, medication_name, dosage, frequency, duration, notes),
-        attachments(id, file_name, file_type, storage_path, created_at),
-        addendums(id, content, created_at, created_by_profile:created_by(full_name))
-      )
-    `)
-    .eq('id', id)
-    .order('created_at', { referencedTable: 'medical_records', ascending: false })
-    .single()
+  const [petResult, regResult] = await Promise.all([
+    supabase
+      .from('pets')
+      .select(`
+        id, name, sex, date_of_birth, color, microchip, notes, created_at, updated_at,
+        species:species_id(id, name),
+        breed:breed_id(id, name),
+        medical_records(
+          id, reason, diagnosis, treatment, notes,
+          weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
+          created_at, tenant_id,
+          created_by_profile:created_by(full_name),
+          prescriptions(id, medication_name, dosage, frequency, duration, notes),
+          attachments(id, file_name, file_type, storage_path, created_at),
+          addendums(id, content, created_at, created_by_profile:created_by(full_name))
+        )
+      `)
+      .eq('id', id)
+      .order('created_at', { referencedTable: 'medical_records', ascending: false })
+      .single(),
+    (supabase as any)
+      .from('pet_registrations')
+      .select('owner:owner_id(id, full_name, email, phone)')
+      .eq('pet_id', id)
+      .maybeSingle(),
+  ])
 
-  if (error?.code === 'PGRST116') return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (petResult.error?.code === 'PGRST116') return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
+  if (petResult.error) return NextResponse.json({ error: petResult.error.message }, { status: 500 })
+
+  const data = {
+    ...(petResult.data as Record<string, unknown>),
+    owner: regResult.data?.owner ?? null,
+  }
+
   return NextResponse.json({ data })
 }
 
