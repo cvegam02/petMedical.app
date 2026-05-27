@@ -36,8 +36,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <aside className="w-64 flex flex-col border-r border-zinc-200/60 bg-white shrink-0">
 
         {/* Brand */}
-        <div className="px-6 py-8">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
+        <div className="px-5 py-5 border-b border-zinc-100">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white">
                 <path d="M7 1C5.5 1 4.5 2 4.5 3.5C4.5 5 5.5 6 7 6C8.5 6 9.5 5 9.5 3.5C9.5 2 8.5 1 7 1Z" fill="currentColor"/>
@@ -54,12 +54,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-3 py-4">
           <SidebarNav role={profile?.role ?? ''} />
         </nav>
 
         {/* User Footer */}
-        <div className="p-4">
+        <div className="p-3 border-t border-zinc-100">
           <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-zinc-50 transition-colors group">
             <div className="w-7 h-7 rounded-md bg-zinc-100 flex items-center justify-center shrink-0">
               <span className="text-[10px] font-bold text-zinc-500">{initials}</span>

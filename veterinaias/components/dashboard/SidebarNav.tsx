@@ -33,19 +33,15 @@ export function SidebarNav({ role }: SidebarNavProps) {
           <Link
             key={href}
             href={href}
-            className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 active:scale-[0.97] ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
               isActive
                 ? 'bg-primary/5 text-primary font-semibold'
-                : 'text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50'
+                : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
             }`}
           >
             <Icon
-              size={16}
-              className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                isActive
-                  ? 'text-primary'
-                  : 'text-zinc-400 group-hover:text-zinc-900'
-              }`}
+              size={15}
+              className={`shrink-0 ${isActive ? 'text-primary' : 'text-zinc-400'}`}
             />
             <span className="tracking-tight">{itemLabel}</span>
           </Link>
