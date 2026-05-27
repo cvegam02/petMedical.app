@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { uploadAttachment } from '@/lib/supabase/storage'
 import { Button } from '@/components/ui/button'
 
@@ -28,10 +29,10 @@ export function AttachmentUploader({ recordId, userId, onUploaded }: AttachmentU
         }),
       })
       const json = await res.json()
-      if (!res.ok) { alert(json.error); return }
+      if (!res.ok) { toast.error(json.error ?? 'Error al subir el archivo'); return }
       onUploaded(json.data)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al subir el archivo')
+      toast.error(err instanceof Error ? err.message : 'Error al subir el archivo')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''

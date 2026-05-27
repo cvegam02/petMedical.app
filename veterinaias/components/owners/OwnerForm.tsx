@@ -2,6 +2,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { ownerSchema, type OwnerFormValues } from '@/lib/validations/owner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,7 +25,7 @@ export function OwnerForm({ defaultValues, ownerId }: OwnerFormProps) {
     const method = ownerId ? 'PATCH' : 'POST'
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) })
     const json = await res.json()
-    if (!res.ok) { alert(json.error); return }
+    if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
     router.push(`/dashboard/owners/${ownerId ?? json.data.id}`)
     router.refresh()
   }

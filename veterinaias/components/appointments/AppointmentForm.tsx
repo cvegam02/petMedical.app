@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { appointmentFormSchema, type AppointmentFormValues } from '@/lib/validations/appointment'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -70,11 +71,11 @@ export function AppointmentForm({ team }: AppointmentFormProps) {
         }),
       })
       const json = await res.json()
-      if (!res.ok) { alert(json.error ?? 'Error al guardar'); return }
+      if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
       router.push(`/dashboard/appointments/${json.data.id}`)
       router.refresh()
     } catch {
-      alert('Error de red. Intenta de nuevo.')
+      toast.error('Error de red. Intenta de nuevo.')
     }
   }
 

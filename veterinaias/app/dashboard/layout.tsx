@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { LogOut, ShieldCheck } from 'lucide-react'
+import { Toaster } from 'sonner'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
+import { signOutAction } from '@/app/actions/auth'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -29,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .toUpperCase() ?? '?'
 
   return (
-    <div className="min-h-screen flex bg-zinc-50/50">
+    <div className="min-h-dvh flex bg-zinc-50/50">
       {/* Sidebar */}
       <aside className="w-64 flex flex-col border-r border-zinc-200/60 bg-white shrink-0">
 
@@ -46,7 +48,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
             <div className="min-w-0">
               <p className="text-base font-bold text-zinc-950 tracking-tight leading-none">VeterinaIAs</p>
-              <p className="text-[10px] font-mono text-zinc-400 mt-1.5 uppercase tracking-widest truncate">{tenantName}</p>
+              <p className="label-overline font-mono text-zinc-400 mt-1.5 truncate">{tenantName}</p>
             </div>
           </Link>
         </div>
@@ -71,9 +73,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 </p>
               </div>
             </div>
-            <button className="p-1.5 rounded-md hover:bg-zinc-200/50 text-zinc-400 hover:text-zinc-600 transition-colors">
-              <LogOut size={14} />
-            </button>
+            <form action={signOutAction}>
+              <button type="submit" className="p-1.5 rounded-md hover:bg-zinc-200/50 text-zinc-400 hover:text-zinc-600 transition-colors">
+                <LogOut size={14} />
+              </button>
+            </form>
           </div>
         </div>
       </aside>
@@ -84,6 +88,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </div>
       </main>
+
+      <Toaster richColors position="bottom-right" />
     </div>
   )
 }

@@ -66,11 +66,14 @@ export default async function AppointmentDetailPage({
         Citas
       </Link>
 
-      <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">
+      <div className="bg-card rounded-2xl border border-border p-6 mb-6 shadow-sm">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-5">
           <div>
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Cita</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-5 h-[1.5px] bg-primary/30 rounded-full" />
+              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Cita</p>
+            </div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
               {pet?.name ?? '—'}
               {pet?.species ? <span className="text-muted-foreground font-normal text-base ml-2">{pet.species.name}</span> : null}
@@ -96,7 +99,7 @@ export default async function AppointmentDetailPage({
         {/* People */}
         <div className="grid grid-cols-2 gap-4 mb-5">
           <div>
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Dueño</p>
+            <p className="label-overline text-muted-foreground/60 mb-1">Dueño</p>
             <Link
               href={`/dashboard/owners/${owner?.id}`}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
@@ -106,7 +109,7 @@ export default async function AppointmentDetailPage({
             {owner?.phone && <p className="text-xs text-muted-foreground mt-0.5">{owner.phone}</p>}
           </div>
           <div>
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Mascota</p>
+            <p className="label-overline text-muted-foreground/60 mb-1">Mascota</p>
             <Link
               href={`/dashboard/pets/${pet?.id}`}
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
@@ -116,13 +119,13 @@ export default async function AppointmentDetailPage({
           </div>
           {assignedTo && (
             <div>
-              <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Atendido por</p>
+              <p className="label-overline text-muted-foreground/60 mb-1">Atendido por</p>
               <p className="text-sm text-foreground">{assignedTo.full_name}</p>
             </div>
           )}
           {createdBy && (
             <div>
-              <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Creado por</p>
+              <p className="label-overline text-muted-foreground/60 mb-1">Creado por</p>
               <p className="text-sm text-muted-foreground">{createdBy.full_name}</p>
             </div>
           )}
@@ -130,14 +133,14 @@ export default async function AppointmentDetailPage({
 
         {appointment.reason && (
           <div className="mb-4">
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Motivo</p>
+            <p className="label-overline text-muted-foreground/60 mb-1">Motivo</p>
             <p className="text-sm text-foreground">{appointment.reason}</p>
           </div>
         )}
 
         {appointment.notes && (
           <div className="mb-4">
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Notas</p>
+            <p className="label-overline text-muted-foreground/60 mb-1">Notas</p>
             <p className="text-sm text-muted-foreground italic">{appointment.notes}</p>
           </div>
         )}
@@ -145,7 +148,7 @@ export default async function AppointmentDetailPage({
         {/* Linked medical record */}
         {medicalRecord && (
           <div className="mt-5 pt-5 border-t border-border">
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-2">Consulta registrada</p>
+            <p className="label-overline text-muted-foreground/60 mb-2">Consulta registrada</p>
             <Link
               href={`/dashboard/pets/${pet?.id}/records/${medicalRecord.id}`}
               className={buttonVariants({ variant: 'outline', size: 'sm' })}

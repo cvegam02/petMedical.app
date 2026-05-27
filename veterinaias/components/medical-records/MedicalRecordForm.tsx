@@ -2,6 +2,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { medicalRecordSchema, type MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { PrescriptionsFields } from './PrescriptionsFields'
 import { Button } from '@/components/ui/button'
@@ -41,11 +42,11 @@ export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormPro
         }),
       })
       const json = await res.json()
-      if (!res.ok) { alert(json.error ?? 'Error al guardar el expediente'); return }
+      if (!res.ok) { toast.error(json.error ?? 'Error al guardar el expediente'); return }
       router.push(`/dashboard/pets/${petId}/records/${json.data.id}`)
       router.refresh()
     } catch {
-      alert('Error de red. Intenta de nuevo.')
+      toast.error('Error de red. Intenta de nuevo.')
     }
   }
 

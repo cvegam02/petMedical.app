@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, CalendarDays } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { AppointmentCard } from '@/components/appointments/AppointmentCard'
 
@@ -56,14 +56,15 @@ export default async function AppointmentsPage({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-0.5">
-            Agenda
-          </p>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Citas</h1>
+      <div className="flex items-end justify-between mb-8">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+            <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Agenda</p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Citas</h1>
         </div>
-        <Link href="/dashboard/appointments/new" className={buttonVariants({ size: 'sm' })}>
+        <Link href="/dashboard/appointments/new" className={buttonVariants({ size: 'sm', className: 'shadow-lg shadow-primary/10 active:scale-[0.97] transition-all' })}>
           <Plus size={14} className="mr-1.5" />
           Nueva cita
         </Link>
@@ -95,13 +96,25 @@ export default async function AppointmentsPage({
 
       {/* List */}
       {list.length === 0 ? (
-        <div className="text-center py-16 rounded-xl border border-dashed border-border">
-          <p className="font-medium text-foreground mb-1">
-            {tab === 'hoy' ? 'Sin citas para hoy' : tab === 'proximas' ? 'Sin citas próximas' : 'No hay citas pendientes de confirmar'}
+        <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
+            <CalendarDays size={22} className="text-muted-foreground/25" />
+          </div>
+          <p className="font-bold text-foreground text-lg tracking-tight">
+            {tab === 'hoy' ? 'Sin citas para hoy' : tab === 'proximas' ? 'Sin citas próximas' : 'Sin citas por confirmar'}
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-2 max-w-[260px] mx-auto leading-relaxed">
             {tab === 'confirmar' ? 'Todas las citas próximas están confirmadas.' : 'Agrega una nueva cita para comenzar.'}
           </p>
+          {tab !== 'confirmar' && (
+            <Link
+              href="/dashboard/appointments/new"
+              className="mt-7 inline-flex items-center px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.95]"
+            >
+              <Plus size={13} className="mr-1.5" />
+              Nueva cita
+            </Link>
+          )}
         </div>
       ) : (
         <div className="space-y-2">

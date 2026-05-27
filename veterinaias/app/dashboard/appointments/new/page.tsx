@@ -31,8 +31,11 @@ export default async function NewAppointmentPage() {
         Citas
       </Link>
 
-      <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Agenda</p>
-      <h1 className="text-xl font-semibold tracking-tight text-foreground mb-6">Nueva cita</h1>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+        <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Agenda</p>
+      </div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-6">Nueva cita</h1>
 
       <AppointmentForm team={(team as any[]) ?? []} />
     </div>

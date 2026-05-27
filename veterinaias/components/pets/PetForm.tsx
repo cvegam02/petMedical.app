@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { petSchema, type PetFormValues } from '@/lib/validations/pet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,7 +51,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
     const payload = petId ? (() => { const { owner_id, ...rest } = values; return rest })() : values
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const json = await res.json()
-    if (!res.ok) { alert(json.error); return }
+    if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
     router.push(`/dashboard/owners/${ownerId}`)
     router.refresh()
   }

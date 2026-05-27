@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { buttonVariants } from '@/components/ui/button'
 import { Button } from '@/components/ui/button'
 
@@ -24,11 +25,11 @@ export function StatusActions({ appointmentId, petId, status }: StatusActionsPro
         body: JSON.stringify({ status: newStatus }),
       })
       const json = await res.json()
-      if (!res.ok) { alert(json.error ?? 'Error al actualizar'); return }
+      if (!res.ok) { toast.error(json.error ?? 'Error al actualizar'); return }
       router.refresh()
-  } catch {
-    alert('Error de red. Intenta de nuevo.')
-  } finally {
+    } catch {
+      toast.error('Error de red. Intenta de nuevo.')
+    } finally {
     setLoading(null)
   }
 }

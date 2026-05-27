@@ -2,6 +2,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { addendumSchema, type AddendumFormValues } from '@/lib/validations/medical-record'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -25,12 +26,12 @@ export function AddendumForm({ recordId, onAdded }: AddendumFormProps) {
         body: JSON.stringify(values),
       })
       const json = await res.json()
-      if (!res.ok) { alert(json.error); return }
+      if (!res.ok) { toast.error(json.error ?? 'Error al guardar la adenda'); return }
       onAdded(json.data)
       reset()
       setOpen(false)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error al guardar la adenda')
+      toast.error(err instanceof Error ? err.message : 'Error al guardar la adenda')
     }
   }
 

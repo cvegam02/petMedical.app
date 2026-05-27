@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { AddendumForm } from './AddendumForm'
 import { AttachmentUploader } from './AttachmentUploader'
+import { toast } from 'sonner'
 import { getAttachmentUrl } from '@/lib/supabase/storage'
 
 interface Attachment { id: string; file_name: string; file_type: string; storage_path: string; created_at: string }
@@ -24,7 +25,7 @@ export function RecordDetailClient({ recordId, petId, userId, initialAttachments
       const url = await getAttachmentUrl(path)
       window.open(url, '_blank')
     } catch {
-      alert('No se pudo abrir el archivo')
+      toast.error('No se pudo abrir el archivo')
     }
   }
 
