@@ -38,8 +38,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* Brand */}
         <div className="px-6 py-8">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-200">
-              <svg width="18" height="18" viewBox="0 0 14 14" fill="none" className="text-white">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+              <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white">
                 <path d="M7 1C5.5 1 4.5 2 4.5 3.5C4.5 5 5.5 6 7 6C8.5 6 9.5 5 9.5 3.5C9.5 2 8.5 1 7 1Z" fill="currentColor"/>
                 <path d="M2.5 4C1.7 4 1 4.7 1 5.5C1 6.3 1.7 7 2.5 7C3.3 7 4 6.3 4 5.5C4 4.7 3.3 4 2.5 4Z" fill="currentColor" opacity="0.7"/>
                 <path d="M11.5 4C10.7 4 10 4.7 10 5.5C10 6.3 10.7 7 11.5 7C12.3 7 13 6.3 13 5.5C13 4.7 12.3 4 11.5 4Z" fill="currentColor" opacity="0.7"/>
@@ -60,22 +60,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         {/* User Footer */}
         <div className="p-4">
-          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-zinc-50 border border-zinc-100 group transition-all duration-200">
-            <div className="w-8 h-8 rounded-full bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
-              <span className="text-[10px] font-bold text-zinc-600">{initials}</span>
+          <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-zinc-50 transition-colors group">
+            <div className="w-7 h-7 rounded-md bg-zinc-100 flex items-center justify-center shrink-0">
+              <span className="text-[10px] font-bold text-zinc-500">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-zinc-900 truncate leading-none">{profile?.full_name}</p>
-              <div className="flex items-center gap-1 mt-1">
-                {profile?.role === 'admin' && <ShieldCheck size={10} className="text-primary" />}
-                <p className="text-[9px] font-mono font-medium text-zinc-400 uppercase tracking-tight italic">
-                  {profile?.role}
-                </p>
+              <div className="flex items-center gap-1 mt-0.5">
+                {profile?.role === 'admin' && <ShieldCheck size={9} className="text-primary/70" />}
+                <p className="label-overline text-zinc-400">{profile?.role}</p>
               </div>
             </div>
             <form action={signOutAction}>
-              <button type="submit" className="p-1.5 rounded-md hover:bg-zinc-200/50 text-zinc-400 hover:text-zinc-600 transition-colors">
-                <LogOut size={14} />
+              <button type="submit" className="p-1.5 text-zinc-300 hover:text-zinc-500 transition-colors opacity-0 group-hover:opacity-100">
+                <LogOut size={13} />
               </button>
             </form>
           </div>
