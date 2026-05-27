@@ -46,6 +46,7 @@ export function AppointmentForm({ team }: AppointmentFormProps) {
     fetch(`/api/pets?ownerId=${selectedOwner.id}`)
       .then(r => r.json())
       .then(json => setPets(json.data ?? []))
+      .catch(() => setPets([]))
   }, [selectedOwner])
 
   function selectOwner(owner: { id: string; full_name: string; phone: string | null }) {

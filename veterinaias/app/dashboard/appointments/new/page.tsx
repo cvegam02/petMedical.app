@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { AppointmentForm } from '@/components/appointments/AppointmentForm'
@@ -6,11 +7,12 @@ import { AppointmentForm } from '@/components/appointments/AppointmentForm'
 export default async function NewAppointmentPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('tenant_id')
-    .eq('id', user!.id)
+    .eq('id', user.id)
     .single()
 
   const { data: team } = await supabase
