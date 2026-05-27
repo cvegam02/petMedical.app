@@ -7,6 +7,7 @@ import { ownerSchema, type OwnerFormValues } from '@/lib/validations/owner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FormSection } from '@/components/ui/form-section'
 
 interface OwnerFormProps {
   defaultValues?: Partial<OwnerFormValues>
@@ -31,32 +32,41 @@ export function OwnerForm({ defaultValues, ownerId }: OwnerFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-lg">
-      <div>
-        <Label htmlFor="full_name">Nombre completo *</Label>
-        <Input id="full_name" {...register('full_name')} />
-        {errors.full_name && <p className="text-red-500 text-sm mt-1">{errors.full_name.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="phone">Teléfono *</Label>
-        <Input id="phone" {...register('phone')} />
-        {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" {...register('email')} />
-        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="address">Dirección</Label>
-        <Input id="address" {...register('address')} />
-        {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>}
-      </div>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Guardando...' : ownerId ? 'Guardar cambios' : 'Crear dueño'}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+        <FormSection title="Identidad">
+          <div className="space-y-1">
+            <Label htmlFor="full_name">Nombre completo <span className="text-destructive">*</span></Label>
+            <Input id="full_name" {...register('full_name')} />
+            {errors.full_name && <p className="text-destructive text-xs mt-1">{errors.full_name.message}</p>}
+          </div>
+        </FormSection>
+
+        <FormSection title="Contacto">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="phone">Teléfono <span className="text-destructive">*</span></Label>
+              <Input id="phone" {...register('phone')} />
+              {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone.message}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" {...register('email')} />
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
+            </div>
+          </div>
+          <div className="space-y-1 mt-4">
+            <Label htmlFor="address">Dirección</Label>
+            <Input id="address" {...register('address')} />
+          </div>
+        </FormSection>
+
+        <div className="px-5 py-4 bg-muted/30 flex items-center gap-3">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Guardando...' : ownerId ? 'Guardar cambios' : 'Crear dueño'}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+        </div>
       </div>
     </form>
   )
