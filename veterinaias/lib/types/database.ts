@@ -62,6 +62,7 @@ export interface Breed {
 
 export interface Owner {
   id: string
+  tenant_id: string
   full_name: string
   email: string | null
   phone: string
@@ -72,7 +73,6 @@ export interface Owner {
 
 export interface Pet {
   id: string
-  owner_id: string
   name: string
   species_id: string
   breed_id: string | null
@@ -83,6 +83,30 @@ export interface Pet {
   notes: string | null
   created_at: string
   updated_at: string
+}
+
+export interface PetRegistration {
+  id: string
+  tenant_id: string
+  pet_id: string
+  owner_id: string
+  registered_at: string
+  notes: string | null
+}
+
+export interface CrossTenantPetResult {
+  pet_id: string
+  pet_name: string
+  species_name: string
+  breed_name: string | null
+  sex: PetSex
+  date_of_birth: string | null
+  microchip: string | null
+  owner_full_name: string | null
+  owner_phone: string | null
+  record_count: number
+  last_visit_at: string | null
+  last_clinic: string | null
 }
 
 export interface MedicalRecord {
