@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { PawPrint, Search, X } from 'lucide-react'
+import { PawPrint, Search, X, Cat, Dog, ChevronRight } from 'lucide-react'
 
 interface Pet {
   id: string
@@ -109,10 +109,10 @@ export default function PetsPage() {
         <div className="bg-white rounded-[2rem] border border-border shadow-xl shadow-primary/[0.02] overflow-hidden">
           {/* Table header */}
           <div className="flex items-center gap-6 px-8 py-4 bg-muted/30 border-b border-border/60">
-            <p className="label-overline text-muted-foreground/60 w-1/3">Paciente</p>
+            <p className="label-overline text-muted-foreground/60 w-1/3">Paciente / ID</p>
             <p className="label-overline text-muted-foreground/60 w-1/4">Especie / Raza</p>
             <p className="label-overline text-muted-foreground/60 flex-1">Responsable</p>
-            <div className="w-6 shrink-0" />
+            <div className="w-8 shrink-0" />
           </div>
 
           <div className="divide-y divide-border/40">
@@ -127,9 +127,9 @@ export default function PetsPage() {
             ))}
           </div>
 
-          <div className="px-8 py-4 bg-muted/10 border-t border-border/40 flex items-center justify-between">
+          <div className="px-8 py-4 bg-muted/10 border-t border-border/40">
             <p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-tight">
-              {pets.length} {pets.length === 1 ? 'mascota' : 'mascotas'}{query ? ` · "${query}"` : ''}
+              {pets.length} {pets.length === 1 ? 'mascota' : 'mascotas'}{query ? ` · "${query}"` : ' en el directorio'}
             </p>
           </div>
         </div>
@@ -139,32 +139,49 @@ export default function PetsPage() {
 }
 
 function PetRow({ pet }: { pet: Pet }) {
+  const speciesName = pet.species?.name?.toLowerCase() ?? ''
+  const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
+
   return (
     <Link
       href={`/dashboard/pets/${pet.id}`}
-      className="group flex items-center gap-6 py-3.5 px-4 hover:bg-primary/[0.02] transition-colors"
+      className="group relative flex items-center gap-6 py-4 px-4 hover:bg-primary/[0.02] active:scale-[0.995] transition-all duration-200 border-b border-border/40 last:border-0"
     >
-      <div className="flex items-center gap-3 w-1/3 min-w-0">
-        <p className="font-bold text-sm text-foreground truncate">{pet.name}</p>
-        <span className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-tight shrink-0">
-          {pet.sex === 'male' ? 'M' : pet.sex === 'female' ? 'H' : '—'}
-        </span>
+      {/* Column 1: Identity */}
+      <div className="flex items-center gap-4 w-1/3 min-w-0">
+        <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+          <Icon size={16} strokeWidth={1.8} />
+        </div>
+        <div className="min-w-0">
+          <p className="font-bold text-foreground text-sm leading-none tracking-tight truncate">{pet.name}</p>
+          <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-1.5 opacity-60">
+            {pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : 'Desconocido'}
+          </p>
+        </div>
       </div>
-      <div className="w-1/4 min-w-0">
-        <p className="text-sm text-muted-foreground truncate">
-          {pet.species?.name ?? '—'}
-          {pet.breed ? <span className="text-muted-foreground/50"> · {pet.breed.name}</span> : null}
-        </p>
-      </div>
-      <div className="flex-1 min-w-0">
-        {pet.owner ? (
-          <p className="text-sm text-muted-foreground truncate">{pet.owner.full_name}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground/40 italic">Sin dueño</p>
+
+      {/* Column 2: Species / Breed */}
+      <div className="flex flex-col gap-1 w-1/4 min-w-0">
+        <p className="text-[11px] font-medium text-muted-foreground truncate">{pet.species?.name ?? '—'}</p>
+        {pet.breed && (
+          <p className="text-[11px] text-muted-foreground/60 truncate">{pet.breed.name}</p>
         )}
       </div>
-      <div className="w-6 shrink-0 flex justify-end">
-        <span className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors">›</span>
+
+      {/* Column 3: Owner */}
+      <div className="flex-1 min-w-0">
+        {pet.owner ? (
+          <p className="text-[11px] text-muted-foreground truncate">{pet.owner.full_name}</p>
+        ) : (
+          <p className="text-[11px] text-muted-foreground/40 italic">Sin dueño</p>
+        )}
+      </div>
+
+      {/* Action */}
+      <div className="shrink-0 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-zinc-300 group-hover:text-primary transition-all shadow-sm">
+          <ChevronRight size={14} strokeWidth={3} />
+        </div>
       </div>
     </Link>
   )

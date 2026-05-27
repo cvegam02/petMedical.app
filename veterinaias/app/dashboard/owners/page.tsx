@@ -28,7 +28,7 @@ export default function OwnersPage() {
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Directorio</p>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dueños y Mascotas</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dueños</h1>
         </div>
         <Link
           href="/dashboard/owners/new"
@@ -56,18 +56,19 @@ export default function OwnersPage() {
           ))}
         </div>
       ) : owners.length === 0 ? (
-        <div className="text-center py-24 rounded-[2.5rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
-          <div className="w-16 h-16 rounded-3xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-6">
-            <Users size={24} className="text-muted-foreground/20" />
+        <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
+            <Users size={22} className="text-muted-foreground/25" />
           </div>
-          <p className="font-bold text-foreground text-xl tracking-tight">Directorio sin registros</p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-[280px] mx-auto leading-relaxed">
+          <p className="font-bold text-foreground text-lg tracking-tight">Directorio sin registros</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-[260px] mx-auto leading-relaxed">
             Parece que aún no tienes clientes registrados en esta clínica.
           </p>
-          <Link 
-            href="/dashboard/owners/new" 
-            className="mt-8 inline-flex items-center px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.95]"
+          <Link
+            href="/dashboard/owners/new"
+            className="mt-7 inline-flex items-center px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-all active:scale-[0.96]"
           >
+            <Plus size={13} className="mr-1.5" />
             Registrar primer dueño
           </Link>
         </div>
@@ -94,12 +95,9 @@ export default function OwnersPage() {
           </div>
 
           {/* Footer Info */}
-          <div className="px-8 py-4 bg-muted/10 border-t border-border/40 flex items-center justify-between">
+          <div className="px-8 py-4 bg-muted/10 border-t border-border/40">
             <p className="text-[10px] font-mono text-muted-foreground/60 uppercase tracking-tight">
-              Mostrando {owners.length} registros del directorio
-            </p>
-            <p className="text-[10px] font-mono text-muted-foreground/40 italic">
-              Actualizado: {new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+              {owners.length} {owners.length === 1 ? 'dueño' : 'dueños'} en el directorio
             </p>
           </div>
         </div>
