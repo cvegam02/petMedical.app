@@ -26,10 +26,12 @@ export function StatusActions({ appointmentId, petId, status }: StatusActionsPro
       const json = await res.json()
       if (!res.ok) { alert(json.error ?? 'Error al actualizar'); return }
       router.refresh()
-    } finally {
-      setLoading(null)
-    }
+  } catch {
+    alert('Error de red. Intenta de nuevo.')
+  } finally {
+    setLoading(null)
   }
+}
 
   if (status === 'scheduled') {
     return (
