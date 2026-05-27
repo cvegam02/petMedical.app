@@ -9,14 +9,7 @@ export async function GET(req: NextRequest) {
 
   const q = req.nextUrl.searchParams.get('q')
   let query = (supabase.from('owners') as any)
-    .select(`
-      id, 
-      full_name, 
-      email, 
-      phone, 
-      created_at,
-      pets(id, name, species:species_id(name))
-    `)
+    .select('id, full_name, email, phone, created_at')
     .order('full_name')
     .limit(50)
 
@@ -26,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Error al obtener dueños' }, { status: 500 })
   return NextResponse.json({ data })
 }
 
@@ -41,14 +34,21 @@ export async function POST(req: NextRequest) {
   const result = ownerSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant asignado' }, { status: 403 })
+
   const { email, ...rest } = result.data
-  const { data, error } = await supabase
-    .from('owners')
-    .insert({ ...rest, email: email || null })
+  const { data, error } = await (supabase.from('owners') as any)
+    .insert({ ...rest, tenant_id: profile.tenant_id, email: email || null })
     .select()
     .single()
 
-  if (error?.code === '23505') return NextResponse.json({ error: 'Ya existe un dueño con ese email' }, { status: 409 })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error?.code === '23505') return NextResponse.json({ error: 'Ya existe un dueño con ese email en tu clínica' }, { status: 409 })
+  if (error) return NextResponse.json({ error: 'Error al guardar el dueño' }, { status: 500 })
   return NextResponse.json({ data }, { status: 201 })
 }
