@@ -10,12 +10,12 @@ describe('MedicalRecordForm', () => {
   it('renders required fields', () => {
     render(<MedicalRecordForm petId="pet-1" />)
     expect(screen.getByLabelText(/motivo/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /guardar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /finalizar consulta/i })).toBeInTheDocument()
   })
 
   it('renders prescriptions section', () => {
     render(<MedicalRecordForm petId="pet-1" />)
-    expect(screen.getByText(/recetas/i)).toBeInTheDocument()
+    expect(screen.getByText(/gestión de recetas/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /agregar medicamento/i })).toBeInTheDocument()
   })
 })
