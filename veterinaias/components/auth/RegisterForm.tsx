@@ -29,7 +29,7 @@ export function RegisterForm() {
       options: { data: { full_name: data.full_name } },
     })
     if (error) {
-      setServerError('No se pudo crear la cuenta. ' + error.message)
+      setServerError('No se pudo crear la cuenta. Intenta de nuevo o contacta soporte.')
       return
     }
     router.push('/onboarding')

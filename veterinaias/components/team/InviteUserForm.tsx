@@ -19,7 +19,7 @@ type InviteInput = z.infer<typeof inviteSchema>
 export function InviteUserForm({ tenantType, onSuccess }: { tenantType: TenantType; onSuccess?: () => void }) {
   const [serverError, setServerError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const { register, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<InviteInput>({
+  const { register, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } = useForm<InviteInput>({
     resolver: zodResolver(inviteSchema),
     defaultValues: { role: 'staff' },
   })
@@ -57,7 +57,7 @@ export function InviteUserForm({ tenantType, onSuccess }: { tenantType: TenantTy
             </div>
             <div className="space-y-1">
               <Label>Rol</Label>
-              <Select defaultValue="staff" onValueChange={(v) => setValue('role', v as InviteInput['role'])}>
+              <Select value={watch('role')} onValueChange={(v) => setValue('role', v as InviteInput['role'])}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar rol" />
                 </SelectTrigger>
