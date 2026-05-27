@@ -135,6 +135,15 @@ DELETE FROM invitations WHERE tenant_id IN (
   'a1a1a1a1-0001-4000-a000-000000000002'
 );
 
+DELETE FROM auth.identities WHERE user_id IN (
+  'b2b2b2b2-0002-4000-a000-000000000001',
+  'b2b2b2b2-0002-4000-a000-000000000002',
+  'b2b2b2b2-0002-4000-a000-000000000003',
+  'b2b2b2b2-0002-4000-a000-000000000004',
+  'b2b2b2b2-0002-4000-a000-000000000005',
+  'b2b2b2b2-0002-4000-a000-000000000006'
+);
+
 DELETE FROM auth.users WHERE id IN (
   'b2b2b2b2-0002-4000-a000-000000000001',
   'b2b2b2b2-0002-4000-a000-000000000002',
@@ -254,6 +263,32 @@ VALUES
     '{"full_name":"Valentina Cruz"}'::jsonb,
     NOW(), NOW()
   );
+
+
+-- ============================================================
+-- AUTH IDENTITIES (requerido por GoTrue para verificar el login)
+-- Sin este registro, signInWithPassword falla con "invalid credentials"
+-- ============================================================
+INSERT INTO auth.identities (id, user_id, provider, provider_id, identity_data, created_at, updated_at)
+VALUES
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000001', 'email', 'superadmin@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000001","email":"superadmin@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW()),
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000002', 'email', 'admin.individual@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000002","email":"admin.individual@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW()),
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000003', 'email', 'staff@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000003","email":"staff@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW()),
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000004', 'email', 'admin.empresa@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000004","email":"admin.empresa@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW()),
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000005', 'email', 'doctor@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000005","email":"doctor@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW()),
+  (gen_random_uuid(), 'b2b2b2b2-0002-4000-a000-000000000006', 'email', 'assistant@test.veterinaias.dev',
+   '{"sub":"b2b2b2b2-0002-4000-a000-000000000006","email":"assistant@test.veterinaias.dev","email_verified":true}'::jsonb,
+   NOW(), NOW());
 
 
 -- ============================================================
