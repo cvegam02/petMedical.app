@@ -3,8 +3,15 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MedicalRecordForm } from '@/components/medical-records/MedicalRecordForm'
 
-export default async function NewRecordPage({ params }: { params: Promise<{ petId: string }> }) {
+export default async function NewRecordPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ petId: string }>
+  searchParams: Promise<{ appointmentId?: string }>
+}) {
   const { petId } = await params
+  const { appointmentId } = await searchParams
   const supabase = await createClient()
 
   const { data: pet, error } = await (supabase.from('pets') as any)
@@ -24,7 +31,7 @@ export default async function NewRecordPage({ params }: { params: Promise<{ petI
       </Link>
       <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1">Nueva consulta</h1>
       <p className="text-sm text-muted-foreground mb-6">Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.</p>
-      <MedicalRecordForm petId={petId} />
+      <MedicalRecordForm petId={petId} appointmentId={appointmentId} />
     </div>
   )
 }

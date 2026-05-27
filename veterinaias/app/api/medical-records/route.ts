@@ -49,5 +49,16 @@ export async function POST(req: NextRequest) {
     if (presError) return NextResponse.json({ error: presError.message }, { status: 500 })
   }
 
+  // If appointment_id provided, mark appointment as completed
+  if (result.data.appointment_id) {
+    await (supabase.from('appointments') as any)
+      .update({
+        status: 'completed',
+        medical_record_id: record.id,
+      })
+      .eq('id', result.data.appointment_id)
+      .eq('tenant_id', profile.tenant_id)
+  }
+
   return NextResponse.json({ data: record }, { status: 201 })
 }
