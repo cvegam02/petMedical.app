@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FormSection } from '@/components/ui/form-section'
 import type { TenantType } from '@/lib/types/database'
 
 const inviteSchema = z.object({
@@ -42,30 +43,40 @@ export function InviteUserForm({ tenantType, onSuccess }: { tenantType: TenantTy
     : [{ value: 'staff', label: 'Staff' }]
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {success && <p className="text-sm text-green-600">Invitacion enviada exitosamente</p>}
-      <div className="space-y-1">
-        <Label htmlFor="invite-email">Email del nuevo usuario</Label>
-        <Input id="invite-email" type="email" placeholder="doctor@clinica.com" {...register('email')} />
-        {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {success && (
+        <p className="text-sm text-primary font-medium mb-4">Invitación enviada exitosamente.</p>
+      )}
+      <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
+        <FormSection title="Nuevo usuario">
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="invite-email">Email del nuevo usuario</Label>
+              <Input id="invite-email" type="email" placeholder="doctor@clinica.com" {...register('email')} />
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label>Rol</Label>
+              <Select defaultValue="staff" onValueChange={(v) => setValue('role', v as InviteInput['role'])}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {serverError && <p className="text-destructive text-xs mt-3">{serverError}</p>}
+        </FormSection>
+        <div className="px-5 py-4 bg-muted/30 flex items-center gap-3">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Invitando...' : 'Enviar invitación'}
+          </Button>
+        </div>
       </div>
-      <div className="space-y-1">
-        <Label>Rol</Label>
-        <Select defaultValue="staff" onValueChange={(v) => setValue('role', v as InviteInput['role'])}>
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar rol" />
-          </SelectTrigger>
-          <SelectContent>
-            {roleOptions.map(opt => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      {serverError && <p className="text-sm text-red-500">{serverError}</p>}
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Invitando...' : 'Enviar invitacion'}
-      </Button>
     </form>
   )
 }
