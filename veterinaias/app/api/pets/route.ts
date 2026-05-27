@@ -16,13 +16,20 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const q = req.nextUrl.searchParams.get('q')
+
   let query = (supabase.from('pets') as any)
-    .select('id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name)')
+    .select('id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name), owner:owner_id(id, full_name)')
     .order('name')
     .limit(100)
 
   if (ownerId) {
     query = query.eq('owner_id', ownerId)
+  }
+
+  if (q && q.trim()) {
+    const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
+    query = query.ilike('name', `%${escaped}%`)
   }
 
   const { data, error } = await query

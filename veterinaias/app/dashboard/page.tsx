@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Users, Calendar, Settings2, ChevronRight, Plus } from 'lucide-react'
+import { Users, PawPrint, Calendar, Settings2, ChevronRight, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function DashboardPage() {
@@ -53,8 +53,22 @@ export default async function DashboardPage() {
             <Users size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground leading-none">Dueños y Mascotas</p>
-            <p className="text-xs text-muted-foreground mt-1">Directorio de clientes y expedientes clínicos</p>
+            <p className="text-sm font-semibold text-foreground leading-none">Dueños</p>
+            <p className="text-xs text-muted-foreground mt-1">Directorio de clientes y responsables</p>
+          </div>
+          <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
+        </Link>
+
+        <Link
+          href="/dashboard/pets"
+          className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+        >
+          <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
+            <PawPrint size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground leading-none">Mascotas</p>
+            <p className="text-xs text-muted-foreground mt-1">Expedientes clínicos y búsqueda por paciente</p>
           </div>
           <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
         </Link>
