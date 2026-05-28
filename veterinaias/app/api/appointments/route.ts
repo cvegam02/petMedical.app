@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { appointmentSchema } from '@/lib/validations/appointment'
+import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 
 const VALID_TABS = ['hoy', 'proximas', 'confirmar'] as const
 const ONE_DAY_MS = 86_400_000
@@ -72,6 +73,15 @@ export async function POST(req: NextRequest) {
   if (profileError) return NextResponse.json({ error: 'Error al verificar el perfil' }, { status: 500 })
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
+  const { data: tenantData } = await supabase
+    .from('tenants')
+    .select('settings')
+    .eq('id', profile.tenant_id)
+    .single()
+
+  const businessHours = (tenantData?.settings as any)?.business_hours ?? DEFAULT_BUSINESS_HOURS
+  const slotInterval: number = businessHours.slot_interval
+
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
 
@@ -81,6 +91,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await (supabase.from('appointments') as any)
     .insert({
       ...result.data,
+      duration_minutes: result.data.duration_minutes ?? slotInterval,
       tenant_id: profile.tenant_id,
       created_by: user.id,
     })
