@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Plus, CalendarDays } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { CalendarDays } from 'lucide-react'
 import { AppointmentCard } from '@/components/appointments/AppointmentCard'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 
 const TABS = [
   { key: 'hoy',      label: 'Hoy' },
@@ -19,6 +19,26 @@ export default async function AppointmentsPage({
   const VALID_TABS = ['hoy', 'proximas', 'confirmar'] as const
   const tab = (VALID_TABS as readonly string[]).includes(rawTab) ? rawTab : 'hoy'
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role, tenant_id, tenants(type)')
+    .eq('id', user!.id)
+    .single() as any
+
+  const tenant = profile?.tenants
+  const showAll =
+    tenant?.type === 'individual' ||
+    profile?.role === 'admin' ||
+    profile?.role === 'assistant' ||
+    profile?.role === 'staff'
+
+  const { data: team } = await supabase
+    .from('user_profiles')
+    .select('id, full_name')
+    .eq('tenant_id', profile?.tenant_id ?? '')
+    .order('full_name') as { data: { id: string; full_name: string }[] | null }
 
   const now = new Date()
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -33,7 +53,12 @@ export default async function AppointmentsPage({
       owner:owner_id(id, full_name, phone),
       assigned_to_profile:assigned_to(id, full_name)
     `)
+    .eq('tenant_id', profile?.tenant_id)
     .order('scheduled_at', { ascending: true })
+
+  if (!showAll && profile?.role === 'doctor') {
+    query = query.eq('assigned_to', user!.id)
+  }
 
   if (tab === 'hoy') {
     query = query
@@ -54,79 +79,72 @@ export default async function AppointmentsPage({
   const list = (appointments as any[]) ?? []
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-end justify-between mb-8">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
-            <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Agenda</p>
+    <div className="space-y-8">
+      <div className="space-y-6">
+        <div className="flex items-end justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Agenda</p>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Citas</h1>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Citas</h1>
+          <NewAppointmentButton team={team ?? []} />
         </div>
-        <Link href="/dashboard/appointments/new" className={buttonVariants({ size: 'sm', className: 'shadow-lg shadow-primary/10 active:scale-[0.97] transition-all' })}>
-          <Plus size={14} className="mr-1.5" />
-          Nueva cita
-        </Link>
-      </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-border">
-        {TABS.map(t => (
-          <Link
-            key={t.key}
-            href={`/dashboard/appointments?tab=${t.key}`}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === t.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </div>
-
-      {/* Callout for confirmar tab */}
-      {tab === 'confirmar' && list.length > 0 && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-primary/5 border border-primary/15 text-sm text-foreground">
-          Estas citas necesitan confirmación. Llama al dueño y marca la cita como confirmada.
-        </div>
-      )}
-
-      {/* List */}
-      {list.length === 0 ? (
-        <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
-          <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
-            <CalendarDays size={22} className="text-muted-foreground/25" />
-          </div>
-          <p className="font-bold text-foreground text-lg tracking-tight">
-            {tab === 'hoy' ? 'Sin citas para hoy' : tab === 'proximas' ? 'Sin citas próximas' : 'Sin citas por confirmar'}
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-[260px] mx-auto leading-relaxed">
-            {tab === 'confirmar' ? 'Todas las citas próximas están confirmadas.' : 'Agrega una nueva cita para comenzar.'}
-          </p>
-          {tab !== 'confirmar' && (
+        <div className="flex gap-1 border-b border-border">
+          {TABS.map(t => (
             <Link
-              href="/dashboard/appointments/new"
-              className="mt-7 inline-flex items-center px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.95]"
+              key={t.key}
+              href={`/dashboard/appointments?tab=${t.key}`}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                tab === t.key
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
             >
-              <Plus size={13} className="mr-1.5" />
-              Nueva cita
+              {t.label}
             </Link>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {list.map((apt: any) => (
-            <AppointmentCard
-              key={apt.id}
-              appointment={apt}
-              showPhone={tab === 'confirmar'}
-            />
           ))}
         </div>
-      )}
+      </div>
+
+      <div className="max-w-2xl mx-auto w-full">
+        {tab === 'confirmar' && list.length > 0 && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-primary/5 border border-primary/15 text-sm text-foreground">
+            Estas citas necesitan confirmación. Llama al dueño y marca la cita como confirmada.
+          </div>
+        )}
+
+        {list.length === 0 ? (
+          <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
+              <CalendarDays size={22} className="text-muted-foreground/25" />
+            </div>
+            <p className="font-bold text-foreground text-lg tracking-tight">
+              {tab === 'hoy' ? 'Sin citas para hoy' : tab === 'proximas' ? 'Sin citas próximas' : 'Sin citas por confirmar'}
+            </p>
+            <p className="text-sm text-muted-foreground mt-2 max-w-[260px] mx-auto leading-relaxed">
+              {tab === 'confirmar' ? 'Todas las citas próximas están confirmadas.' : 'Agrega una nueva cita para comenzar.'}
+            </p>
+            {tab !== 'confirmar' && (
+              <div className="mt-7 flex justify-center">
+                <NewAppointmentButton team={team ?? []} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {list.map((apt: any) => (
+              <AppointmentCard
+                key={apt.id}
+                appointment={apt}
+                showPhone={tab === 'confirmar'}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

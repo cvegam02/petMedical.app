@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { Users, PawPrint, Calendar, Settings2, ChevronRight, Plus, CalendarDays } from 'lucide-react'
+import { Users, PawPrint, Calendar, Settings2, ChevronRight, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { AppointmentCard } from '@/components/appointments/AppointmentCard'
 import { NextAppointmentCard } from '@/components/dashboard/NextAppointmentCard'
 import { AppointmentQuickModal } from '@/components/dashboard/AppointmentQuickModal'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 import type { DashboardAppointment } from '@/components/dashboard/DashboardAppointmentCard'
 
 export default async function DashboardPage() {
@@ -23,15 +24,20 @@ export default async function DashboardPage() {
   const firstName = profile?.full_name?.split(' ')[0] ?? ''
   const today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  // Fetch appointments
+  const { data: team } = await supabase
+    .from('user_profiles')
+    .select('id, full_name')
+    .eq('tenant_id', profile?.tenant_id ?? '')
+    .order('full_name') as { data: { id: string; full_name: string }[] | null }
+
   const now = new Date()
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const tomorrowStart = new Date(todayStart.getTime() + 86400000)
 
-  const showAll = 
-    tenant?.type === 'individual' || 
-    profile?.role === 'admin' || 
-    profile?.role === 'assistant' || 
+  const showAll =
+    tenant?.type === 'individual' ||
+    profile?.role === 'admin' ||
+    profile?.role === 'assistant' ||
     profile?.role === 'staff'
 
   let appointmentsQuery = supabase
@@ -69,7 +75,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-10">
-      {/* Header & Quick actions - Aligned Left */}
       <div className="space-y-6">
         <div>
           <p className="text-sm text-muted-foreground capitalize">{today}</p>
@@ -83,18 +88,12 @@ export default async function DashboardPage() {
             <Plus size={13} />
             Nuevo dueño
           </Link>
-          <Link href="/dashboard/appointments/new" className={buttonVariants({ size: 'sm', variant: 'outline' })}>
-            <Plus size={13} />
-            Nueva cita
-          </Link>
+          <NewAppointmentButton team={team ?? []} />
         </div>
       </div>
 
-      {/* Main Content Sections - Centered */}
       <div className="max-w-2xl mx-auto space-y-12">
-        {/* Appointments Sections */}
         <div className="space-y-6">
-          {/* Today's Appointments */}
           <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
               <p className="label-overline text-muted-foreground/50">Citas de hoy</p>
@@ -120,7 +119,6 @@ export default async function DashboardPage() {
             )}
           </section>
 
-          {/* Future Appointments */}
           {futureAppointments.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between px-1">
@@ -138,14 +136,10 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Work areas */}
         <div className="space-y-2">
           <p className="label-overline text-muted-foreground/50 px-1 mb-3">Módulos</p>
 
-          <Link
-            href="/dashboard/owners"
-            className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
-          >
+          <Link href="/dashboard/owners" className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all">
             <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
               <Users size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
             </div>
@@ -156,10 +150,7 @@ export default async function DashboardPage() {
             <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
           </Link>
 
-          <Link
-            href="/dashboard/pets"
-            className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
-          >
+          <Link href="/dashboard/pets" className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all">
             <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
               <PawPrint size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
             </div>
@@ -170,10 +161,7 @@ export default async function DashboardPage() {
             <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
           </Link>
 
-          <Link
-            href="/dashboard/appointments"
-            className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
-          >
+          <Link href="/dashboard/appointments" className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all">
             <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
               <Calendar size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
             </div>
@@ -185,10 +173,7 @@ export default async function DashboardPage() {
           </Link>
 
           {profile?.role === 'admin' && (
-            <Link
-              href="/dashboard/settings/team"
-              className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
-            >
+            <Link href="/dashboard/settings/team" className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all">
               <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
                 <Settings2 size={17} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
               </div>
@@ -201,7 +186,6 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Clinic info */}
         <div className="border-t border-border/60 pt-6">
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground/60">
             <span>{tenant?.name}</span>
