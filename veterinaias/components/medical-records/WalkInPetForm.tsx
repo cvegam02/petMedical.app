@@ -63,7 +63,7 @@ export function WalkInPetForm({ values, onChange, errors }: WalkInPetFormProps) 
             </Label>
             <Select
               value={values.species_id || ''}
-              onValueChange={v => update({ species_id: v, breed_id: undefined })}
+              onValueChange={v => update({ species_id: v ?? '', breed_id: undefined })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar especie" />

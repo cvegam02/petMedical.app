@@ -168,7 +168,7 @@ export function WalkInConsultationPage() {
                     Agregar receta
                   </button>
                 ) : (
-                  <PrescriptionsFields control={control} />
+                  <PrescriptionsFields control={control as any} />
                 )}
               </FormSection>
 
