@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MedicalRecordForm } from '@/components/medical-records/MedicalRecordForm'
+import type { IncompletePatient } from '@/components/medical-records/MedicalRecordForm'
 
-export default async function NewRecordPage({
+export default async function MedicalRecordNewPage({
   params,
   searchParams,
 }: {
@@ -15,11 +16,57 @@ export default async function NewRecordPage({
   const supabase = await createClient()
 
   const { data: pet, error } = await (supabase.from('pets') as any)
-    .select('id, name, owner_id')
+    .select('id, name')
     .eq('id', petId)
     .single()
 
-  if (error || !pet) notFound()
+  if (error || !pet) {
+    console.error('Pet not found or error:', error)
+    notFound()
+  }
+
+  // Detect incomplete profile (stub owner created during first-visit scheduling)
+  let incompletePatient: IncompletePatient | null = null
+
+  if (appointmentId) {
+    const { data: appointment } = await (supabase.from('appointments') as any)
+      .select('owner_id')
+      .eq('id', appointmentId)
+      .maybeSingle()
+
+    if (appointment?.owner_id) {
+      const [ownerResult, petProfileResult] = await Promise.all([
+        (supabase.from('owners') as any)
+          .select('id, full_name, email, phone')
+          .eq('id', appointment.owner_id)
+          .single(),
+        (supabase.from('pets') as any)
+          .select('id, species_id, sex, date_of_birth')
+          .eq('id', petId)
+          .single(),
+      ])
+
+      const owner = ownerResult.data
+      if (owner && !owner.phone && !owner.email) {
+        incompletePatient = {
+          owner: {
+            id: owner.id,
+            full_name: owner.full_name,
+            phone: owner.phone,
+            email: owner.email,
+          },
+          pet: petProfileResult.data
+            ? {
+                id: petProfileResult.data.id,
+                species_id: petProfileResult.data.species_id,
+                sex: petProfileResult.data.sex,
+                date_of_birth: petProfileResult.data.date_of_birth,
+              }
+            : null,
+        }
+      }
+    }
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -30,8 +77,14 @@ export default async function NewRecordPage({
         ← {pet.name}
       </Link>
       <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1">Nueva consulta</h1>
-      <p className="text-sm text-muted-foreground mb-6">Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.</p>
-      <MedicalRecordForm petId={petId} appointmentId={appointmentId} />
+      <p className="text-sm text-muted-foreground mb-6">
+        Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
+      </p>
+      <MedicalRecordForm
+        petId={petId}
+        appointmentId={appointmentId}
+        incompletePatient={incompletePatient}
+      />
     </div>
   )
 }

@@ -1,22 +1,32 @@
 'use client'
+import { useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { medicalRecordSchema, type MedicalRecordFormValues } from '@/lib/validations/medical-record'
+import { PatientDataSection, type PatientDataValues } from './PatientDataSection'
 import { PrescriptionsFields } from './PrescriptionsFields'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Stethoscope, Activity, ClipboardList, Pill, Save, X, Heart, Thermometer } from 'lucide-react'
 
+export interface IncompletePatient {
+  owner: { id: string; full_name: string; phone: string | null; email: string | null }
+  pet: { id: string; species_id: string | null; sex: string; date_of_birth: string | null } | null
+}
+
 interface MedicalRecordFormProps {
   petId: string
   appointmentId?: string
+  incompletePatient?: IncompletePatient | null
 }
 
-export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormProps) {
+export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: MedicalRecordFormProps) {
   const router = useRouter()
+  const patientDataRef = useRef<PatientDataValues | null>(null)
+
   const {
     register,
     handleSubmit,
@@ -24,25 +34,71 @@ export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormPro
     formState: { errors, isSubmitting },
   } = useForm<MedicalRecordFormValues>({
     resolver: zodResolver(medicalRecordSchema) as any,
-    defaultValues: { 
-      pet_id: petId, 
+    defaultValues: {
+      pet_id: petId,
       prescriptions: [],
-      ...(appointmentId ? { appointment_id: appointmentId } : {})
+      ...(appointmentId ? { appointment_id: appointmentId } : {}),
     },
   })
 
+  async function patchOwner(owner: PatientDataValues['owner']) {
+    const body: Record<string, string> = { full_name: owner.full_name }
+    if (owner.phone) body.phone = owner.phone
+    if (owner.email) body.email = owner.email
+    const res = await fetch(`/api/owners/${owner.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error('owner patch failed')
+  }
+
+  async function patchPet(pet: PatientDataValues['pet']) {
+    const body: Record<string, string> = {}
+    if (pet.species_id) body.species_id = pet.species_id
+    if (pet.sex && pet.sex !== 'unknown') body.sex = pet.sex
+    if (pet.date_of_birth) body.date_of_birth = pet.date_of_birth
+    if (Object.keys(body).length === 0) return
+    const res = await fetch(`/api/pets/${pet.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) throw new Error('pet patch failed')
+  }
+
   const onSubmit = async (values: MedicalRecordFormValues) => {
     try {
-      const res = await fetch('/api/medical-records', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...values,
-          ...(appointmentId ? { appointment_id: appointmentId } : {}),
+      const tasks: Promise<unknown>[] = [
+        fetch('/api/medical-records', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...values,
+            ...(appointmentId ? { appointment_id: appointmentId } : {}),
+          }),
         }),
-      })
-      const json = await res.json()
-      if (!res.ok) { toast.error(json.error ?? 'Error al guardar el expediente'); return }
+      ]
+
+      if (incompletePatient && patientDataRef.current) {
+        tasks.push(
+          patchOwner(patientDataRef.current.owner).catch(() => {
+            toast.warning('Datos del dueño no guardados — puedes actualizarlos en su perfil.')
+          }),
+        )
+        if (patientDataRef.current.pet && incompletePatient.pet) {
+          tasks.push(
+            patchPet(patientDataRef.current.pet).catch(() => {
+              toast.warning('Datos de la mascota no guardados — puedes actualizarlos en su perfil.')
+            }),
+          )
+        }
+      }
+
+      const [recordRes] = await Promise.all(tasks) as [Response, ...unknown[]]
+      const json = await recordRes.json()
+      if (!recordRes.ok) { toast.error(json.error ?? 'Error al guardar el expediente'); return }
+
       router.push(`/dashboard/pets/${petId}/records/${json.data.id}`)
       router.refresh()
     } catch {
@@ -54,6 +110,20 @@ export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormPro
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-12 pb-24">
       <input type="hidden" {...register('pet_id')} />
       {appointmentId && <input type="hidden" {...register('appointment_id')} />}
+
+      {/* PHASE 00: PATIENT DATA (only for incomplete profiles) */}
+      {incompletePatient && (
+        <PatientDataSection
+          initialOwner={incompletePatient.owner}
+          initialPet={incompletePatient.pet ?? {
+            id: petId,
+            species_id: null,
+            sex: 'unknown',
+            date_of_birth: null,
+          }}
+          onChange={values => { patientDataRef.current = values }}
+        />
+      )}
 
       {/* PHASE 01: TRIAGE */}
       <section className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -70,10 +140,10 @@ export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormPro
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           <div className="md:col-span-12">
             <Label htmlFor="reason" className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3 block">Motivo de consulta *</Label>
-            <Input 
-              id="reason" 
-              {...register('reason')} 
-              placeholder="Ej. Control de vacunas, pérdida de apetito, cirugía programada..." 
+            <Input
+              id="reason"
+              {...register('reason')}
+              placeholder="Ej. Control de vacunas, pérdida de apetito, cirugía programada..."
               className="bg-white border-zinc-200 focus:ring-4 focus:ring-primary/5 rounded-2xl py-7 text-lg font-medium shadow-sm transition-all"
             />
             {errors.reason && <p className="text-destructive text-xs mt-2 font-bold flex items-center gap-1"><X size={12} /> {errors.reason.message}</p>}
@@ -167,26 +237,26 @@ export function MedicalRecordForm({ petId, appointmentId }: MedicalRecordFormPro
         </div>
 
         <div className="bg-white rounded-[2rem] border border-border/60 shadow-xl shadow-primary/5 p-8 relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-           <PrescriptionsFields control={control} />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+          <PrescriptionsFields control={control} />
         </div>
       </section>
 
-      {/* ACTIONS BAR - HIGH FIDELITY STICKY BAR */}
+      {/* ACTIONS BAR */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 p-2 bg-zinc-950/90 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-2xl animate-in slide-in-from-bottom-8 duration-700 fill-mode-both delay-500">
-        <Button 
-          type="button" 
-          variant="ghost" 
+        <Button
+          type="button"
+          variant="ghost"
           onClick={() => router.back()}
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-2xl px-6 h-12"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-800 rounded px-6 h-10"
         >
-          <X size={18} className="mr-2" />
+          <X size={18} />
           Cancelar
         </Button>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isSubmitting}
-          className="bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl px-8 h-12 shadow-lg shadow-primary/20 active:scale-[0.95] transition-all"
+          className="bg-primary hover:bg-primary/90 text-white font-semibold rounded px-8 h-10 shadow-sm shadow-primary/20 active:scale-[0.97] transition-all duration-150"
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
