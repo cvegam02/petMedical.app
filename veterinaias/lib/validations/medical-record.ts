@@ -81,7 +81,7 @@ const existingOwnerSchema = z.object({ id: z.string().uuid() })
 const newOwnerSchema = z.object({
   full_name: z.string().min(1, 'Nombre es requerido'),
   phone: z.string().optional(),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().email().optional(),
 })
 
 export const walkInOwnerSchema = z.union([existingOwnerSchema, newOwnerSchema]).nullable()
