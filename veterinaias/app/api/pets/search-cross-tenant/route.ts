@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Se requiere al menos un parámetro de búsqueda' }, { status: 400 })
   }
 
-  const { data, error } = await supabase.rpc('search_pets_cross_tenant', {
+  const { data, error } = await (supabase as any).rpc('search_pets_cross_tenant', {
     p_phone:      phone      ?? null,
     p_pet_name:   petName    ?? null,
     p_species_id: speciesId  ?? null,

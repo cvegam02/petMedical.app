@@ -14,21 +14,24 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
   const supabase = await createClient()
 
   const { data: owner, error } = await (supabase.from('owners') as any)
+    .select('id, full_name, email, phone, address, created_at')
+    .eq('id', ownerId)
+    .single()
+
+  if (error || !owner) notFound()
+
+  const { data: registrations } = await (supabase.from('pet_registrations') as any)
     .select(`
-      id, full_name, email, phone, address, created_at,
-      pets(
+      pet:pet_id(
         id, name, sex, date_of_birth, color, microchip,
         species:species_id(id, name),
         breed:breed_id(id, name),
         medical_records(created_at)
       )
     `)
-    .eq('id', ownerId)
-    .single()
+    .eq('owner_id', ownerId)
 
-  if (error || !owner) notFound()
-
-  const pets = (owner.pets as any[]) ?? []
+  const pets = (registrations ?? []).map((reg: any) => reg.pet).filter(Boolean)
   const initials = getInitials(owner.full_name)
 
   return (
@@ -102,9 +105,9 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
         </div>
         <Link
           href={`/dashboard/owners/${ownerId}/pets/new`}
-          className={buttonVariants({ size: 'sm', className: 'shadow-sm active:scale-[0.97] transition-all' })}
+          className={buttonVariants({ size: 'sm' })}
         >
-          <Plus size={14} className="mr-1.5" />
+          <Plus size={14} />
           Nueva mascota
         </Link>
       </div>
@@ -115,7 +118,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
           <p className="text-sm text-muted-foreground mt-1">Este dueño no tiene mascotas en el sistema.</p>
           <Link
             href={`/dashboard/owners/${ownerId}/pets/new`}
-            className="mt-5 inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-all active:scale-[0.96]"
+            className={buttonVariants({ size: 'sm', className: 'mt-5' })}
           >
             Registrar primera mascota
           </Link>

@@ -20,27 +20,34 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const { petId } = await params
   const supabase = await createClient()
 
-  const { data: pet, error } = await (supabase.from('pets') as any)
-    .select(`
-      id, name, sex, date_of_birth, color, microchip, notes, created_at,
-      owner:owner_id(id, full_name),
-      species:species_id(name),
-      breed:breed_id(name),
-      medical_records(
-        id, reason, diagnosis, weight_kg, created_at,
-        created_by_profile:created_by(full_name),
-        prescriptions(id),
-        attachments(id),
-        addendums(id)
-      )
-    `)
-    .eq('id', petId)
-    .order('created_at', { referencedTable: 'medical_records', ascending: false })
-    .single()
+  const [petResult, regResult] = await Promise.all([
+    (supabase.from('pets') as any)
+      .select(`
+        id, name, sex, date_of_birth, color, microchip, notes, created_at,
+        species:species_id(name),
+        breed:breed_id(name),
+        medical_records(
+          id, reason, diagnosis, weight_kg, created_at,
+          created_by_profile:created_by(full_name),
+          prescriptions(id),
+          attachments(id),
+          addendums(id)
+        )
+      `)
+      .eq('id', petId)
+      .order('created_at', { referencedTable: 'medical_records', ascending: false })
+      .single(),
+    (supabase as any).from('pet_registrations')
+      .select('owner:owner_id(id, full_name, email, phone)')
+      .eq('pet_id', petId)
+      .maybeSingle(),
+  ])
 
-  if (error || !pet) notFound()
+  if (petResult.error?.code === 'PGRST116' || !petResult.data) notFound()
+  if (petResult.error) throw petResult.error
 
-  const owner = pet.owner as any
+  const pet = petResult.data
+  const owner = regResult?.data?.owner ?? null
   const species = pet.species as any
   const breed = pet.breed as any
   const records = (pet.medical_records as any[]) ?? []
@@ -143,9 +150,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         </div>
         <Link
           href={`/dashboard/pets/${petId}/records/new`}
-          className={buttonVariants({ size: 'sm', className: 'shadow-sm active:scale-[0.97] transition-all' })}
+          className={buttonVariants({ size: 'sm' })}
         >
-          <Plus size={14} className="mr-1.5" />
+          <Plus size={14} />
           Nueva consulta
         </Link>
       </div>
@@ -158,9 +165,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           </p>
           <Link
             href={`/dashboard/pets/${petId}/records/new`}
-            className="mt-5 inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition-all active:scale-[0.96]"
+            className={buttonVariants({ size: 'sm', className: 'mt-5' })}
           >
-            <Plus size={13} className="mr-1.5" />
+            <Plus size={13} />
             Registrar primera consulta
           </Link>
         </div>
