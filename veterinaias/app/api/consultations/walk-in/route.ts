@@ -43,12 +43,12 @@ export async function POST(req: NextRequest) {
   if (petError) return NextResponse.json({ error: 'Error al crear la mascota' }, { status: 500 })
 
   const petId = pet.id
+  let ownerWasCreated = false
 
   // Step 2: Resolve owner
   let ownerId: string
 
   if (ownerInput === null) {
-    // Create placeholder owner
     const { data: placeholder, error: placeholderError } = await (supabase.from('owners') as any)
       .insert({ full_name: 'Sin registrar', tenant_id: profile.tenant_id })
       .select('id')
@@ -56,19 +56,29 @@ export async function POST(req: NextRequest) {
 
     if (placeholderError) {
       await supabase.from('pets').delete().eq('id', petId)
-      return NextResponse.json({ error: 'Error al crear dueño' }, { status: 500 })
+      return NextResponse.json({ error: 'Error al crear dueño temporal' }, { status: 500 })
     }
     ownerId = placeholder.id
+    ownerWasCreated = true
   } else if ('id' in ownerInput) {
-    // Existing owner
+    // Verify existing owner belongs to this tenant
+    const { data: ownerCheck } = await (supabase.from('owners') as any)
+      .select('id')
+      .eq('id', ownerInput.id)
+      .eq('tenant_id', profile.tenant_id)
+      .single()
+
+    if (!ownerCheck) {
+      await supabase.from('pets').delete().eq('id', petId)
+      return NextResponse.json({ error: 'Dueño no encontrado' }, { status: 404 })
+    }
     ownerId = ownerInput.id
   } else {
-    // New owner
     const { data: newOwner, error: ownerError } = await (supabase.from('owners') as any)
       .insert({
         full_name: ownerInput.full_name,
         phone: ownerInput.phone ?? null,
-        email: ownerInput.email || null,
+        email: ownerInput.email ?? null,
         tenant_id: profile.tenant_id,
       })
       .select('id')
@@ -79,6 +89,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Error al crear el dueño' }, { status: 500 })
     }
     ownerId = newOwner.id
+    ownerWasCreated = true
   }
 
   // Step 3: Create pet_registration
@@ -86,6 +97,7 @@ export async function POST(req: NextRequest) {
     .insert({ tenant_id: profile.tenant_id, pet_id: petId, owner_id: ownerId })
 
   if (regError) {
+    if (ownerWasCreated) await (supabase.from('owners') as any).delete().eq('id', ownerId)
     await supabase.from('pets').delete().eq('id', petId)
     return NextResponse.json({ error: 'Error al registrar la mascota' }, { status: 500 })
   }
@@ -110,14 +122,19 @@ export async function POST(req: NextRequest) {
 
   if (recordError) {
     await (supabase.from('pet_registrations') as any).delete().eq('pet_id', petId)
+    if (ownerWasCreated) await (supabase.from('owners') as any).delete().eq('id', ownerId)
     await supabase.from('pets').delete().eq('id', petId)
     return NextResponse.json({ error: 'Error al crear la consulta' }, { status: 500 })
   }
 
   if (prescriptions && prescriptions.length > 0) {
-    await supabase
+    const { error: presError } = await supabase
       .from('prescriptions')
       .insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))
+
+    if (presError) {
+      return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ petId, recordId: record.id }, { status: 201 })
