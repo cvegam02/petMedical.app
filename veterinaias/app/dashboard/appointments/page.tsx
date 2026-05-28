@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 import Link from 'next/link'
 import { CalendarDays } from 'lucide-react'
 import { AppointmentCard } from '@/components/appointments/AppointmentCard'
@@ -23,11 +24,12 @@ export default async function AppointmentsPage({
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('role, tenant_id, tenants(type)')
+    .select('role, tenant_id, tenants(type, settings)')
     .eq('id', user!.id)
     .single() as any
 
   const tenant = profile?.tenants
+  const businessHours = (tenant as any)?.settings?.business_hours ?? DEFAULT_BUSINESS_HOURS
   const showAll =
     tenant?.type === 'individual' ||
     profile?.role === 'admin' ||
@@ -89,7 +91,7 @@ export default async function AppointmentsPage({
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Citas</h1>
           </div>
-          <NewAppointmentButton team={team ?? []} />
+          <NewAppointmentButton team={team ?? []} businessHours={businessHours} />
         </div>
 
         <div className="flex gap-1 border-b border-border">
@@ -129,7 +131,7 @@ export default async function AppointmentsPage({
             </p>
             {tab !== 'confirmar' && (
               <div className="mt-7 flex justify-center">
-                <NewAppointmentButton team={team ?? []} />
+                <NewAppointmentButton team={team ?? []} businessHours={businessHours} />
               </div>
             )}
           </div>

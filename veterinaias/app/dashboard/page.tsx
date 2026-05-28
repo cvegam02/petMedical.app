@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 import Link from 'next/link'
 import { Users, PawPrint, Calendar, Settings2, ChevronRight, Plus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
@@ -14,11 +15,12 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('full_name, role, tenant_id, tenants(name, type, subscription_status)')
+    .select('full_name, role, tenant_id, tenants(name, type, subscription_status, settings)')
     .eq('id', user!.id)
     .single() as any
 
   const tenant = profile?.tenants
+  const businessHours = (tenant as any)?.settings?.business_hours ?? DEFAULT_BUSINESS_HOURS
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
   const firstName = profile?.full_name?.split(' ')[0] ?? ''
@@ -88,7 +90,7 @@ export default async function DashboardPage() {
             <Plus size={13} />
             Nuevo dueño
           </Link>
-          <NewAppointmentButton team={team ?? []} />
+          <NewAppointmentButton team={team ?? []} businessHours={businessHours} />
         </div>
       </div>
 
