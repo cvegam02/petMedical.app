@@ -27,7 +27,8 @@ export function WalkInPetForm({ values, onChange, errors }: WalkInPetFormProps) 
   }, [])
 
   useEffect(() => {
-    if (!values.species_id) { setBreeds([]); return }
+    setBreeds([])
+    if (!values.species_id) return
     fetch(`/api/species/${values.species_id}/breeds`)
       .then(r => r.json())
       .then(json => setBreeds(json.data ?? []))
@@ -62,7 +63,7 @@ export function WalkInPetForm({ values, onChange, errors }: WalkInPetFormProps) 
             </Label>
             <Select
               value={values.species_id || ''}
-              onValueChange={(v: string | null) => update({ species_id: v || '', breed_id: undefined })}
+              onValueChange={v => update({ species_id: v, breed_id: undefined })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar especie" />
