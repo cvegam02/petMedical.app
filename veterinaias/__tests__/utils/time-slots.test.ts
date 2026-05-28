@@ -41,6 +41,12 @@ describe('generateTimeSlots', () => {
     const slots = generateTimeSlots(CONFIG, today)
     expect(slots).toEqual([])
   })
+
+  it('returns empty array for a day outside business days', () => {
+    const sunday = new Date(2026, 5, 7) // June 7 2026 — Sunday (getDay() = 0)
+    const slots = generateTimeSlots(CONFIG, sunday) // CONFIG.days = [1..6], no Sunday
+    expect(slots).toEqual([])
+  })
 })
 
 describe('combineDateAndTime', () => {

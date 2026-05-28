@@ -13,6 +13,8 @@ export const DEFAULT_BUSINESS_HOURS: BusinessHoursConfig = {
 }
 
 export function generateTimeSlots(config: BusinessHoursConfig, date: Date): string[] {
+  if (!config.days.includes(date.getDay())) return []
+
   const [startH, startM] = config.start.split(':').map(Number)
   const [endH, endM] = config.end.split(':').map(Number)
 
