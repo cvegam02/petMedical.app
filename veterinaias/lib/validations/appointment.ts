@@ -37,3 +37,17 @@ export const appointmentFormSchema = z.object({
 export type AppointmentCreateValues = z.infer<typeof appointmentSchema>
 export type AppointmentFormValues = z.infer<typeof appointmentFormSchema>
 export type UpdateAppointmentValues = z.infer<typeof updateAppointmentSchema>
+
+export const firstVisitSchema = z.object({
+  pet_name: z.string().min(1, 'Nombre de mascota requerido'),
+  scheduled_at: z.string().datetime('Fecha y hora inválidas'),
+  duration_minutes: z.preprocess(
+    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas')
+  ),
+  reason: z.string().optional(),
+  notes: z.string().optional(),
+  assigned_to: z.string().uuid().optional().nullable(),
+})
+
+export type FirstVisitValues = z.infer<typeof firstVisitSchema>
