@@ -81,6 +81,7 @@ describe('POST /api/owners', () => {
     expect(res.status).toBe(201)
     const body = await res.json()
     expect(body.data.full_name).toBe('Ana García')
+    expect(body.data.tenant_id).toBe('tenant-1')
   })
 })
 
