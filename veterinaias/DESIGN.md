@@ -1,4 +1,4 @@
-# Design System: VeterinaIAs — "Architectural Order"
+# Design System: petMedical.app — "Architectural Order"
 
 ## 1. Visual Theme & Atmosphere
 "Architectural Order" — Una interfaz diseñada para la eficiencia y la claridad mental. Se siente como un consultorio moderno y bien organizado: mucha luz, estructuras limpias y enfoque en la tarea.
@@ -6,32 +6,32 @@
 - **Variance:** 3 (Symmetric, predictable, easy to navigate)
 - **Motion:** 5 (Fluid, helpful transitions)
 
-## 2. Color Palette (Calibrated OKLCH — "Professional Warmth")
+## 2. Color Palette (Calibrated OKLCH — "Clinical Teal")
 
-El color primario es sage/verde bosque — cálido, profesional, y diferente del estereotipo SaaS azul-índigo. El modo oscuro usa lienzo petroleum con acento ámbar.
+El color primario es teal clínico — limpio, profesional, y diferente del estereotipo SaaS azul-índigo. El modo oscuro usa lienzo petroleum con primario teal brillante.
 
 ### Light Mode (`:root`)
 | Token | Valor | Uso |
 |-------|-------|-----|
-| `--background` | `oklch(0.99 0.003 155)` | Fondo principal — blanco con matiz sage barely visible |
-| `--foreground` | `oklch(0.18 0.025 155)` | Texto principal — casi negro con matiz sage |
-| `--primary` | `oklch(0.44 0.10 155)` | "Deep Sage" — principal interactivo |
-| `--primary-foreground` | `oklch(0.99 0.003 155)` | Texto sobre primario |
-| `--secondary` | `oklch(0.96 0.010 155)` | Fondos de énfasis suave |
-| `--muted` | `oklch(0.97 0.007 155)` | Fondos apagados |
-| `--muted-foreground` | `oklch(0.45 0.03 155)` | Texto secundario |
-| `--accent` | `oklch(0.30 0.045 155)` | Acento oscuro para estados de alta tensión |
+| `--background` | `oklch(0.99 0.003 190)` | Fondo principal — blanco con matiz teal barely visible |
+| `--foreground` | `oklch(0.18 0.022 190)` | Texto principal — casi negro con matiz teal |
+| `--primary` | `oklch(0.50 0.13 190)` | "Brand Teal" — principal interactivo |
+| `--primary-foreground` | `oklch(0.99 0.003 190)` | Texto sobre primario |
+| `--secondary` | `oklch(0.96 0.010 190)` | Fondos de énfasis suave |
+| `--muted` | `oklch(0.97 0.007 190)` | Fondos apagados |
+| `--muted-foreground` | `oklch(0.45 0.030 190)` | Texto secundario |
+| `--accent` | `oklch(0.30 0.040 190)` | Acento oscuro para estados de alta tensión |
 | `--destructive` | `oklch(0.58 0.20 25)` | Rojo clínico |
-| `--border` | `oklch(0.92 0.012 155)` | Bordes hairline |
-| `--input` | `oklch(0.89 0.018 155)` | Fondos de inputs |
-| `--ring` | `oklch(0.44 0.10 155)` | Focus ring — igual que primary |
+| `--border` | `oklch(0.92 0.010 190)` | Bordes hairline |
+| `--input` | `oklch(0.89 0.015 190)` | Fondos de inputs |
+| `--ring` | `oklch(0.50 0.13 190)` | Focus ring — igual que primary |
 
 ### Dark Mode (`.dark`)
-Canvas petroleum con acento ámbar — contrasta y complementa el sage del modo claro.
+Canvas petroleum con primario teal — consistente con el modo claro.
 | Token | Valor | Uso |
 |-------|-------|-----|
 | `--background` | `oklch(0.155 0.018 230)` | Petroleum oscuro |
-| `--primary` | `oklch(0.70 0.14 80)` | Warm Amber — acento cálido |
+| `--primary` | `oklch(0.70 0.13 190)` | Brand Teal bright — acento clínico |
 | `--foreground` | `oklch(0.975 0.005 230)` | Texto claro sobre petroleum |
 
 ## 3. Typography Rules
@@ -49,7 +49,7 @@ Canvas petroleum con acento ámbar — contrasta y complementa el sage del modo 
 - **Easing:** `--ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1)` para entradas; `--ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1)` para transiciones bidireccionales
 
 ## 5. Interaction Patterns
-- Botón primario: `shadow-lg shadow-primary/10 active:scale-[0.97] transition-all`
+- Botón primario: `shadow-sm shadow-primary/20 hover:bg-primary/90 active:scale-[0.97]` — ya incorporado en el componente `<Button>`, no agregar manualmente
 - Links de navegación hover: `hover:text-primary transition-colors`
 - Cards de lista hover: `hover:border-primary/40 hover:shadow-sm transition-all`
 - Toasts: `sonner` con `richColors` y posición `bottom-right`
@@ -57,7 +57,7 @@ Canvas petroleum con acento ámbar — contrasta y complementa el sage del modo 
 ## 6. Anti-Patterns (Banned)
 - No gradients en texto ni fondos principales.
 - No glassmorphism (`backdrop-blur` solo en overlays de alta prioridad como el action bar de MedicalRecordForm).
-- No primario azul-índigo (`hue 260`) — es el estereotipo SaaS que PRODUCT.md rechaza explícitamente.
+- No primario azul-índigo (`hue 260`) ni verde genérico SaaS (`hue 155`) — el brand teal es `hue 190`.
 - No `alert()` / `confirm()` del browser — usar `toast.error()` de sonner.
 - No `min-h-screen` — usar `min-h-dvh` para compatibilidad con mobile Safari.
 - No tipografías gigantes (> 40px).

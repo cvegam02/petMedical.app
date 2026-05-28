@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -48,10 +49,10 @@ export default async function OnboardingPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-dvh flex items-center justify-center bg-background">
       <div className="w-full max-w-lg px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">VeterinaIAs</h1>
+        <div className="flex justify-center mb-8">
+          <Image src="/logo.png" alt="petMedical.app" width={220} height={88} priority />
           <p className="text-slate-500 mt-2">Configura tu clinica para empezar</p>
         </div>
         <Card>

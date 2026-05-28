@@ -17,7 +17,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
     <div className="min-h-screen flex">
       <aside className="w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-4 border-b border-slate-700">
-          <p className="font-bold text-sm">VeterinaIAs</p>
+          <p className="text-sm">pet<span className="font-bold">Medical</span>.app</p>
           <p className="text-xs text-slate-400">Super Admin</p>
         </div>
         <nav className="flex-1 p-4 space-y-1">

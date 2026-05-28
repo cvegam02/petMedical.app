@@ -1,0 +1,289 @@
+<style>
+  .preview-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 20px;
+  }
+  .preview-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #8da598;
+    margin-bottom: 8px;
+  }
+
+  /* ── Browser chrome ── */
+  .browser { border: 1.5px solid #dde5df; border-radius: 10px; overflow: hidden; background: #f3f7f4; font-family: 'Inter', system-ui, sans-serif; }
+  .browser-bar { height: 32px; background: #fff; border-bottom: 1px solid #e5ece7; display: flex; align-items: center; padding: 0 10px; gap: 5px; }
+  .bdot { width: 8px; height: 8px; border-radius: 50%; }
+  .bdot.r { background: #fc5753; } .bdot.y { background: #fdbc40; } .bdot.g { background: #33c748; }
+  .browser-url { flex: 1; height: 16px; background: #f3f7f4; border-radius: 3px; margin: 0 10px; }
+  .browser-body { display: flex; height: 420px; }
+
+  /* ── Sidebar ── */
+  .sidebar { width: 44px; background: #fff; border-right: 1px solid #e5ece7; display: flex; flex-direction: column; align-items: center; padding: 12px 0 12px; gap: 6px; }
+  .s-logo { width: 22px; height: 22px; border-radius: 6px; background: #3d6455; margin-bottom: 8px; }
+  .s-item { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+  .s-item.active { background: #eef4f0; }
+  .s-icon { width: 14px; height: 3px; background: #c5d5cb; border-radius: 2px; position: relative; }
+  .s-icon::before, .s-icon::after { content: ''; position: absolute; left: 0; width: 100%; height: 3px; background: #c5d5cb; border-radius: 2px; }
+  .s-icon::before { top: -5px; } .s-icon::after { top: 5px; }
+  .s-item.active .s-icon, .s-item.active .s-icon::before, .s-item.active .s-icon::after { background: #3d6455; }
+  .s-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5ece7; }
+  .s-dot.active { background: #3d6455; }
+
+  /* ── Main content ── */
+  .main { flex: 1; overflow: auto; padding: 18px 16px; }
+
+  /* breadcrumb */
+  .breadcrumb { display: flex; align-items: center; gap: 5px; margin-bottom: 14px; }
+  .bc-link { font-size: 10px; color: #8da598; cursor: pointer; }
+  .bc-sep { font-size: 10px; color: #c5d5cb; }
+  .bc-cur { font-size: 10px; font-weight: 700; color: #2d4a3e; }
+
+  /* Page header */
+  .page-header { margin-bottom: 16px; }
+  .page-overline { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+  .overline-line { width: 16px; height: 1.5px; background: rgba(90,122,104,0.35); border-radius: 1px; }
+  .overline-text { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #5a7a68; font-family: monospace; }
+  .page-title { font-size: 15px; font-weight: 700; color: #1a2e26; letter-spacing: -0.02em; }
+
+  /* Two-column layout */
+  .form-layout { display: grid; grid-template-columns: 1fr 220px; gap: 12px; }
+
+  /* Form card with sections */
+  .form-card { background: #fff; border: 1px solid #e5ece7; border-radius: 8px; overflow: hidden; }
+  .form-section { padding: 12px 14px; }
+  .form-section + .form-section { border-top: 1px solid #edf1ee; }
+  .section-header { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+  .section-label { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #5a7a68; white-space: nowrap; }
+  .section-rule { flex: 1; height: 1px; background: #e5ece7; }
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .fields-grid.full { grid-template-columns: 1fr; }
+  .field { }
+  .field-label { font-size: 8px; font-weight: 600; color: #556b5d; margin-bottom: 2.5px; }
+  .field-label .req { color: #b85050; }
+  .field-input { height: 22px; background: #f5f8f6; border: 1px solid #d5e0d8; border-radius: 3px; width: 100%; }
+  .field-input.focused { border-color: #5a7a68; box-shadow: 0 0 0 2px rgba(90,122,104,0.12); background: #fff; }
+  .field-hint { font-size: 7px; color: #a0b5a8; margin-top: 2px; }
+
+  /* Form actions */
+  .form-actions { padding: 10px 14px; background: #f8faf8; border-top: 1px solid #edf1ee; display: flex; align-items: center; gap: 6px; }
+  .btn-primary { height: 26px; background: #3d6455; color: #fff; font-size: 9px; font-weight: 700; border-radius: 3px; display: flex; align-items: center; justify-content: center; padding: 0 12px; gap: 4px; }
+  .btn-outline { height: 26px; background: transparent; border: 1px solid #d5e0d8; color: #556b5d; font-size: 9px; font-weight: 600; border-radius: 3px; display: flex; align-items: center; justify-content: center; padding: 0 10px; }
+  .btn-icon { width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
+
+  /* Context panel */
+  .context-panel { display: flex; flex-direction: column; gap: 8px; }
+  .context-card { background: #fff; border: 1px solid #e5ece7; border-radius: 8px; padding: 10px 12px; }
+  .ctx-title { font-size: 8.5px; font-weight: 700; color: #2d4a3e; margin-bottom: 6px; }
+  .ctx-item { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 5px; }
+  .ctx-dot { width: 4px; height: 4px; border-radius: 50%; background: #5a7a68; margin-top: 3.5px; flex-shrink: 0; }
+  .ctx-text { font-size: 8px; color: #6b8a79; line-height: 1.5; }
+  .ctx-rule { height: 1px; background: #edf1ee; margin: 8px 0; }
+  .ctx-required-title { font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #8da598; margin-bottom: 5px; }
+  .ctx-badge { display: inline-flex; align-items: center; gap: 3px; background: #eef4f0; border: 1px solid #d5e4db; border-radius: 3px; padding: 2px 6px; margin: 2px 2px 2px 0; font-size: 7.5px; font-weight: 600; color: #3d6455; }
+  .ctx-asterisk { color: #b85050; font-weight: 700; }
+
+  /* The "after this" flow card */
+  .flow-card { background: #f3f7f4; border: 1px solid #e5ece7; border-radius: 8px; padding: 10px 12px; }
+  .flow-step { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+  .flow-num { width: 14px; height: 14px; border-radius: 50%; background: #d5e4db; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; color: #3d6455; flex-shrink: 0; }
+  .flow-num.done { background: #3d6455; color: #fff; }
+  .flow-text { font-size: 8px; color: #556b5d; font-weight: 500; }
+  .flow-conn { width: 14px; display: flex; justify-content: center; }
+  .flow-line { width: 1px; height: 10px; background: #d5e4db; }
+</style>
+
+<h2>Combinación B + C — Vista previa</h2>
+<p class="subtitle">Secciones dentro del formulario (C) + panel contextual a la derecha (B). Aquí tienes el mismo diseño aplicado a dos formularios distintos.</p>
+
+<div class="preview-wrap">
+
+  <!-- FORM 1: Nuevo Dueño -->
+  <div>
+    <div class="preview-label">Formulario simple — Nuevo dueño</div>
+    <div class="browser">
+      <div class="browser-bar"><div class="bdot r"></div><div class="bdot y"></div><div class="bdot g"></div><div class="browser-url"></div></div>
+      <div class="browser-body">
+        <div class="sidebar">
+          <div class="s-logo"></div>
+          <div class="s-item active"><div class="s-icon"></div></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+        </div>
+        <div class="main">
+          <div class="breadcrumb">
+            <span class="bc-link">Dueños</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-cur">Nuevo dueño</span>
+          </div>
+          <div class="page-header">
+            <div class="page-overline"><div class="overline-line"></div><span class="overline-text">Directorio</span></div>
+            <div class="page-title">Nuevo dueño</div>
+          </div>
+          <div class="form-layout">
+            <div>
+              <div class="form-card">
+                <div class="form-section">
+                  <div class="section-header"><span class="section-label">Identidad</span><div class="section-rule"></div></div>
+                  <div class="fields-grid full">
+                    <div class="field">
+                      <div class="field-label">Nombre completo <span class="req">*</span></div>
+                      <div class="field-input focused"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-section">
+                  <div class="section-header"><span class="section-label">Contacto</span><div class="section-rule"></div></div>
+                  <div class="fields-grid">
+                    <div class="field">
+                      <div class="field-label">Teléfono <span class="req">*</span></div>
+                      <div class="field-input"></div>
+                    </div>
+                    <div class="field">
+                      <div class="field-label">Email</div>
+                      <div class="field-input"></div>
+                    </div>
+                  </div>
+                  <div style="margin-top:7px">
+                    <div class="field">
+                      <div class="field-label">Dirección</div>
+                      <div class="field-input"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <div class="btn-primary">Crear dueño</div>
+                  <div class="btn-outline">Cancelar</div>
+                </div>
+              </div>
+            </div>
+            <div class="context-panel">
+              <div class="context-card">
+                <div class="ctx-required-title">Campos requeridos</div>
+                <div><span class="ctx-badge"><span class="ctx-asterisk">*</span> Nombre</span><span class="ctx-badge"><span class="ctx-asterisk">*</span> Teléfono</span></div>
+                <div class="ctx-rule"></div>
+                <div class="ctx-title">Al crear el dueño</div>
+                <div class="ctx-item"><div class="ctx-dot"></div><div class="ctx-text">Podrás registrar sus mascotas</div></div>
+                <div class="ctx-item"><div class="ctx-dot"></div><div class="ctx-text">Agendar citas directamente</div></div>
+                <div class="ctx-item"><div class="ctx-dot"></div><div class="ctx-text">Acceder a su historial clínico</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM 2: Nueva Cita (más complejo) -->
+  <div>
+    <div class="preview-label">Formulario complejo — Nueva cita</div>
+    <div class="browser">
+      <div class="browser-bar"><div class="bdot r"></div><div class="bdot y"></div><div class="bdot g"></div><div class="browser-url"></div></div>
+      <div class="browser-body">
+        <div class="sidebar">
+          <div class="s-logo"></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+          <div class="s-item active"><div class="s-icon"></div></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+          <div class="s-item"><div class="s-icon"></div></div>
+        </div>
+        <div class="main">
+          <div class="breadcrumb">
+            <span class="bc-link">Citas</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-cur">Nueva cita</span>
+          </div>
+          <div class="page-header">
+            <div class="page-overline"><div class="overline-line"></div><span class="overline-text">Agenda</span></div>
+            <div class="page-title">Nueva cita</div>
+          </div>
+          <div class="form-layout">
+            <div>
+              <div class="form-card">
+                <div class="form-section">
+                  <div class="section-header"><span class="section-label">Paciente</span><div class="section-rule"></div></div>
+                  <div class="fields-grid full">
+                    <div class="field">
+                      <div class="field-label">Dueño <span class="req">*</span></div>
+                      <div class="field-input focused"></div>
+                      <div class="field-hint">Busca por nombre, teléfono o email</div>
+                    </div>
+                  </div>
+                  <div style="margin-top:7px">
+                    <div class="field">
+                      <div class="field-label">Mascota <span class="req">*</span></div>
+                      <div class="field-input" style="opacity:0.4"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-section">
+                  <div class="section-header"><span class="section-label">Horario</span><div class="section-rule"></div></div>
+                  <div class="fields-grid">
+                    <div class="field">
+                      <div class="field-label">Fecha y hora <span class="req">*</span></div>
+                      <div class="field-input"></div>
+                    </div>
+                    <div class="field">
+                      <div class="field-label">Duración</div>
+                      <div class="field-input"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-section">
+                  <div class="section-header"><span class="section-label">Detalles</span><div class="section-rule"></div></div>
+                  <div class="field">
+                    <div class="field-label">Motivo</div>
+                    <div class="field-input"></div>
+                  </div>
+                  <div style="margin-top:7px" class="field">
+                    <div class="field-label">Notas internas</div>
+                    <div class="field-input" style="height:30px"></div>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <div class="btn-primary">Crear cita</div>
+                  <div class="btn-outline">Cancelar</div>
+                </div>
+              </div>
+            </div>
+            <div class="context-panel">
+              <div class="flow-card">
+                <div class="ctx-title">Flujo de la cita</div>
+                <div class="flow-step"><div class="flow-num done">✓</div><div class="flow-text">Crear cita</div></div>
+                <div class="flow-step"><div class="flow-conn"><div class="flow-line"></div></div></div>
+                <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Confirmar con dueño</div></div>
+                <div class="flow-step"><div class="flow-conn"><div class="flow-line"></div></div></div>
+                <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Registrar consulta</div></div>
+              </div>
+              <div class="context-card">
+                <div class="ctx-required-title">Requerido</div>
+                <div><span class="ctx-badge"><span class="ctx-asterisk">*</span> Dueño</span><span class="ctx-badge"><span class="ctx-asterisk">*</span> Mascota</span><span class="ctx-badge"><span class="ctx-asterisk">*</span> Fecha</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 24px; padding: 14px 16px; background: #f3f7f4; border: 1px solid #d5e4db; border-radius: 8px;">
+  <p style="font-size: 12px; font-weight: 700; color: #2d4a3e; margin: 0 0 6px;">Lo que incluye este diseño</p>
+  <ul style="font-size: 11px; color: #556b5d; margin: 0; padding-left: 16px; line-height: 2;">
+    <li>Breadcrumb de navegación en todas las páginas de formulario</li>
+    <li>Overline + título al estilo del design system (igual que las páginas de lista)</li>
+    <li>Campos agrupados en secciones nombradas con separador visual</li>
+    <li>Grid de 2 columnas dentro de cada sección cuando hay espacio</li>
+    <li>Panel contextual a la derecha: campos requeridos, flujo del proceso</li>
+    <li>Botones en la parte inferior de la card (no flotando solos)</li>
+    <li>Input component actualizado: mismo radio y altura que los botones</li>
+    <li>Estilos de error usando <code>text-destructive</code> del design system</li>
+    <li>Selects nativos reemplazados por componentes consistentes con los inputs</li>
+  </ul>
+</div>

@@ -10,7 +10,7 @@ Veterinary professionals working in the clinic: lead vets, staff vets, assistant
 
 ## Product Purpose
 
-VeterinaIAs is a multitenant SaaS for veterinary practice management. It lets individual veterinarians and veterinary hospitals manage owners, pets, clinical records, and appointments from one place. Success looks like: a vet can pull up a pet's complete clinical history in under five seconds and add a new consultation record without leaving the page they're on.
+petMedical.app is a multitenant SaaS for veterinary practice management. It lets individual veterinarians and veterinary hospitals manage owners, pets, clinical records, and appointments from one place. Success looks like: a vet can pull up a pet's complete clinical history in under five seconds and add a new consultation record without leaving the page they're on.
 
 ## Brand Personality
 

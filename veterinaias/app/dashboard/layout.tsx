@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { LogOut, ShieldCheck } from 'lucide-react'
@@ -38,16 +39,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* Brand */}
         <div className="px-5 py-5 border-b border-zinc-100">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <svg width="16" height="16" viewBox="0 0 14 14" fill="none" className="text-white">
-                <path d="M7 1C5.5 1 4.5 2 4.5 3.5C4.5 5 5.5 6 7 6C8.5 6 9.5 5 9.5 3.5C9.5 2 8.5 1 7 1Z" fill="currentColor"/>
-                <path d="M2.5 4C1.7 4 1 4.7 1 5.5C1 6.3 1.7 7 2.5 7C3.3 7 4 6.3 4 5.5C4 4.7 3.3 4 2.5 4Z" fill="currentColor" opacity="0.7"/>
-                <path d="M11.5 4C10.7 4 10 4.7 10 5.5C10 6.3 10.7 7 11.5 7C12.3 7 13 6.3 13 5.5C13 4.7 12.3 4 11.5 4Z" fill="currentColor" opacity="0.7"/>
-                <path d="M3 8C2 8.5 1.5 9.5 2 11C2.5 12.5 4.5 13 7 13C9.5 13 11.5 12.5 12 11C12.5 9.5 12 8.5 11 8C10 7.5 9 8.5 7 8.5C5 8.5 4 7.5 3 8Z" fill="currentColor"/>
-              </svg>
-            </div>
+            <Image src="/icon.png" alt="petMedical.app" width={36} height={36} className="rounded-lg shrink-0" />
             <div className="min-w-0">
-              <p className="text-base font-bold text-zinc-950 tracking-tight leading-none">VeterinaIAs</p>
+              <p className="text-base text-zinc-950 tracking-tight leading-none">pet<span className="font-bold">Medical</span>.app</p>
               <p className="label-overline font-mono text-zinc-400 mt-1.5 truncate">{tenantName}</p>
             </div>
           </Link>

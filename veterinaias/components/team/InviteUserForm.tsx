@@ -57,7 +57,11 @@ export function InviteUserForm({ tenantType, onSuccess }: { tenantType: TenantTy
             </div>
             <div className="space-y-1">
               <Label>Rol</Label>
-              <Select value={watch('role')} onValueChange={(v) => setValue('role', v as InviteInput['role'])}>
+              <Select
+                value={watch('role')}
+                onValueChange={(v) => setValue('role', v as InviteInput['role'])}
+                items={Object.fromEntries(roleOptions.map(opt => [opt.value, opt.label]))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar rol" />
                 </SelectTrigger>

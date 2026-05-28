@@ -32,9 +32,9 @@ export default function OwnersPage() {
         </div>
         <Link
           href="/dashboard/owners/new"
-          className={buttonVariants({ size: 'sm', className: 'shadow-lg shadow-primary/10 active:scale-[0.97] transition-all' })}
+          className={buttonVariants({ size: 'sm' })}
         >
-          <Plus size={14} className="mr-1.5" />
+          <Plus size={14} />
           Nuevo dueño
         </Link>
       </div>
@@ -66,9 +66,9 @@ export default function OwnersPage() {
           </p>
           <Link
             href="/dashboard/owners/new"
-            className="mt-7 inline-flex items-center px-5 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-all active:scale-[0.96]"
+            className={buttonVariants({ className: 'mt-7' })}
           >
-            <Plus size={13} className="mr-1.5" />
+            <Plus size={14} />
             Registrar primer dueño
           </Link>
         </div>

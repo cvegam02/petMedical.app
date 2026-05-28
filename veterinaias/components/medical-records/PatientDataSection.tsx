@@ -108,7 +108,7 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                 Especie
               </Label>
-              <Select value={speciesId} onValueChange={v => setSpeciesId(v ?? '')}>
+              <Select value={speciesId} onValueChange={v => setSpeciesId(v ?? '')} items={Object.fromEntries(species.map(s => [s.id, s.name]))}>
                 <SelectTrigger className="bg-white border-zinc-200 rounded-2xl">
                   <SelectValue placeholder="Seleccionar especie" />
                 </SelectTrigger>
@@ -123,7 +123,7 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                 Sexo
               </Label>
-              <Select value={sex} onValueChange={v => setSex(v ?? 'unknown')}>
+              <Select value={sex} onValueChange={v => setSex(v ?? 'unknown')} items={{ male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }}>
                 <SelectTrigger className="bg-white border-zinc-200 rounded-2xl">
                   <SelectValue />
                 </SelectTrigger>

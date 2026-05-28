@@ -5,11 +5,6 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-sm">
       <div className="mb-7 text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="w-5 h-[1.5px] bg-primary/30 rounded-full" />
-          <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">VeterinaIAs</p>
-          <span className="w-5 h-[1.5px] bg-primary/30 rounded-full" />
-        </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Crear cuenta</h1>
         <p className="text-sm text-muted-foreground mt-1">Registra tu veterinaria o clinica</p>
       </div>

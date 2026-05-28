@@ -24,9 +24,14 @@ interface AppointmentCardProps {
 }
 
 export function AppointmentCard({ appointment, showPhone }: AppointmentCardProps) {
-  const time = new Date(appointment.scheduled_at).toLocaleTimeString('es-MX', {
+  const dateObj = new Date(appointment.scheduled_at)
+  const time = dateObj.toLocaleTimeString('es-MX', {
     hour: '2-digit', minute: '2-digit',
   })
+  const date = dateObj.toLocaleDateString('es-MX', {
+    day: 'numeric', month: 'short',
+  }).replace('.', '')
+
   const status = STATUS_CONFIG[appointment.status] ?? STATUS_CONFIG.scheduled
 
   return (
@@ -34,17 +39,17 @@ export function AppointmentCard({ appointment, showPhone }: AppointmentCardProps
       href={`/dashboard/appointments/${appointment.id}`}
       className="group flex items-center gap-4 bg-card rounded-xl border border-border px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all"
     >
-      {/* Time block */}
-      <div className="flex flex-col items-center w-14 shrink-0">
+      {/* Time & Date block */}
+      <div className="flex flex-col items-center w-16 shrink-0 border-r border-border pr-4">
+        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase leading-none mb-1">
+          {date}
+        </span>
         <span className="text-base font-semibold text-foreground leading-none">{time}</span>
-        <span className="text-[11px] text-muted-foreground/60 mt-0.5 flex items-center gap-0.5">
+        <span className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-0.5">
           <Clock size={9} />
-          {appointment.duration_minutes} min
+          {appointment.duration_minutes}m
         </span>
       </div>
-
-      {/* Divider */}
-      <div className="w-px h-10 bg-border shrink-0" />
 
       {/* Main info */}
       <div className="flex-1 min-w-0">

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'VeterinaIAs',
+  title: 'petMedical.app',
   description: 'Plataforma de gestion veterinaria',
 }
 

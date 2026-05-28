@@ -5,7 +5,7 @@ const PUBLIC_ROUTES = ['/login', '/register', '/accept-invite']
 const SUPER_ADMIN_ROUTES = ['/super-admin']
 const ONBOARDING_ROUTE = '/onboarding'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request })
   const { pathname } = request.nextUrl
 
@@ -74,5 +74,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/|auth/|share/).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|otf)).*)',
+  ],
 }

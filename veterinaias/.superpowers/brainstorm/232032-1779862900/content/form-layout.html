@@ -1,0 +1,205 @@
+<style>
+  .mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+  .mockup-frame {
+    border: 1.5px solid #e2e8e4;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f9faf8;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .mockup-frame:hover { border-color: #5a7a68; box-shadow: 0 0 0 3px rgba(90,122,104,0.1); }
+  .mockup-frame.selected { border-color: #5a7a68; box-shadow: 0 0 0 3px rgba(90,122,104,0.18); }
+
+  /* Shared chrome */
+  .m-topbar { height: 36px; background: #fff; border-bottom: 1px solid #e8ece9; display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+  .m-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .m-dot.red { background: #fc5753; }
+  .m-dot.yellow { background: #fdbc40; }
+  .m-dot.green { background: #33c748; }
+  .m-sidebar { width: 48px; background: #fff; border-right: 1px solid #e8ece9; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 8px; }
+  .m-navdot { width: 20px; height: 4px; border-radius: 2px; background: #dde5df; }
+  .m-navdot.active { background: #5a7a68; }
+  .m-body { display: flex; height: 180px; }
+  .m-content { flex: 1; padding: 12px; overflow: hidden; }
+
+  /* Option A — Centered card */
+  .oa-inner { background: #fff; border: 1px solid #e8ece9; border-radius: 8px; padding: 12px; max-width: 200px; margin: 0 auto; }
+  .oa-breadcrumb { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
+  .oa-bc-link { font-size: 9px; color: #8da598; font-family: monospace; }
+  .oa-bc-sep { font-size: 9px; color: #c5d2cb; }
+  .oa-bc-cur { font-size: 9px; color: #2d4a3e; font-weight: 700; }
+  .oa-title { font-size: 11px; font-weight: 700; color: #1a2e26; margin-bottom: 2px; letter-spacing: -0.02em; }
+  .oa-overline { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #5a7a68; margin-bottom: 8px; }
+  .oa-field { margin-bottom: 7px; }
+  .oa-label { font-size: 8px; font-weight: 600; color: #556b5d; margin-bottom: 2px; }
+  .oa-input { height: 22px; background: #f3f7f4; border: 1px solid #d5e0d8; border-radius: 3px; width: 100%; }
+  .oa-row { display: flex; gap: 6px; }
+  .oa-row .oa-field { flex: 1; }
+  .oa-actions { display: flex; gap: 5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #edf1ee; }
+  .oa-btn-p { height: 18px; background: #3d6455; border-radius: 2px; flex: 1; font-size: 8px; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .oa-btn-o { height: 18px; background: transparent; border: 1px solid #d5e0d8; border-radius: 2px; flex: 1; font-size: 8px; color: #556b5d; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+
+  /* Option B — Two-column */
+  .ob-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 100%; }
+  .ob-left { display: flex; flex-direction: column; gap: 6px; }
+  .ob-right { background: #f3f7f4; border: 1px solid #e5ece7; border-radius: 6px; padding: 8px; }
+  .ob-context-title { font-size: 8px; font-weight: 700; color: #2d4a3e; margin-bottom: 4px; }
+  .ob-tip { font-size: 7px; color: #8da598; line-height: 1.5; }
+  .ob-divider { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #8da598; margin: 4px 0; border-top: 1px solid #e5ece7; padding-top: 5px; }
+  .ob-entity { display: flex; align-items: center; gap: 4px; padding: 4px; background: #fff; border: 1px solid #e5ece7; border-radius: 4px; }
+  .ob-avatar { width: 16px; height: 16px; border-radius: 4px; background: #d5e4db; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #3d6455; font-weight: 700; }
+  .ob-entity-name { font-size: 8px; font-weight: 600; color: #1a2e26; }
+  .ob-entity-sub { font-size: 7px; color: #8da598; }
+
+  /* Option C — Sections */
+  .oc-inner { background: #fff; border: 1px solid #e8ece9; border-radius: 8px; overflow: hidden; }
+  .oc-section { padding: 8px 10px; }
+  .oc-section + .oc-section { border-top: 1px solid #edf1ee; }
+  .oc-sec-header { display: flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+  .oc-sec-label { font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #5a7a68; }
+  .oc-sec-line { flex: 1; height: 1px; background: #e5ece7; }
+  .oc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .oc-field { }
+  .oc-label { font-size: 7px; font-weight: 600; color: #556b5d; margin-bottom: 2px; }
+  .oc-input { height: 18px; background: #f3f7f4; border: 1px solid #d5e0d8; border-radius: 3px; }
+  .oc-actions { background: #f8faf8; padding: 8px 10px; display: flex; gap: 5px; border-top: 1px solid #edf1ee; }
+  .oc-btn-p { height: 18px; background: #3d6455; border-radius: 2px; padding: 0 10px; font-size: 8px; color: #fff; font-weight: 700; display: flex; align-items: center; }
+  .oc-btn-o { height: 18px; background: transparent; border: 1px solid #d5e0d8; border-radius: 2px; padding: 0 8px; font-size: 8px; color: #556b5d; font-weight: 600; display: flex; align-items: center; }
+</style>
+
+<h2>¿Cómo deben estructurarse las páginas de formulario?</h2>
+<p class="subtitle">Actualmente son una página en blanco con título y campos sueltos. Elige el enfoque que prefieras.</p>
+
+<div class="mockup-grid">
+
+  <!-- Option A -->
+  <div class="card mockup-frame" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f9faf8;">
+      <div class="m-topbar"><div class="m-dot red"></div><div class="m-dot yellow"></div><div class="m-dot green"></div></div>
+      <div class="m-body">
+        <div class="m-sidebar">
+          <div class="m-navdot"></div><div class="m-navdot active"></div><div class="m-navdot"></div><div class="m-navdot"></div>
+        </div>
+        <div class="m-content" style="background: #f3f7f4;">
+          <div class="oa-breadcrumb">
+            <span class="oa-bc-link">Dueños</span>
+            <span class="oa-bc-sep">/</span>
+            <span class="oa-bc-cur">Nuevo dueño</span>
+          </div>
+          <div class="oa-inner">
+            <div class="oa-overline">✦ Directorio</div>
+            <div class="oa-title">Nuevo dueño</div>
+            <div style="height:6px"></div>
+            <div class="oa-field"><div class="oa-label">Nombre completo *</div><div class="oa-input"></div></div>
+            <div class="oa-row">
+              <div class="oa-field"><div class="oa-label">Teléfono *</div><div class="oa-input"></div></div>
+              <div class="oa-field"><div class="oa-label">Email</div><div class="oa-input"></div></div>
+            </div>
+            <div class="oa-field"><div class="oa-label">Dirección</div><div class="oa-input"></div></div>
+            <div class="oa-actions">
+              <div class="oa-btn-p">Crear dueño</div>
+              <div class="oa-btn-o">Cancelar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Card centrada</h3>
+      <p>Formulario en tarjeta blanca sobre fondo gris sage. Breadcrumb de navegación. Layout limpio y enfocado. Campos densos pero respirados.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card mockup-frame" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f9faf8;">
+      <div class="m-topbar"><div class="m-dot red"></div><div class="m-dot yellow"></div><div class="m-dot green"></div></div>
+      <div class="m-body">
+        <div class="m-sidebar">
+          <div class="m-navdot"></div><div class="m-navdot active"></div><div class="m-navdot"></div><div class="m-navdot"></div>
+        </div>
+        <div class="m-content" style="background: #f3f7f4; padding: 8px;">
+          <div class="oa-breadcrumb">
+            <span class="oa-bc-link">Dueños</span>
+            <span class="oa-bc-sep">/</span>
+            <span class="oa-bc-cur">Nuevo dueño</span>
+          </div>
+          <div class="ob-inner">
+            <div class="ob-left">
+              <div class="oa-title" style="margin-bottom:6px">Nuevo dueño</div>
+              <div class="oa-field"><div class="oa-label">Nombre completo *</div><div class="oa-input"></div></div>
+              <div class="oa-field"><div class="oa-label">Teléfono *</div><div class="oa-input"></div></div>
+              <div class="oa-field"><div class="oa-label">Email</div><div class="oa-input"></div></div>
+              <div class="oa-actions" style="margin-top:4px; padding-top:6px;">
+                <div class="oa-btn-p">Crear dueño</div>
+                <div class="oa-btn-o">Cancelar</div>
+              </div>
+            </div>
+            <div class="ob-right">
+              <div class="ob-context-title">Al guardar podrás:</div>
+              <div class="ob-tip">→ Agregar mascotas al dueño<br>→ Agendar citas<br>→ Registrar consultas</div>
+              <div class="ob-divider">Campos requeridos</div>
+              <div class="ob-tip" style="color:#3d6455; font-weight:600;">Nombre y teléfono son obligatorios</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Dos columnas con contexto</h3>
+      <p>Formulario a la izquierda, panel informativo a la derecha con guía contextual. Útil para formularios complejos como citas o expedientes.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card mockup-frame" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px; background: #f9faf8;">
+      <div class="m-topbar"><div class="m-dot red"></div><div class="m-dot yellow"></div><div class="m-dot green"></div></div>
+      <div class="m-body">
+        <div class="m-sidebar">
+          <div class="m-navdot"></div><div class="m-navdot active"></div><div class="m-navdot"></div><div class="m-navdot"></div>
+        </div>
+        <div class="m-content" style="background: #f3f7f4; padding: 8px;">
+          <div class="oa-breadcrumb" style="margin-bottom:6px">
+            <span class="oa-bc-link">Dueños</span>
+            <span class="oa-bc-sep">/</span>
+            <span class="oa-bc-cur">Nuevo dueño</span>
+          </div>
+          <div class="oa-title" style="margin-bottom:6px">Nuevo dueño</div>
+          <div class="oc-inner">
+            <div class="oc-section">
+              <div class="oc-sec-header">
+                <span class="oc-sec-label">Identidad</span>
+                <div class="oc-sec-line"></div>
+              </div>
+              <div class="oc-grid">
+                <div class="oc-field"><div class="oc-label">Nombre *</div><div class="oc-input"></div></div>
+                <div class="oc-field"><div class="oc-label">Teléfono *</div><div class="oc-input"></div></div>
+              </div>
+            </div>
+            <div class="oc-section">
+              <div class="oc-sec-header">
+                <span class="oc-sec-label">Contacto</span>
+                <div class="oc-sec-line"></div>
+              </div>
+              <div class="oc-grid">
+                <div class="oc-field"><div class="oc-label">Email</div><div class="oc-input"></div></div>
+                <div class="oc-field"><div class="oc-label">Dirección</div><div class="oc-input"></div></div>
+              </div>
+            </div>
+            <div class="oc-actions">
+              <div class="oc-btn-p">Crear dueño</div>
+              <div class="oc-btn-o">Cancelar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Secciones dentro de card</h3>
+      <p>Campos agrupados en secciones con separadores internos. Un solo contenedor blanco con título de cada grupo. Apropiado para formularios con muchos campos.</p>
+    </div>
+  </div>
+
+</div>
