@@ -76,8 +76,8 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      onKeyDown={e => { if (e.key === 'Escape') onClose() }}
+      onClick={e => { if (e.target === e.currentTarget && !isSubmitting) onClose() }}
+      onKeyDown={e => { if (e.key === 'Escape' && !isSubmitting) onClose() }}
       role="dialog"
       aria-modal="true"
       tabIndex={-1}

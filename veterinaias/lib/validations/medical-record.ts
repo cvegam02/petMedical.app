@@ -15,19 +15,19 @@ export const medicalRecordSchema = z.object({
   treatment: z.string().optional(),
   notes: z.string().optional(),
   weight_kg: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
   ),
   temperature_celsius: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
   ),
   heart_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().int().positive().optional()
   ),
   respiratory_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),
@@ -59,19 +59,19 @@ export const walkInRecordSchema = z.object({
   treatment: z.string().optional(),
   notes: z.string().optional(),
   weight_kg: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
   ),
   temperature_celsius: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
   ),
   heart_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().int().positive().optional()
   ),
   respiratory_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
+    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),

@@ -133,6 +133,10 @@ export async function POST(req: NextRequest) {
       .insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))
 
     if (presError) {
+      await supabase.from('medical_records').delete().eq('id', record.id)
+      await (supabase.from('pet_registrations') as any).delete().eq('pet_id', petId)
+      if (ownerWasCreated) await (supabase.from('owners') as any).delete().eq('id', ownerId)
+      await supabase.from('pets').delete().eq('id', petId)
       return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
     }
   }

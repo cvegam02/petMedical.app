@@ -118,21 +118,25 @@ export function WalkInConsultationPage() {
                     <Label htmlFor="weight_kg">Peso (kg)</Label>
                     <Input id="weight_kg" type="number" step="0.01" placeholder="0.0"
                       {...register('weight_kg', { valueAsNumber: true })} />
+                    {errors.weight_kg && <p className="text-destructive text-xs mt-1">{errors.weight_kg.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="temperature_celsius">Temp (°C)</Label>
                     <Input id="temperature_celsius" type="number" step="0.1" placeholder="38.5"
                       {...register('temperature_celsius', { valueAsNumber: true })} />
+                    {errors.temperature_celsius && <p className="text-destructive text-xs mt-1">{errors.temperature_celsius.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="heart_rate_bpm">FC (lpm)</Label>
                     <Input id="heart_rate_bpm" type="number" placeholder="80"
                       {...register('heart_rate_bpm', { valueAsNumber: true })} />
+                    {errors.heart_rate_bpm && <p className="text-destructive text-xs mt-1">{errors.heart_rate_bpm.message}</p>}
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="respiratory_rate_bpm">FR (rpm)</Label>
                     <Input id="respiratory_rate_bpm" type="number" placeholder="20"
                       {...register('respiratory_rate_bpm', { valueAsNumber: true })} />
+                    {errors.respiratory_rate_bpm && <p className="text-destructive text-xs mt-1">{errors.respiratory_rate_bpm.message}</p>}
                   </div>
                 </div>
               </FormSection>
