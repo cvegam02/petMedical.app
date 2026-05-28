@@ -4,11 +4,16 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CalendarIcon } from 'lucide-react'
 import { petSchema, type PetFormValues } from '@/lib/validations/pet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { FormSection } from '@/components/ui/form-section'
 
 interface Species { id: string; name: string }
@@ -24,6 +29,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
   const router = useRouter()
   const [species, setSpecies] = useState<Species[]>([])
   const [breeds, setBreeds] = useState<Breed[]>([])
+  const [dobOpen, setDobOpen] = useState(false)
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<PetFormValues>({
     resolver: zodResolver(petSchema) as any,
@@ -74,6 +80,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
               <Select
                 value={watch('species_id') || ''}
                 onValueChange={(v) => { if (v != null) { setValue('species_id', v as string); setValue('breed_id', undefined as any) } }}
+                items={Object.fromEntries(species.map(s => [s.id, s.name]))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar especie" />
@@ -92,6 +99,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
                 <Select
                   value={watch('breed_id') || ''}
                   onValueChange={(v) => { if (v != null) setValue('breed_id', v as string) }}
+                  items={Object.fromEntries(breeds.map(b => [b.id, b.name]))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sin especificar" />
@@ -107,6 +115,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
               <Select
                 value={watch('sex') || 'unknown'}
                 onValueChange={(v) => { if (v != null) setValue('sex', v as 'male' | 'female' | 'unknown') }}
+                items={{ unknown: 'Desconocido', male: 'Macho', female: 'Hembra' }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -124,8 +133,30 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
         <FormSection title="Datos clínicos">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label htmlFor="date_of_birth">Fecha de nacimiento</Label>
-              <Input id="date_of_birth" type="date" {...register('date_of_birth')} />
+              <Label>Fecha de nacimiento</Label>
+              <Popover open={dobOpen} onOpenChange={(open) => setDobOpen(open)}>
+                <PopoverTrigger
+                  className="flex h-9 w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground shadow-xs hover:bg-accent"
+                >
+                  <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
+                  {watch('date_of_birth')
+                    ? format(new Date(watch('date_of_birth')! + 'T12:00:00'), 'd MMM yyyy', { locale: es })
+                    : <span className="text-muted-foreground">Selecciona una fecha</span>
+                  }
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={watch('date_of_birth') ? new Date(watch('date_of_birth')! + 'T12:00:00') : undefined}
+                    onSelect={(date) => {
+                      if (date) setValue('date_of_birth', format(date, 'yyyy-MM-dd'))
+                      setDobOpen(false)
+                    }}
+                    disabled={(date) => date > new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.date_of_birth && <p className="text-destructive text-xs mt-1">{errors.date_of_birth.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="color">Color</Label>
