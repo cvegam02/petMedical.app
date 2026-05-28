@@ -110,9 +110,10 @@ describe('POST /api/appointments', () => {
       duration_minutes: 30,
       status: 'scheduled',
     }
-    // POST route:
-    //   1st from() call: user_profiles → single() returns mockProfile
-    //   2nd from() call: appointments insert → single() returns newAppointment
+    // POST route calls from() 3 times:
+    //   1st: user_profiles → profile
+    //   2nd: tenants → settings (business_hours)
+    //   3rd: appointments → insert
     let fromCallCount = 0
     const fromMock = vi.fn().mockImplementation(() => {
       fromCallCount++
@@ -121,7 +122,15 @@ describe('POST /api/appointments', () => {
           single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
         })
       }
-      // appointments.insert().select().single()
+      if (fromCallCount === 2) {
+        return makeChain({
+          single: vi.fn().mockResolvedValue({
+            data: { settings: { business_hours: { days: [1,2,3,4,5,6], start: '09:00', end: '18:00', slot_interval: 30 } } },
+            error: null,
+          }),
+        })
+      }
+      // 3rd: appointments insert
       return makeChain({
         single: vi.fn().mockResolvedValue({ data: newAppointment, error: null }),
       })
@@ -136,7 +145,7 @@ describe('POST /api/appointments', () => {
         pet_id: VALID_PET_ID,
         owner_id: VALID_OWNER_ID,
         scheduled_at: new Date().toISOString(),
-        duration_minutes: 30,
+        // duration_minutes intentionally omitted — API derives it from settings
       }),
     })
     const res = await POST(req)
