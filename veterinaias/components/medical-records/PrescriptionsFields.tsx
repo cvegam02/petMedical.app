@@ -1,12 +1,12 @@
 'use client'
 import { useFieldArray, Control } from 'react-hook-form'
-import type { MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 interface PrescriptionsFieldsProps {
-  control: Control<MedicalRecordFormValues>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: Control<any>
 }
 
 export function PrescriptionsFields({ control }: PrescriptionsFieldsProps) {

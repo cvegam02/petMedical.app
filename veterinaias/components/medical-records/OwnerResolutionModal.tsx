@@ -91,7 +91,8 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            disabled={isSubmitting}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40"
           >
             <X size={16} />
           </button>

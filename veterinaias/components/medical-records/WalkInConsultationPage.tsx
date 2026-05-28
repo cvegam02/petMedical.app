@@ -35,11 +35,12 @@ export function WalkInConsultationPage() {
   const [showPrescriptions, setShowPrescriptions] = useState(false)
   const [ownerModalOpen, setOwnerModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const pendingRecordRef = useRef<WalkInRecordValues | null>(null)
+  const pendingRecordRef = useRef<{ record: WalkInRecordValues; pet: WalkInPetValues } | null>(null)
 
   const petReady = petValues.name.trim().length > 0 && petValues.species_id.length > 0
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<WalkInRecordValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(walkInRecordSchema) as any,
     defaultValues: { prescriptions: [] },
   })
@@ -57,19 +58,19 @@ export function WalkInConsultationPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
-    pendingRecordRef.current = recordValues
+    pendingRecordRef.current = { record: recordValues, pet: petValues }
     setOwnerModalOpen(true)
   }
 
   async function handleOwnerResolved(owner: WalkInOwnerValue) {
-    const record = pendingRecordRef.current
-    if (!record) return
+    const pending = pendingRecordRef.current
+    if (!pending) return
     setIsSubmitting(true)
     try {
       const res = await fetch('/api/consultations/walk-in', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pet: petValues, record, owner }),
+        body: JSON.stringify({ pet: pending.pet, record: pending.record, owner }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -167,12 +168,12 @@ export function WalkInConsultationPage() {
                     Agregar receta
                   </button>
                 ) : (
-                  <PrescriptionsFields control={control as any} />
+                  <PrescriptionsFields control={control} />
                 )}
               </FormSection>
 
               <div className="px-5 py-4 bg-muted/30 flex items-center gap-3">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || ownerModalOpen}>
                   Finalizar consulta
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
