@@ -8,7 +8,7 @@ export const appointmentSchema = z.object({
   scheduled_at: z.string().datetime('Fecha y hora inválidas'),
   duration_minutes: z.preprocess(
     v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
-    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas')
+    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas').optional()
   ),
   reason: z.string().optional(),
   notes: z.string().optional(),
@@ -26,10 +26,6 @@ export const appointmentFormSchema = z.object({
   pet_id: z.string().uuid('Mascota es requerida'),
   owner_id: z.string().uuid('Dueño es requerido'),
   scheduled_at: z.string().min(1, 'Fecha y hora son requeridas'),
-  duration_minutes: z.preprocess(
-    v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
-    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas')
-  ),
   reason: z.string().optional(),
   notes: z.string().optional(),
 })
@@ -43,7 +39,7 @@ export const firstVisitSchema = z.object({
   scheduled_at: z.string().datetime('Fecha y hora inválidas'),
   duration_minutes: z.preprocess(
     v => (v === '' || v === null || v === undefined) ? undefined : Number(v),
-    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas')
+    z.number().int().min(15, 'Mínimo 15 minutos').max(180, 'Máximo 3 horas').optional()
   ),
   reason: z.string().optional(),
   notes: z.string().optional(),
