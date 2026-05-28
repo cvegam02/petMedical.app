@@ -1,12 +1,17 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { X } from 'lucide-react'
+import { X, CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { generateTimeSlots, combineDateAndTime, BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 
 interface TeamMember { id: string; full_name: string }
 
@@ -14,18 +19,22 @@ export interface NewAppointmentModalProps {
   isOpen: boolean
   onClose: () => void
   team: TeamMember[]
+  businessHours?: BusinessHoursConfig
 }
 
 type Mode = 'registered' | 'first_visit'
 
-export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentModalProps) {
+export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS }: NewAppointmentModalProps) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Date/time
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  const [selectedTime, setSelectedTime] = useState('')
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+
   // Shared fields
-  const [scheduledAt, setScheduledAt] = useState('')
-  const [durationMinutes, setDurationMinutes] = useState(30)
   const [reason, setReason] = useState('')
   const [assignedTo, setAssignedTo] = useState('')
 
@@ -42,6 +51,11 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
   const [petName, setPetName] = useState('')
 
   const modalRef = useRef<HTMLDivElement>(null)
+
+  const timeSlots = useMemo(
+    () => selectedDate ? generateTimeSlots(businessHours, selectedDate) : [],
+    [selectedDate, businessHours]
+  )
 
   // Escape key
   useEffect(() => {
@@ -84,8 +98,9 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
 
   function reset() {
     setMode('registered')
-    setScheduledAt('')
-    setDurationMinutes(30)
+    setSelectedDate(undefined)
+    setSelectedTime('')
+    setDatePickerOpen(false)
     setReason('')
     setAssignedTo('')
     setOwnerQuery('')
@@ -104,7 +119,7 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!scheduledAt) { toast.error('Fecha y hora son requeridas'); return }
+    if (!selectedDate || !selectedTime) { toast.error('Fecha y hora son requeridas'); return }
 
     if (mode === 'registered') {
       if (!selectedOwner) { toast.error('Selecciona un dueño'); return }
@@ -115,7 +130,7 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
 
     setIsSubmitting(true)
     try {
-      const scheduledAtISO = new Date(scheduledAt).toISOString()
+      const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
 
       if (mode === 'registered') {
         const res = await fetch('/api/appointments', {
@@ -125,7 +140,6 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
             pet_id: selectedPetId,
             owner_id: selectedOwner!.id,
             scheduled_at: scheduledAtISO,
-            duration_minutes: durationMinutes,
             ...(reason ? { reason } : {}),
             ...(assignedTo ? { assigned_to: assignedTo } : {}),
           }),
@@ -139,7 +153,6 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
           body: JSON.stringify({
             pet_name: petName.trim(),
             scheduled_at: scheduledAtISO,
-            duration_minutes: durationMinutes,
             ...(reason ? { reason } : {}),
             ...(assignedTo ? { assigned_to: assignedTo } : {}),
           }),
@@ -306,35 +319,68 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
 
             {/* Shared fields */}
             <div className="space-y-4">
+              {/* Date + Time */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label htmlFor="scheduled_at">
-                    Fecha y hora <span className="text-destructive">*</span>
+                  <Label>
+                    Fecha <span className="text-destructive">*</span>
                   </Label>
-                  <Input
-                    id="scheduled_at"
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={e => setScheduledAt(e.target.value)}
-                  />
+                  <Popover open={datePickerOpen} onOpenChange={(open) => setDatePickerOpen(open)}>
+                    <PopoverTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="flex h-9 w-full items-center justify-start gap-2 rounded-sm border border-input bg-transparent px-2.5 py-2 text-sm font-normal transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        />
+                      }
+                    >
+                      <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
+                      {selectedDate
+                        ? format(selectedDate, 'd MMM yyyy', { locale: es })
+                        : <span className="text-muted-foreground">Selecciona una fecha</span>
+                      }
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date)
+                          setSelectedTime('')
+                          setDatePickerOpen(false)
+                        }}
+                        disabled={(date) => {
+                          const today = new Date()
+                          today.setHours(0, 0, 0, 0)
+                          return date < today || !businessHours.days.includes(date.getDay())
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-1">
-                  <Label>Duración</Label>
+                  <Label>
+                    Hora <span className="text-destructive">*</span>
+                  </Label>
                   <Select
-                    value={String(durationMinutes)}
-                    onValueChange={v => setDurationMinutes(Number(v))}
+                    value={selectedTime}
+                    onValueChange={v => setSelectedTime(v ?? '')}
+                    disabled={!selectedDate || timeSlots.length === 0}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={!selectedDate ? 'Primero elige fecha' : 'Selecciona hora'}
+                      />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="15">15 min</SelectItem>
-                      <SelectItem value="30">30 min</SelectItem>
-                      <SelectItem value="45">45 min</SelectItem>
-                      <SelectItem value="60">1 hora</SelectItem>
-                      <SelectItem value="90">1.5 horas</SelectItem>
+                      {timeSlots.map(slot => (
+                        <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
               <div className="space-y-1">
                 <Label htmlFor="reason">Motivo</Label>
                 <Input
@@ -347,7 +393,10 @@ export function NewAppointmentModal({ isOpen, onClose, team }: NewAppointmentMod
               {team.length > 0 && (
                 <div className="space-y-1">
                   <Label>Asignar a</Label>
-                  <Select value={assignedTo} onValueChange={v => setAssignedTo(v ?? '')}>
+                  <Select
+                    value={assignedTo}
+                    onValueChange={v => setAssignedTo(v ?? '')}
+                  >
                     <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Sin asignar</SelectItem>
