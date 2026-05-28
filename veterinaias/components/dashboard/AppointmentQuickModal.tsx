@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -28,6 +28,13 @@ export function AppointmentQuickModal({ appointments }: Props) {
   const router = useRouter()
   const [selected, setSelected] = useState<DashboardAppointment | null>(null)
   const [loading, setLoading] = useState<string | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (selected) {
+      modalRef.current?.focus()
+    }
+  }, [selected])
 
   async function transition(newStatus: string) {
     if (!selected) return
@@ -63,11 +70,13 @@ export function AppointmentQuickModal({ appointments }: Props) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setSelected(null) }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setSelected(null) }}
           role="dialog"
           aria-modal="true"
           aria-label="Detalle de cita"
+          tabIndex={-1}
         >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div ref={modalRef} tabIndex={-1} className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div>
