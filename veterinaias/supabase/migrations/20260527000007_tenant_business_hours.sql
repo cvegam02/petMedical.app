@@ -21,4 +21,5 @@ SET settings = settings || '{
     "slot_interval": 30
   }
 }'::jsonb
-WHERE settings -> 'business_hours' IS NULL;
+WHERE settings IS NOT NULL
+  AND settings -> 'business_hours' IS NULL;

@@ -4,9 +4,17 @@ export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' |
 export type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
 export type PetSex = 'male' | 'female' | 'unknown'
 
+export interface BusinessHoursConfig {
+  days: number[]
+  start: string
+  end: string
+  slot_interval: number
+}
+
 export interface TenantSettings {
   confirmation_reminder_days: number
   share_link_expiry_days: number
+  business_hours: BusinessHoursConfig
 }
 
 export interface Tenant {
