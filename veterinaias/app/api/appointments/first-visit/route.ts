@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
     .select('id')
     .single()
   if (petError) {
-    await (supabase.from('owners') as any).delete().eq('id', owner.id)
+    const { error: cleanupErr } = await (supabase.from('owners') as any)
+      .delete().eq('id', owner.id).eq('tenant_id', profile.tenant_id)
+    if (cleanupErr) console.error('first-visit cleanup failed (owner):', cleanupErr)
     return NextResponse.json({ error: 'Error al crear la mascota' }, { status: 500 })
   }
 
@@ -49,10 +51,12 @@ export async function POST(req: NextRequest) {
     .from('pet_registrations')
     .insert({ tenant_id: profile.tenant_id, pet_id: pet.id, owner_id: owner.id })
   if (regError) {
-    await Promise.all([
+    const [petDel, ownerDel] = await Promise.all([
       (supabase.from('pets') as any).delete().eq('id', pet.id),
-      (supabase.from('owners') as any).delete().eq('id', owner.id),
+      (supabase.from('owners') as any).delete().eq('id', owner.id).eq('tenant_id', profile.tenant_id),
     ])
+    if (petDel.error) console.error('first-visit cleanup failed (pet):', petDel.error)
+    if (ownerDel.error) console.error('first-visit cleanup failed (owner):', ownerDel.error)
     return NextResponse.json({ error: 'Error al registrar la mascota' }, { status: 500 })
   }
 
@@ -72,11 +76,14 @@ export async function POST(req: NextRequest) {
     .select('id')
     .single()
   if (aptError) {
-    await Promise.all([
-      supabase.from('pet_registrations').delete().eq('pet_id', pet.id),
+    const [regDel, petDel, ownerDel] = await Promise.all([
+      supabase.from('pet_registrations').delete().eq('pet_id', pet.id).eq('tenant_id', profile.tenant_id),
       (supabase.from('pets') as any).delete().eq('id', pet.id),
-      (supabase.from('owners') as any).delete().eq('id', owner.id),
+      (supabase.from('owners') as any).delete().eq('id', owner.id).eq('tenant_id', profile.tenant_id),
     ])
+    if (regDel.error) console.error('first-visit cleanup failed (registration):', regDel.error)
+    if (petDel.error) console.error('first-visit cleanup failed (pet):', petDel.error)
+    if (ownerDel.error) console.error('first-visit cleanup failed (owner):', ownerDel.error)
     return NextResponse.json({ error: 'Error al crear la cita' }, { status: 500 })
   }
 
