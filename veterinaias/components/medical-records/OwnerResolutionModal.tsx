@@ -26,12 +26,14 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
   const [nameError, setNameError] = useState('')
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const preloadedRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (!isOpen) {
       setQuery(''); setResults([]); setMode('search')
       setNewName(''); setNewPhone(''); setNewEmail(''); setNameError('')
       preloadedRef.current = false
+      abortRef.current?.abort()
     }
   }, [isOpen])
 
@@ -40,10 +42,13 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     setIsSearching(true)
     debounceRef.current = setTimeout(() => {
-      fetch(`/api/owners?q=${encodeURIComponent(query)}&limit=5`)
+      abortRef.current?.abort()
+      const ctrl = new AbortController()
+      abortRef.current = ctrl
+      fetch(`/api/owners?q=${encodeURIComponent(query)}&limit=5`, { signal: ctrl.signal })
         .then(r => r.json())
         .then(json => setResults(json.data ?? []))
-        .catch(() => {})
+        .catch(e => { if (e?.name !== 'AbortError') {} })
         .finally(() => setIsSearching(false))
     }, 150)
   }, [query, isOpen])
@@ -51,10 +56,13 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
   function preload() {
     if (preloadedRef.current || query.length > 0) return
     preloadedRef.current = true
-    fetch('/api/owners?limit=5')
+    abortRef.current?.abort()
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
+    fetch('/api/owners?limit=5', { signal: ctrl.signal })
       .then(r => r.json())
       .then(json => setResults(json.data ?? []))
-      .catch(() => {})
+      .catch(e => { if (e?.name !== 'AbortError') {} })
   }
 
   function handleNewSubmit() {
@@ -94,6 +102,7 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
           <button
             type="button"
             onClick={() => setMode('search')}
+            disabled={isSubmitting}
             className={`flex-1 pb-2 text-xs font-medium transition-colors ${mode === 'search' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'}`}
           >
             Buscar existente
@@ -101,6 +110,7 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
           <button
             type="button"
             onClick={() => setMode('new')}
+            disabled={isSubmitting}
             className={`flex-1 pb-2 text-xs font-medium transition-colors ${mode === 'new' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'}`}
           >
             Registrar nuevo
@@ -119,6 +129,7 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
                   placeholder="Nombre o teléfono..."
                   className="pl-9"
                   autoFocus
+                  disabled={isSubmitting}
                 />
                 {isSearching && (
                   <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -143,7 +154,7 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
               </div>
               <button
                 type="button"
-                onClick={() => setMode('new')}
+                onClick={() => { setMode('new'); setQuery(''); setResults([]) }}
                 className="flex items-center gap-1.5 text-xs text-primary hover:underline w-full justify-center"
               >
                 <UserPlus size={12} />
