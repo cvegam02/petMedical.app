@@ -19,7 +19,10 @@ export async function GET(req: NextRequest) {
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
   const tab = req.nextUrl.searchParams.get('tab') ?? 'hoy'
-  if (!VALID_TABS.includes(tab as typeof VALID_TABS[number])) {
+  const from = req.nextUrl.searchParams.get('from')
+  const to = req.nextUrl.searchParams.get('to')
+
+  if (!VALID_TABS.includes(tab as typeof VALID_TABS[number]) && !(from && to)) {
     return NextResponse.json({ error: 'Tab inválido' }, { status: 400 })
   }
 
@@ -37,9 +40,12 @@ export async function GET(req: NextRequest) {
       assigned_to_profile:assigned_to(id, full_name)
     `)
     .eq('tenant_id', profile.tenant_id)
-    .order('scheduled_at', { ascending: true })
 
-  if (tab === 'hoy') {
+  if (from && to) {
+    query = query
+      .gte('scheduled_at', from)
+      .lte('scheduled_at', to)
+  } else if (tab === 'hoy') {
     query = query
       .gte('scheduled_at', todayStart.toISOString())
       .lt('scheduled_at', tomorrowStart.toISOString())
@@ -54,6 +60,8 @@ export async function GET(req: NextRequest) {
       .lt('scheduled_at', in2DaysFromNow.toISOString())
       .eq('status', 'scheduled')
   }
+
+  query = query.order('scheduled_at', { ascending: true })
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

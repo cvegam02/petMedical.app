@@ -22,8 +22,9 @@ function makeChain(overrides: Record<string, unknown> = {}) {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockResolvedValue({ data: [], error: null }),
-    order: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
+    order: vi.fn().mockResolvedValue({ data: [], error: null }),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
@@ -70,7 +71,7 @@ describe('GET /api/appointments', () => {
         })
       }
       return makeChain({
-        lt: vi.fn().mockResolvedValue({ data: appointments, error: null }),
+        order: vi.fn().mockResolvedValue({ data: appointments, error: null }),
       })
     })
     vi.mocked(createClient).mockResolvedValue({
@@ -240,5 +241,37 @@ describe('PATCH /api/appointments/[id]', () => {
     })
     const res = await PATCH(req, { params: Promise.resolve({ id: VALID_APT_ID }) })
     expect(res.status).toBe(200)
+  })
+})
+
+// ──────────────────────────────────────────────────────────
+// GET /api/appointments con ?from= y ?to=
+// ──────────────────────────────────────────────────────────
+describe('GET /api/appointments con ?from= y ?to=', () => {
+  it('filtra por rango de fechas cuando from y to están presentes', async () => {
+    const appointments = [
+      { id: 'apt-range', status: 'confirmed', scheduled_at: '2026-06-15T10:00:00Z' },
+    ]
+    const chain: Record<string, unknown> = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: appointments, error: null }),
+      single: vi.fn().mockResolvedValue({ data: mockProfile, error: null }),
+    }
+    const supabase = {
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
+      from: vi.fn().mockReturnValue(chain),
+    }
+    vi.mocked(createClient).mockResolvedValue(supabase as any)
+
+    const req = new NextRequest(
+      'http://localhost/api/appointments?from=2026-06-01T00:00:00Z&to=2026-06-30T23:59:59Z'
+    )
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+    expect(chain.gte).toHaveBeenCalledWith('scheduled_at', '2026-06-01T00:00:00Z')
+    expect(chain.lte).toHaveBeenCalledWith('scheduled_at', '2026-06-30T23:59:59Z')
   })
 })
