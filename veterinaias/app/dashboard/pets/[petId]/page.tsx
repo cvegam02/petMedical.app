@@ -144,7 +144,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
             <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
               {pet.habitat && <p><span className="text-muted-foreground">Dónde vive: </span>{pet.habitat}</p>}
               {pet.feeding && <p><span className="text-muted-foreground">Alimentación: </span>{pet.feeding}</p>}
-              <p><span className="text-muted-foreground">Esterilizado: </span>{pet.sterilized ? 'Sí' : 'No'}</p>
+              {pet.sterilized !== null && pet.sterilized !== undefined && (
+                <p><span className="text-muted-foreground">Esterilizado: </span>{pet.sterilized ? 'Sí' : 'No'}</p>
+              )}
               {pet.cohabitation && pet.cohabitation_details && (
                 <p className="col-span-2"><span className="text-muted-foreground">Convive con: </span>{pet.cohabitation_details}</p>
               )}
