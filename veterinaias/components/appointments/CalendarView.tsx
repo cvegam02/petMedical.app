@@ -116,8 +116,9 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   return (
     <div className="relative">
       {loading && (
-        <div className="absolute bottom-4 right-4 z-10 text-xs text-muted-foreground animate-pulse">
-          Cargando...
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-sm">
+          <div className="rbc-loading-shimmer absolute inset-0" />
+          <div className="rbc-loading-scanline" />
         </div>
       )}
       {error && (
@@ -125,7 +126,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           {error}
         </div>
       )}
-      <div className="rbc-wrapper">
+      <div className={`rbc-wrapper transition-opacity duration-500 ${loading ? 'opacity-60' : 'opacity-100'}`}>
         <Calendar<CalendarEvent>
           localizer={localizer}
           events={events}
