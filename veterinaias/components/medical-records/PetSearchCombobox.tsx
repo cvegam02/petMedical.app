@@ -48,6 +48,14 @@ export function PetSearchCombobox({
     return () => { abortRef.current?.abort() }
   }, [])
 
+  useEffect(() => {
+    if (value.trim() === '') {
+      setResults([])
+      setOpen(false)
+      setHasSearched(false)
+    }
+  }, [value])
+
   function handleChange(name: string) {
     onChange(name)
     setHasSearched(false)

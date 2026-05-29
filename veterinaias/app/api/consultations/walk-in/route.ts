@@ -32,11 +32,12 @@ export async function POST(req: NextRequest) {
 
     const { existingPetId, record: recordData } = result.data
 
-    // Verify pet exists
+    // Verify pet is registered at this tenant
     const { data: petCheck, error: petCheckError } = await supabase
-      .from('pets')
-      .select('id')
-      .eq('id', existingPetId)
+      .from('pet_registrations')
+      .select('pet_id')
+      .eq('pet_id', existingPetId)
+      .eq('tenant_id', profile.tenant_id)
       .single()
 
     if (petCheckError || !petCheck) {
