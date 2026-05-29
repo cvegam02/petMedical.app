@@ -74,8 +74,10 @@ Sin cambios en el esquema de base de datos ni en RLS.
 
 ```typescript
 interface CalendarViewProps {
-  businessHours: { start: number; end: number } // e.g. { start: 7, end: 20 }
+  businessHours: BusinessHoursConfig // { start: string, end: string, slot_interval: number, days: number[] }
 }
+// BusinessHoursConfig viene de lib/utils/time-slots.ts
+// start y end son strings "HH:mm" (e.g. "09:00", "18:00")
 ```
 
 `businessHours` lo pasa el Server Component desde `tenant.settings.business_hours` (ya disponible en `page.tsx`).
@@ -85,7 +87,7 @@ interface CalendarViewProps {
 1. **Estado inicial:** vista de semana (`week`), semana actual
 2. **Vistas disponibles:** `week` y `month` — el usuario puede alternar con los controles nativos de react-big-calendar
 3. **Fetch de datos:** al montar y en cada `onRangeChange` (navegación entre semanas/meses), llama a `GET /api/appointments?from=&to=` con el rango visible. Resultado guardado en `useState`
-4. **Horario visible (vista semana):** de `businessHours.start` a `businessHours.end`
+4. **Horario visible (vista semana):** de `businessHours.start` a `businessHours.end` — se parsea el string "HH:mm" a un objeto `Date` para pasarlo a react-big-calendar como `min` y `max`
 5. **Locale:** español (usando `date-fns/locale/es` + `localizer` de react-big-calendar)
 6. **Slots vacíos:** no hacen nada al clic (`selectable={false}`)
 
@@ -114,7 +116,7 @@ Abre `AppointmentPopover` anclado al elemento del evento. El popover recibe el o
 
 **Archivo:** `components/appointments/AppointmentPopover.tsx`
 **Tipo:** Client Component
-**Librería:** Radix UI Popover (ya disponible via shadcn/ui)
+**Librería:** Base UI Popover — ya disponible en `components/ui/popover.tsx` (`@base-ui/react/popover`)
 
 ### Contenido
 
@@ -149,7 +151,7 @@ app/dashboard/appointments/page.tsx   # Toggle + render condicional + pasar busi
 ```
 react-big-calendar
 @types/react-big-calendar
-date-fns                               # probablemente ya instalado
+date-fns                               # ya instalado (v4.3.0)
 ```
 
 ---
