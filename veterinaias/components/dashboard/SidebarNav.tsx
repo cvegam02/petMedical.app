@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 ]
 
 const ADMIN_NAV_ITEMS = [
-  { href: '/dashboard/settings/team', icon: Settings2, label: 'Equipo' },
+  { href: '/dashboard/settings', icon: Settings2, label: 'Configuración' },
 ]
 
 interface SidebarNavProps {
