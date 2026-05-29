@@ -155,8 +155,11 @@
 .rbc-wrapper .rbc-event.rbc-selected { background: color-mix(in oklch, var(--primary) 32%, var(--card)); outline: 2px solid var(--primary); }
 .rbc-wrapper .rbc-current-time-indicator { background: var(--primary); }
 .rbc-wrapper .rbc-off-range-bg { background: var(--muted); }
-.rbc-wrapper .rbc-time-content { border-color: var(--border); }
+.rbc-wrapper .rbc-time-content { border-color: var(--border); overflow-y: scroll; }
 .rbc-wrapper .rbc-time-header-content { border-color: var(--border); }
 .rbc-wrapper .rbc-day-slot .rbc-time-slot { border-color: color-mix(in oklch, var(--border) 50%, transparent); }
+.rbc-wrapper .rbc-day-slot .rbc-events-container { margin-right: 0; }
+.rbc-wrapper .rbc-day-slot .rbc-event { align-items: center; }
+.rbc-wrapper .rbc-day-slot .rbc-event-label { display: none; }
 .rbc-wrapper .rbc-time-gutter .rbc-time-slot { display: flex; align-items: center; justify-content: center; }
-.rbc-wrapper .rbc-time-gutter .rbc-label { font-size: 0.6rem; font-family: var(--font-mono); color: var(--muted-foreground); text-align: center; line-height: 1; width: 100%; }
+.rbc-wrapper .rbc-time-gutter .rbc-label { font-size: 0.72rem; font-family: var(--font-sans); font-weight: 400; color: var(--muted-foreground); text-align: center; line-height: 1; width: 100%; }
