@@ -21,7 +21,7 @@ export default async function SettingsClinicaPage() {
         <h2 className="text-base font-semibold text-foreground">Datos de la clínica</h2>
         <p className="text-sm text-muted-foreground mt-0.5">Esta información aparece en PDFs y documentos generados.</p>
       </div>
-      <ClinicaForm name={tenant?.name ?? ''} address={settings.address ?? null} phone={settings.phone ?? null} />
+      <ClinicaForm name={tenant?.name ?? ''} address={settings.address ?? null} phone={settings.phone ?? null} logoUrl={settings.logo_url ?? null} />
     </div>
   )
 }
