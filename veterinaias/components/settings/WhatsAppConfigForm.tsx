@@ -1,126 +1,174 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, RefreshCw, Wifi, WifiOff } from 'lucide-react'
+import Image from 'next/image'
+
+type SessionStatus = 'NOT_CREATED' | 'STARTING' | 'SCAN_QR_CODE' | 'WORKING' | 'FAILED' | 'STOPPED'
 
 interface WhatsAppConfigFormProps {
-  phoneNumberId: string | null
-  hasToken: boolean
+  initialStatus: SessionStatus
+  initialQr: string | null
+  initialPhone: string | null
 }
 
-export function WhatsAppConfigForm({ phoneNumberId, hasToken }: WhatsAppConfigFormProps) {
-  const [form, setForm] = useState({ phone_number_id: phoneNumberId ?? '', access_token: '' })
-  const [saving, setSaving] = useState(false)
-  const [testing, setTesting] = useState(false)
-  const [testResult, setTestResult] = useState<{ success?: boolean; phone?: string; error?: string; detail?: string } | null>(null)
+const STATUS_LABELS: Record<SessionStatus, string> = {
+  NOT_CREATED: 'No conectado',
+  STARTING: 'Iniciando…',
+  SCAN_QR_CODE: 'Escanea el QR',
+  WORKING: 'Conectado',
+  FAILED: 'Error',
+  STOPPED: 'Detenido',
+}
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault()
-    setSaving(true)
+const STATUS_COLORS: Record<SessionStatus, string> = {
+  NOT_CREATED: 'text-muted-foreground',
+  STARTING: 'text-amber-600',
+  SCAN_QR_CODE: 'text-blue-600',
+  WORKING: 'text-green-700',
+  FAILED: 'text-destructive',
+  STOPPED: 'text-muted-foreground',
+}
+
+export function WhatsAppConfigForm({ initialStatus, initialQr, initialPhone }: WhatsAppConfigFormProps) {
+  const [status, setStatus] = useState<SessionStatus>(initialStatus)
+  const [qr, setQr] = useState<string | null>(initialQr)
+  const [phone, setPhone] = useState<string | null>(initialPhone)
+  const [connecting, setConnecting] = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
+
+  const shouldPoll = status === 'STARTING' || status === 'SCAN_QR_CODE'
+
+  const fetchStatus = useCallback(async () => {
     try {
-      const payload: Record<string, string> = { phone_number_id: form.phone_number_id }
-      if (form.access_token) payload.access_token = form.access_token
-
-      const res = await fetch('/api/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: { whatsapp_config: payload } }),
-      })
-      if (!res.ok) throw new Error()
-      toast.success('Configuración de WhatsApp guardada')
-      setForm(f => ({ ...f, access_token: '' }))
+      const res = await fetch('/api/settings/whatsapp/session', { cache: 'no-store' })
+      if (!res.ok) return
+      const data = await res.json()
+      setStatus(data.status)
+      setQr(data.qr ?? null)
+      setPhone(data.phone ?? null)
     } catch {
-      toast.error('Error al guardar')
+      // ignore network errors during polling
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!shouldPoll) return
+    const interval = setInterval(fetchStatus, 3000)
+    return () => clearInterval(interval)
+  }, [shouldPoll, fetchStatus])
+
+  async function handleConnect() {
+    setConnecting(true)
+    try {
+      const res = await fetch('/api/settings/whatsapp/session', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error ?? 'Error al crear sesión')
+        return
+      }
+      setStatus(data.status)
+      setQr(data.qr ?? null)
+      setPhone(null)
+    } catch {
+      toast.error('Error de red')
     } finally {
-      setSaving(false)
+      setConnecting(false)
     }
   }
 
-  async function handleTest() {
-    setTesting(true)
-    setTestResult(null)
+  async function handleDisconnect() {
+    setDisconnecting(true)
     try {
-      const res = await fetch('/api/settings/whatsapp/test')
-      const json = await res.json()
-      setTestResult(res.ok ? { success: true, phone: json.phone } : { error: json.error, detail: json.detail })
+      const res = await fetch('/api/settings/whatsapp/session', { method: 'DELETE' })
+      if (!res.ok) { toast.error('Error al desconectar'); return }
+      setStatus('NOT_CREATED')
+      setQr(null)
+      setPhone(null)
+      toast.success('WhatsApp desconectado')
     } catch {
-      setTestResult({ error: 'Error de red' })
+      toast.error('Error de red')
     } finally {
-      setTesting(false)
+      setDisconnecting(false)
     }
   }
 
   return (
-    <div className="space-y-6 max-w-md">
+    <div className="space-y-5 max-w-md">
       <div>
-        <h3 className="text-sm font-semibold text-foreground">WhatsApp Business API</h3>
+        <h3 className="text-sm font-semibold text-foreground">WhatsApp Business</h3>
         <p className="text-xs text-muted-foreground mt-1">
-          Ingresa las credenciales de tu cuenta Meta Business para enviar mensajes por WhatsApp.
-          Obtén el <strong>Phone Number ID</strong> y el <strong>Access Token</strong> desde{' '}
-          <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-            Meta for Developers
-          </a>.
+          Conecta el número de WhatsApp de tu clínica para enviar resúmenes de consulta directamente desde el sistema.
         </p>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Phone Number ID</label>
-          <Input
-            value={form.phone_number_id}
-            onChange={e => setForm(f => ({ ...f, phone_number_id: e.target.value }))}
-            placeholder="123456789012345"
-            required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">
-            Access Token{' '}
-            {hasToken && !form.access_token && (
-              <span className="text-xs font-normal text-muted-foreground">(guardado — deja en blanco para conservar)</span>
-            )}
-          </label>
-          <Input
-            type="password"
-            value={form.access_token}
-            onChange={e => setForm(f => ({ ...f, access_token: e.target.value }))}
-            placeholder={hasToken ? '••••••••••••' : 'EAABwzLixnjYBO...'}
-          />
-        </div>
+      {/* Status badge */}
+      <div className="flex items-center gap-2">
+        {status === 'WORKING'
+          ? <Wifi size={14} className="text-green-700" />
+          : <WifiOff size={14} className="text-muted-foreground" />}
+        <span className={`text-sm font-medium ${STATUS_COLORS[status]}`}>
+          {STATUS_LABELS[status]}
+          {(status === 'STARTING') && <Loader2 size={12} className="inline ml-1.5 animate-spin" />}
+        </span>
+        {phone && status === 'WORKING' && (
+          <span className="text-xs text-muted-foreground">· +{phone}</span>
+        )}
+      </div>
 
-        <div className="flex items-center gap-3 pt-1">
-          <Button type="submit" disabled={saving} size="sm">
-            {saving ? 'Guardando...' : 'Guardar'}
-          </Button>
-          <button
-            type="button"
-            disabled={testing}
-            onClick={handleTest}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'gap-1.5')}
-          >
-            {testing && <Loader2 size={12} className="animate-spin" />}
-            Probar conexión
-          </button>
-        </div>
-      </form>
-
-      {testResult && (
-        <div className={`flex items-start gap-2 text-sm rounded-lg px-3 py-2.5 ${
-          testResult.success
-            ? 'bg-green-50 text-green-800 border border-green-200'
-            : 'bg-destructive/5 text-destructive border border-destructive/20'
-        }`}>
-          {testResult.success
-            ? <CheckCircle2 size={15} className="shrink-0 mt-0.5" />
-            : <XCircle size={15} className="shrink-0 mt-0.5" />}
-          <div>
-            <p>{testResult.success ? `Conexión exitosa · ${testResult.phone}` : testResult.error}</p>
-            {testResult.detail && <p className="text-xs opacity-70 mt-0.5">{testResult.detail}</p>}
+      {/* QR code */}
+      {status === 'SCAN_QR_CODE' && qr && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Abre WhatsApp en tu teléfono → <strong>Dispositivos vinculados</strong> → <strong>Vincular un dispositivo</strong> → escanea este código.
+          </p>
+          <div className="w-48 h-48 border border-border rounded-xl overflow-hidden bg-white p-2">
+            <Image src={qr} alt="WhatsApp QR" width={176} height={176} unoptimized className="w-full h-full object-contain" />
           </div>
+          <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+            <Loader2 size={10} className="animate-spin" />
+            Actualizando automáticamente…
+          </p>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-1">
+        {status !== 'WORKING' && (
+          <Button size="sm" onClick={handleConnect} disabled={connecting || status === 'STARTING'}>
+            {connecting || status === 'STARTING'
+              ? <><Loader2 size={13} className="animate-spin mr-1.5" />Iniciando…</>
+              : status === 'SCAN_QR_CODE'
+                ? <><RefreshCw size={13} className="mr-1.5" />Nuevo QR</>
+                : 'Conectar WhatsApp'}
+          </Button>
+        )}
+        {(status === 'WORKING' || status === 'SCAN_QR_CODE' || status === 'STOPPED') && (
+          <button
+            onClick={handleDisconnect}
+            disabled={disconnecting}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'text-destructive hover:text-destructive')}
+          >
+            {disconnecting ? <Loader2 size={13} className="animate-spin mr-1" /> : null}
+            Desconectar
+          </button>
+        )}
+      </div>
+
+      {status === 'FAILED' && (
+        <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/5 border border-destructive/20 rounded-lg px-3 py-2.5">
+          <XCircle size={15} className="shrink-0 mt-0.5" />
+          <p>La sesión falló. Haz clic en Conectar para reintentar.</p>
+        </div>
+      )}
+
+      {status === 'WORKING' && (
+        <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
+          <CheckCircle2 size={15} className="shrink-0" />
+          <p>WhatsApp conectado. Los mensajes se enviarán automáticamente.</p>
         </div>
       )}
     </div>

@@ -1,18 +1,23 @@
-import { createClient } from '@/lib/supabase/server'
 import { WhatsAppConfigForm } from '@/components/settings/WhatsAppConfigForm'
 
 export default async function SettingsIntegracionesPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  // Fetch initial session status server-side
+  let initialStatus: 'NOT_CREATED' | 'STARTING' | 'SCAN_QR_CODE' | 'WORKING' | 'FAILED' | 'STOPPED' = 'NOT_CREATED'
+  let initialQr: string | null = null
+  let initialPhone: string | null = null
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('tenant_id, tenants(settings)')
-    .eq('id', user.id)
-    .single() as any
-
-  const waConfig = profile?.tenants?.settings?.whatsapp_config ?? {}
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/settings/whatsapp/session`, { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      initialStatus = data.status ?? 'NOT_CREATED'
+      initialQr = data.qr ?? null
+      initialPhone = data.phone ?? null
+    }
+  } catch {
+    // fallback to NOT_CREATED; client will poll anyway
+  }
 
   return (
     <div className="space-y-8">
@@ -22,8 +27,9 @@ export default async function SettingsIntegracionesPage() {
       </div>
       <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
         <WhatsAppConfigForm
-          phoneNumberId={waConfig.phone_number_id ?? null}
-          hasToken={!!waConfig.access_token}
+          initialStatus={initialStatus}
+          initialQr={initialQr}
+          initialPhone={initialPhone}
         />
       </div>
     </div>
