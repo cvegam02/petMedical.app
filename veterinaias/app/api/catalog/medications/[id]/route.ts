@@ -11,8 +11,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
-  const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('user_profiles').select('role, tenant_id').eq('id', user.id).single()
   if ((profile as any)?.role !== 'admin') return NextResponse.json({ error: 'Solo admins' }, { status: 403 })
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica' }, { status: 403 })
+  const tenantId = (profile as any).tenant_id as string
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
@@ -24,6 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .from('medication_catalog')
     .update(result.data)
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .select()
     .single()
 
@@ -39,13 +42,16 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
-  const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).single()
+  const { data: profile } = await supabase.from('user_profiles').select('role, tenant_id').eq('id', user.id).single()
   if ((profile as any)?.role !== 'admin') return NextResponse.json({ error: 'Solo admins' }, { status: 403 })
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica' }, { status: 403 })
+  const tenantId = (profile as any).tenant_id as string
 
   const { data, error } = await (supabase as any)
     .from('medication_catalog')
     .update({ active: false })
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .select()
     .single()
 

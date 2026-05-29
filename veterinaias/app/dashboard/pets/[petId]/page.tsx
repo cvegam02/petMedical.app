@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { MedicalRecordCard } from '@/components/medical-records/MedicalRecordCard'
 import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeft, Plus, Cat, Dog, PawPrint, CalendarDays, Cpu, User, ExternalLink } from 'lucide-react'
@@ -19,6 +19,8 @@ function calcAge(dob: string) {
 export default async function PetDetailPage({ params }: { params: Promise<{ petId: string }> }) {
   const { petId } = await params
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { redirect('/login'); return null }
 
   const [petResult, regResult] = await Promise.all([
     (supabase.from('pets') as any)
