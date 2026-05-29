@@ -62,24 +62,33 @@ export async function GET(
   const tenant = profile.tenants as any
   const generatedAt = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-  const buffer = await (renderToBuffer as any)(
-    createElement(MedicalHistoryDocument, {
-      pet,
-      owner,
-      records,
-      tenantName: tenant?.name ?? 'Clínica Veterinaria',
-      tenantLogoUrl: tenant?.settings?.logo_url ?? null,
-      generatedAt,
-    })
-  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let buffer: any
+  try {
+    buffer = await (renderToBuffer as any)(
+      createElement(MedicalHistoryDocument, {
+        pet,
+        owner,
+        records,
+        tenantName: tenant?.name ?? 'Clínica Veterinaria',
+        tenantLogoUrl: tenant?.settings?.logo_url ?? null,
+        generatedAt,
+      })
+    )
+  } catch {
+    return NextResponse.json({ error: 'Error al generar el PDF' }, { status: 500 })
+  }
 
-  const petName = (pet.name as string).toLowerCase().replace(/\s+/g, '-')
+  const safeName = (pet.name as string)
+    .toLowerCase()
+    .replace(/[^a-z0-9\-_]/g, '-')
+    .replace(/-{2,}/g, '-')
   const dateStr = new Date().toISOString().split('T')[0]
 
   return new NextResponse(buffer, {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="historial-${petName}-${dateStr}.pdf"`,
+      'Content-Disposition': `attachment; filename="historial-${safeName}-${dateStr}.pdf"`,
     },
   })
 }

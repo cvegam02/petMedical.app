@@ -17,11 +17,20 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant asignado' }, { status: 403 })
+
   let query = (supabase.from('pet_registrations') as any)
     .select(`
       owner:owner_id(id, full_name, phone),
-      pet:pet_id(id, name, sex, date_of_birth, species:species_id(id, name), breed:breed_id(id, name))
+      pet:pet_id(id, name, sex, date_of_birth, breed, species:species_id(id, name))
     `)
+    .eq('tenant_id', profile.tenant_id)
     .limit(100)
 
   if (ownerId) {
@@ -60,11 +69,17 @@ export async function POST(req: NextRequest) {
 
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant asignado' }, { status: 403 })
 
-  const { owner_id, date_of_birth, breed_id, ...petData } = result.data
+  const { owner_id, date_of_birth, breed, microchip, color, notes, ...petData } = result.data
 
-  const { data: pet, error: petError } = await supabase
-    .from('pets')
-    .insert({ ...petData, date_of_birth: date_of_birth || null, breed_id: breed_id || null })
+  const { data: pet, error: petError } = await (supabase.from('pets') as any)
+    .insert({
+      ...petData,
+      date_of_birth: date_of_birth || null,
+      breed: breed || null,
+      microchip: microchip || null,
+      color: color || null,
+      notes: notes || null,
+    })
     .select()
     .single()
 

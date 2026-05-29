@@ -18,6 +18,7 @@ export function PetSearchHistorial() {
   const [results, setResults] = useState<PetResult[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -33,6 +34,7 @@ export function PetSearchHistorial() {
       const controller = new AbortController()
       abortRef.current = controller
       setLoading(true)
+      setError(null)
       try {
         const res = await fetch(`/api/pets?q=${encodeURIComponent(query.trim())}`, { signal: controller.signal })
         if (!res.ok) return
@@ -41,6 +43,9 @@ export function PetSearchHistorial() {
         setSearched(true)
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return
+        setResults([])
+        setSearched(true)
+        setError('Error al buscar. Intenta de nuevo.')
       } finally {
         if (abortRef.current === controller) setLoading(false)
       }
@@ -68,6 +73,10 @@ export function PetSearchHistorial() {
 
       {loading && (
         <p className="text-sm text-muted-foreground">Buscando...</p>
+      )}
+
+      {error && (
+        <p className="text-sm text-destructive">{error}</p>
       )}
 
       {searched && !loading && results.length === 0 && (
