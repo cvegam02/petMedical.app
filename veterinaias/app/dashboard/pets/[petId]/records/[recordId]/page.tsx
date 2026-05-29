@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { RecordDetailClient } from '@/components/medical-records/RecordDetailClient'
+import { ShareConsultationModal } from '@/components/medical-records/ShareConsultationModal'
 
 export default async function RecordDetailPage({
   params,
@@ -18,7 +19,7 @@ export default async function RecordDetailPage({
       id, reason, diagnosis, treatment, notes,
       weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
       created_at,
-      pet:pet_id(id, name, owner:owner_id(id, full_name)),
+      pet:pet_id(id, name),
       created_by_profile:created_by(full_name),
       prescriptions(id, medication_name, dosage, frequency, duration, notes),
       attachments(id, file_name, file_type, storage_path, created_at),
@@ -28,6 +29,13 @@ export default async function RecordDetailPage({
     .single()
 
   if (error || !record) notFound()
+
+  const { data: regData } = await (supabase as any)
+    .from('pet_registrations')
+    .select('owner:owner_id(phone)')
+    .eq('pet_id', petId)
+    .maybeSingle()
+  const ownerPhone = (regData?.owner as any)?.phone ?? null
 
   const pet = record.pet as any
   const createdBy = record.created_by_profile as any
@@ -53,9 +61,16 @@ export default async function RecordDetailPage({
               {date}{createdBy?.full_name ? ` · Dr. ${createdBy.full_name}` : ''}
             </p>
           </div>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-            Registro inmutable
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <ShareConsultationModal
+              recordId={recordId}
+              ownerPhone={ownerPhone}
+              petName={pet?.name ?? ''}
+            />
+            <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+              Registro inmutable
+            </span>
+          </div>
         </div>
 
         {record.diagnosis && (
