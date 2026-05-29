@@ -34,7 +34,10 @@ export function AppointmentPopover({ appointment, children }: AppointmentPopover
 
   return (
     <Popover>
-      <PopoverTrigger render={<span />}>
+      <PopoverTrigger
+        render={<span className="w-full h-full flex items-center gap-1 px-1 overflow-hidden cursor-pointer" />}
+        nativeButton={false}
+      >
         {children}
       </PopoverTrigger>
       <PopoverContent side="top" className="w-64 p-3">

@@ -38,16 +38,11 @@ interface CalendarEvent {
 function EventComponent({ event }: EventProps<CalendarEvent>) {
   return (
     <AppointmentPopover appointment={event.resource}>
-      <button
-        className="w-full h-full text-left flex items-center gap-1 px-1 overflow-hidden"
-        onClick={e => e.stopPropagation()}
-      >
-        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[event.resource.status] ?? 'bg-muted-foreground/40'}`} />
-        <span className="text-[11px] truncate leading-tight">
-          {event.resource.pet?.name ?? '—'}
-          {event.resource.pet?.species ? ` · ${event.resource.pet.species.name}` : ''}
-        </span>
-      </button>
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[event.resource.status] ?? 'bg-muted-foreground/40'}`} />
+      <span className="text-[11px] truncate leading-tight">
+        {event.resource.pet?.name ?? '—'}
+        {event.resource.pet?.species ? ` · ${event.resource.pet.species.name}` : ''}
+      </span>
     </AppointmentPopover>
   )
 }
