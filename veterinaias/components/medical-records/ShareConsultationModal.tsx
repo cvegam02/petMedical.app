@@ -16,10 +16,21 @@ export function ShareConsultationModal({ recordId, ownerPhone, petName }: ShareC
   const [open, setOpen] = useState(false)
   const [phone, setPhone] = useState(ownerPhone ?? '')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ waUrl?: string; shareUrl?: string; error?: string } | null>(null)
+  const [result, setResult] = useState<{ shareUrl?: string; error?: string } | null>(null)
   const [copied, setCopied] = useState(false)
 
-  async function handleGenerate() {
+  function formatPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(formatPhone(e.target.value))
+  }
+
+  async function handleSend() {
     setLoading(true)
     setResult(null)
     try {
@@ -30,7 +41,7 @@ export function ShareConsultationModal({ recordId, ownerPhone, petName }: ShareC
       })
       const json = await res.json()
       if (res.ok) {
-        setResult({ waUrl: json.wa_url, shareUrl: json.share_url })
+        setResult({ shareUrl: json.share_url })
       } else {
         setResult({ error: json.error })
       }
@@ -77,15 +88,15 @@ export function ShareConsultationModal({ recordId, ownerPhone, petName }: ShareC
           </button>
         </div>
 
-        {!result?.waUrl ? (
+        {!result?.shareUrl ? (
           <div className="space-y-4">
             <p className="text-xs text-muted-foreground">
-              Se generará un link del resumen de la consulta de <strong>{petName}</strong> para enviar por WhatsApp.
+              Se enviará el resumen de la consulta de <strong>{petName}</strong> directamente por WhatsApp.
             </p>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Número de WhatsApp</label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+52 55 1234 5678" />
-              <p className="text-[10px] text-muted-foreground">Incluir código de país. Ej: +52 para México.</p>
+              <Input value={phone} onChange={handlePhoneChange} placeholder="555 123 4567" />
+              <p className="text-[10px] text-muted-foreground">Número a 10 dígitos, México.</p>
             </div>
 
             {result?.error && (
@@ -96,13 +107,13 @@ export function ShareConsultationModal({ recordId, ownerPhone, petName }: ShareC
 
             <div className="flex gap-2 pt-1">
               <Button
-                onClick={handleGenerate}
+                onClick={handleSend}
                 disabled={loading || !phone.trim()}
                 size="sm"
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white border-0"
               >
                 {loading ? <Loader2 size={13} className="animate-spin mr-1.5" /> : <MessageCircle size={13} className="mr-1.5" />}
-                {loading ? 'Generando...' : 'Generar link'}
+                {loading ? 'Enviando…' : 'Enviar por WhatsApp'}
               </Button>
               <Button variant="outline" size="sm" onClick={close}>Cancelar</Button>
             </div>
@@ -111,30 +122,21 @@ export function ShareConsultationModal({ recordId, ownerPhone, petName }: ShareC
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-green-700">
               <CheckCircle2 size={16} />
-              <p className="text-sm font-medium">Link generado</p>
+              <p className="text-sm font-medium">Mensaje enviado</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Haz clic en &quot;Abrir WhatsApp&quot; — se abrirá con el mensaje listo para enviar a {phone}.
+              El resumen fue enviado a <strong>{phone}</strong> por WhatsApp. También puedes copiar el link para compartirlo por otro medio.
             </p>
             <div className="flex gap-2">
-              <a
-                href={result.waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(buttonVariants({ size: 'sm' }), 'flex-1 bg-green-600 hover:bg-green-700 text-white border-0 gap-1.5')}
-              >
-                <MessageCircle size={13} />
-                Abrir WhatsApp
-              </a>
               <button
                 onClick={copyLink}
-                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'gap-1.5')}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'flex-1 gap-1.5')}
               >
                 {copied ? <Check size={13} /> : <Copy size={13} />}
                 {copied ? 'Copiado' : 'Copiar link'}
               </button>
+              <Button variant="ghost" size="sm" onClick={close}>Cerrar</Button>
             </div>
-            <Button variant="ghost" size="sm" className="w-full" onClick={close}>Cerrar</Button>
           </div>
         )}
       </div>
