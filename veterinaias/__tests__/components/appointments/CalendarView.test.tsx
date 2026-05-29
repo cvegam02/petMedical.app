@@ -39,7 +39,8 @@ describe('CalendarView', () => {
     render(<CalendarView businessHours={businessHours} />)
     await vi.waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/appointments?from=')
+        expect.stringContaining('/api/appointments?from='),
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
       )
     })
   })
