@@ -1,0 +1,15 @@
+services:
+  waha:
+    image: devlikeapro/waha
+    container_name: waha
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      WHATSAPP_API_KEY: ${WAHA_API_KEY}
+      WHATSAPP_HOOK_URL: ""
+    volumes:
+      - waha_sessions:/app/.sessions
+
+volumes:
+  waha_sessions:
