@@ -6,7 +6,7 @@ services:
     ports:
       - "3001:3000"
     environment:
-      WHATSAPP_API_KEY: "cambia-esto-por-una-clave-segura"
+      WHATSAPP_API_KEY: ${WAHA_API_KEY}
       WHATSAPP_HOOK_URL: ""
     volumes:
       - waha_sessions:/app/.sessions

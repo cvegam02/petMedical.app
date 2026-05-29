@@ -31,6 +31,12 @@ export async function POST(req: NextRequest) {
   const { record_id, phone, pet_name } = body
   if (!record_id || !phone) return NextResponse.json({ error: 'record_id y phone son requeridos' }, { status: 400 })
 
+  const { data: record } = await (supabase.from('medical_records') as any)
+    .select('id')
+    .eq('id', record_id)
+    .single()
+  if (!record) return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 })
+
   const expiryDays: number = profile.tenants?.settings?.share_link_expiry_days ?? 7
   const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString()
 
@@ -41,9 +47,8 @@ export async function POST(req: NextRequest) {
 
   if (sharedError) return NextResponse.json({ error: 'Error al generar link compartible' }, { status: 500 })
 
-  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
-  const host = req.headers.get('host') ?? 'petmedical.app'
-  const shareUrl = `${proto}://${host}/r/${shared.token}`
+  const appUrl = (process.env.APP_URL ?? 'https://petmedical.app').replace(/\/$/, '')
+  const shareUrl = `${appUrl}/r/${shared.token}`
 
   const clinicName: string = profile.tenants?.name ?? 'tu clínica'
   const message = `Hola 👋 Te compartimos el resumen de la consulta de *${pet_name ?? 'tu mascota'}* en *${clinicName}*:\n\n${shareUrl}\n\n_Este enlace expira en ${expiryDays} días._`

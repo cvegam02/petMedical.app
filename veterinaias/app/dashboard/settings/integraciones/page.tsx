@@ -1,22 +1,39 @@
+import { createClient } from '@/lib/supabase/server'
 import { WhatsAppConfigForm } from '@/components/settings/WhatsAppConfigForm'
+import { wahaSessionName, wahaGetSession, wahaGetQR } from '@/lib/waha'
 
 export default async function SettingsIntegracionesPage() {
-  // Fetch initial session status server-side
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single() as any
+
+  const tenantId = profile?.tenant_id ?? null
+
   let initialStatus: 'NOT_CREATED' | 'STARTING' | 'SCAN_QR_CODE' | 'WORKING' | 'FAILED' | 'STOPPED' = 'NOT_CREATED'
   let initialQr: string | null = null
   let initialPhone: string | null = null
 
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-    const res = await fetch(`${baseUrl}/api/settings/whatsapp/session`, { cache: 'no-store' })
-    if (res.ok) {
-      const data = await res.json()
-      initialStatus = data.status ?? 'NOT_CREATED'
-      initialQr = data.qr ?? null
-      initialPhone = data.phone ?? null
+  if (tenantId) {
+    const sessionName = wahaSessionName(tenantId)
+    const session = await wahaGetSession(sessionName)
+
+    if (session) {
+      initialStatus = session.status as typeof initialStatus
+      initialPhone = session.me?.id?.user ?? null
+
+      if (session.status === 'SCAN_QR_CODE') {
+        const qrData = await wahaGetQR(sessionName)
+        if (qrData) {
+          initialQr = `data:${qrData.mimeType};base64,${qrData.value}`
+        }
+      }
     }
-  } catch {
-    // fallback to NOT_CREATED; client will poll anyway
   }
 
   return (
