@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
-import type { EventProps } from 'react-big-calendar'
+import type { EventProps, View } from 'react-big-calendar'
 import {
   format, parse, startOfWeek, endOfWeek, getDay,
 } from 'date-fns'
@@ -60,7 +60,10 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentView, setCurrentView] = useState<View>(Views.WEEK)
   const abortRef = useRef<AbortController | null>(null)
+
+  const components = useMemo(() => ({ event: EventComponent }), [])
 
   const fetchRange = useCallback(async (from: Date, to: Date) => {
     abortRef.current?.abort()
@@ -89,7 +92,9 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
       if (err instanceof DOMException && err.name === 'AbortError') return
       setError('No se pudieron cargar las citas.')
     } finally {
-      setLoading(false)
+      // Only clear loading if this controller is still the active one.
+      // If aborted, abortRef.current is already the newer controller.
+      if (abortRef.current === controller) setLoading(false)
     }
   }, [])
 
@@ -130,13 +135,14 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
         <Calendar<CalendarEvent>
           localizer={localizer}
           events={events}
-          defaultView={Views.WEEK}
+          view={currentView}
+          onView={setCurrentView}
           views={[Views.WEEK, Views.MONTH]}
           onRangeChange={handleRangeChange}
           min={parseHHMM(businessHours.start)}
           max={parseHHMM(businessHours.end)}
           culture="es"
-          components={{ event: EventComponent }}
+          components={components}
           selectable={false}
           style={{ height: 600 }}
           messages={{
