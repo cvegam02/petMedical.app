@@ -43,12 +43,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {/* Tenant identity */}
           <div className="px-4 h-14 flex items-center gap-2.5 shrink-0">
             {tenantLogoUrl ? (
-              <div className="w-8 h-8 rounded-lg border border-border bg-white overflow-hidden flex items-center justify-center shrink-0">
-                <Image src={tenantLogoUrl} alt={tenantName} width={32} height={32} className="object-contain" unoptimized />
+              <div className="w-[50px] h-[50px] rounded-lg border border-border bg-white overflow-hidden flex items-center justify-center shrink-0">
+                <Image src={tenantLogoUrl} alt={tenantName} width={50} height={50} className="object-contain" unoptimized />
               </div>
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-                <span className="text-[11px] font-bold text-primary/80">
+              <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-primary/80">
                   {tenantName.slice(0, 2).toUpperCase() || '?'}
                 </span>
               </div>
