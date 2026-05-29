@@ -4,14 +4,16 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormSection } from '@/components/ui/form-section'
 import { PrescriptionsFields } from './PrescriptionsFields'
 import { WalkInPetForm } from './WalkInPetForm'
+import { PetBanner } from './PetBanner'
 import { OwnerResolutionModal } from './OwnerResolutionModal'
+import { type PetSearchResult } from './PetSearchCombobox'
 import {
   walkInRecordSchema,
   type WalkInPetValues,
@@ -32,12 +34,13 @@ export function WalkInConsultationPage() {
   const router = useRouter()
   const [petValues, setPetValues] = useState<WalkInPetValues>(DEFAULT_PET)
   const [petErrors, setPetErrors] = useState<Partial<Record<keyof WalkInPetValues, string>>>({})
+  const [selectedPet, setSelectedPet] = useState<PetSearchResult | null>(null)
   const [showPrescriptions, setShowPrescriptions] = useState(false)
   const [ownerModalOpen, setOwnerModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const pendingRecordRef = useRef<{ record: WalkInRecordValues; pet: WalkInPetValues } | null>(null)
 
-  const petReady = petValues.name.trim().length > 0 && petValues.species_id.length > 0
+  const petReady = selectedPet !== null || (petValues.name.trim().length > 0 && petValues.species_id.length > 0)
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<WalkInRecordValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +56,31 @@ export function WalkInConsultationPage() {
     return Object.keys(errs).length === 0
   }
 
-  function onRecordValid(recordValues: WalkInRecordValues) {
+  async function onRecordValid(recordValues: WalkInRecordValues) {
+    // Existing-pet path: skip owner modal, submit directly
+    if (selectedPet) {
+      setIsSubmitting(true)
+      try {
+        const res = await fetch('/api/consultations/walk-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ existingPetId: selectedPet.pet_id, record: recordValues }),
+        })
+        const json = await res.json()
+        if (!res.ok) {
+          toast.error(json.error ?? 'Error al guardar la consulta')
+          return
+        }
+        router.push(`/dashboard/pets/${json.petId}/records/${json.recordId}`)
+      } catch {
+        toast.error('Error de red. Intenta de nuevo.')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
+
+    // New-pet path: validate pet form, open owner modal
     if (!validatePet()) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -86,6 +113,12 @@ export function WalkInConsultationPage() {
     }
   }
 
+  function handleClearSelectedPet() {
+    setSelectedPet(null)
+    setPetValues(DEFAULT_PET)
+    setPetErrors({})
+  }
+
   return (
     <>
       <div className="max-w-3xl mx-auto">
@@ -94,12 +127,32 @@ export function WalkInConsultationPage() {
           Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
         </p>
 
-        <WalkInPetForm
-          values={petValues}
-          onChange={setPetValues}
-          errors={petErrors}
-          onPetSelected={() => {}}
-        />
+        {/* Pet section: banner when existing pet selected, form otherwise */}
+        {selectedPet ? (
+          <div className="mb-5">
+            <PetBanner
+              name={selectedPet.pet_name}
+              species={selectedPet.species_name}
+              breed={selectedPet.breed_name}
+              ownerName={selectedPet.owner_name}
+            />
+            <button
+              type="button"
+              onClick={handleClearSelectedPet}
+              className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X size={12} />
+              Cambiar mascota
+            </button>
+          </div>
+        ) : (
+          <WalkInPetForm
+            values={petValues}
+            onChange={setPetValues}
+            errors={petErrors}
+            onPetSelected={setSelectedPet}
+          />
+        )}
 
         {petReady && (
           <form onSubmit={handleSubmit(onRecordValid)} className="animate-in fade-in slide-in-from-top-2 duration-300">
