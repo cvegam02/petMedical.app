@@ -116,7 +116,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   return (
     <div className="relative">
       {loading && (
-        <div className="absolute top-2 right-2 z-10 text-xs text-muted-foreground animate-pulse">
+        <div className="absolute bottom-4 right-4 z-10 text-xs text-muted-foreground animate-pulse">
           Cargando...
         </div>
       )}
