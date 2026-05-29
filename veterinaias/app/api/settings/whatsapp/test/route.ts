@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { wahaSessionName, wahaGetSession } from '@/lib/waha'
 
 export async function GET() {
   const supabase = await createClient()
@@ -8,31 +9,28 @@ export async function GET() {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('tenant_id, tenants(settings)')
+    .select('tenant_id')
     .eq('id', user.id)
-    .single() as any
+    .single()
 
-  const config = profile?.tenants?.settings?.whatsapp_config
-  if (!config?.phone_number_id || !config?.access_token) {
-    return NextResponse.json({ error: 'WhatsApp no configurado' }, { status: 400 })
+  const tenantId = (profile as any)?.tenant_id
+  if (!tenantId) return NextResponse.json({ error: 'Sin tenant' }, { status: 403 })
+
+  const sessionName = wahaSessionName(tenantId)
+  const session = await wahaGetSession(sessionName)
+
+  if (!session) {
+    return NextResponse.json({ error: 'Sesión no encontrada. Ve a Integraciones → Conectar.' }, { status: 400 })
   }
 
-  const res = await fetch(
-    `https://graph.facebook.com/v21.0/${config.phone_number_id}`,
-    { headers: { Authorization: `Bearer ${config.access_token}` } }
-  )
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
+  if (session.status !== 'WORKING') {
     return NextResponse.json({
-      error: 'Credenciales inválidas',
-      detail: (err as any)?.error?.message,
+      error: `Sesión en estado ${session.status}. Escanea el QR para conectar.`,
     }, { status: 400 })
   }
 
-  const data = await res.json()
   return NextResponse.json({
     success: true,
-    phone: (data as any).display_phone_number ?? 'Número verificado',
+    phone: session.me?.id?.user ?? 'Número conectado',
   })
 }
