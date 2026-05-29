@@ -72,10 +72,15 @@ export async function PATCH(
     return NextResponse.json({ error: 'No hay campos para actualizar' }, { status: 422 })
   }
 
-  const { date_of_birth, breed, ...rest } = result.data
+  const { date_of_birth, breed, sterilized, habitat, feeding, cohabitation, cohabitation_details, ...rest } = result.data
   const update: Record<string, unknown> = { ...rest }
   if (date_of_birth !== undefined) update.date_of_birth = date_of_birth || null
   if (breed !== undefined) update.breed = breed || null
+  if (sterilized !== undefined) update.sterilized = sterilized
+  if (habitat !== undefined) update.habitat = habitat || null
+  if (feeding !== undefined) update.feeding = feeding || null
+  if (cohabitation !== undefined) update.cohabitation = cohabitation
+  if (cohabitation_details !== undefined) update.cohabitation_details = cohabitation_details || null
 
   const { data, error } = await (supabase.from('pets') as any)
     .update(update)

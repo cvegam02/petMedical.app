@@ -16,6 +16,11 @@ export const petSchema = z.object({
   color: z.string().optional(),
   microchip: z.string().optional(),
   notes: z.string().optional(),
+  sterilized: z.boolean().optional(),
+  habitat: z.string().optional(),
+  feeding: z.string().optional(),
+  cohabitation: z.boolean().optional(),
+  cohabitation_details: z.string().optional(),
 })
 
 export const updatePetSchema = petSchema.omit({ owner_id: true }).partial()
