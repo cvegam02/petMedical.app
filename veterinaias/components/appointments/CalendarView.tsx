@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
+import type { EventProps } from 'react-big-calendar'
 import {
-  format, parse, startOfWeek, endOfWeek,
-  startOfMonth, endOfMonth, getDay,
+  format, parse, startOfWeek, endOfWeek, getDay,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -35,7 +35,7 @@ interface CalendarEvent {
   resource: AppointmentResource
 }
 
-function EventComponent({ event }: { event: CalendarEvent }) {
+function EventComponent({ event }: EventProps<CalendarEvent>) {
   return (
     <AppointmentPopover appointment={event.resource}>
       <button
@@ -54,9 +54,7 @@ function EventComponent({ event }: { event: CalendarEvent }) {
 
 function parseHHMM(timeStr: string): Date {
   const [hours, minutes] = timeStr.split(':').map(Number)
-  const d = new Date()
-  d.setHours(hours, minutes, 0, 0)
-  return d
+  return new Date(1970, 0, 1, hours, minutes, 0, 0)
 }
 
 interface CalendarViewProps {
@@ -66,13 +64,23 @@ interface CalendarViewProps {
 export function CalendarView({ businessHours }: CalendarViewProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
   const fetchRange = useCallback(async (from: Date, to: Date) => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
+    setError(null)
     try {
       const url = `/api/appointments?from=${from.toISOString()}&to=${to.toISOString()}`
-      const res = await fetch(url)
-      if (!res.ok) return
+      const res = await fetch(url, { signal: controller.signal })
+      if (!res.ok) {
+        setError('No se pudieron cargar las citas.')
+        return
+      }
       const json = await res.json()
       const apts: AppointmentResource[] = json.data ?? []
       setEvents(
@@ -82,6 +90,9 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           return { title: apt.pet?.name ?? '—', start, end, resource: apt }
         })
       )
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      setError('No se pudieron cargar las citas.')
     } finally {
       setLoading(false)
     }
@@ -93,6 +104,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
       startOfWeek(now, { weekStartsOn: 1 }),
       endOfWeek(now, { weekStartsOn: 1 })
     )
+    return () => { abortRef.current?.abort() }
   }, [fetchRange])
 
   const handleRangeChange = useCallback(
@@ -100,7 +112,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
       if (Array.isArray(range)) {
         fetchRange(range[0], range[range.length - 1])
       } else {
-        fetchRange(startOfMonth(range.start), endOfMonth(range.end))
+        fetchRange(range.start, range.end)
       }
     },
     [fetchRange]
@@ -113,8 +125,13 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           Cargando...
         </div>
       )}
+      {error && (
+        <div className="mb-3 px-4 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+          {error}
+        </div>
+      )}
       <div className="rbc-wrapper">
-        <Calendar
+        <Calendar<CalendarEvent>
           localizer={localizer}
           events={events}
           defaultView={Views.WEEK}
@@ -123,7 +140,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           min={parseHHMM(businessHours.start)}
           max={parseHHMM(businessHours.end)}
           culture="es"
-          components={{ event: EventComponent as any }}
+          components={{ event: EventComponent }}
           selectable={false}
           style={{ height: 600 }}
           messages={{
