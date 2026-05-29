@@ -155,7 +155,7 @@
 .rbc-wrapper .rbc-event.rbc-selected { background: color-mix(in oklch, var(--primary) 32%, var(--card)); outline: 2px solid var(--primary); }
 .rbc-wrapper .rbc-current-time-indicator { background: var(--primary); }
 .rbc-wrapper .rbc-off-range-bg { background: var(--muted); }
-.rbc-wrapper .rbc-time-content { border-color: var(--border); overflow-y: scroll; }
+.rbc-wrapper .rbc-time-content { border-color: var(--border); }
 .rbc-wrapper .rbc-time-header-content { border-color: var(--border); }
 .rbc-wrapper .rbc-day-slot .rbc-time-slot { border-color: color-mix(in oklch, var(--border) 50%, transparent); }
 .rbc-wrapper .rbc-day-slot .rbc-events-container { margin-right: 0; }
