@@ -1,5 +1,5 @@
 -- Catálogo de vacunas (nivel tenant)
-CREATE TABLE vaccine_catalog (
+CREATE TABLE IF NOT EXISTS vaccine_catalog (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE vaccine_catalog (
 );
 
 -- Catálogo de medicamentos (nivel tenant, sin inventario)
-CREATE TABLE medication_catalog (
+CREATE TABLE IF NOT EXISTS medication_catalog (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
