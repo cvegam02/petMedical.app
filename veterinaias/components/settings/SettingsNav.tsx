@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Building2, SlidersHorizontal, Plug, Users } from 'lucide-react'
+import { Building2, SlidersHorizontal, Plug, Users, BookOpen } from 'lucide-react'
 
 const SECTIONS = [
   { href: '/dashboard/settings/clinica', icon: Building2, label: 'Clínica' },
   { href: '/dashboard/settings/configuracion', icon: SlidersHorizontal, label: 'Configuración' },
+  { href: '/dashboard/settings/catalogos', icon: BookOpen, label: 'Catálogos' },
   { href: '/dashboard/settings/integraciones', icon: Plug, label: 'Integraciones' },
   { href: '/dashboard/settings/team', icon: Users, label: 'Equipo' },
 ]
