@@ -151,10 +151,12 @@
 .rbc-wrapper .rbc-btn-group button.rbc-active { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
 .rbc-wrapper .rbc-header { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); padding: 0.5rem 0; border-color: var(--border); }
 .rbc-wrapper .rbc-today { background: color-mix(in oklch, var(--primary) 5%, transparent); }
-.rbc-wrapper .rbc-event { background: color-mix(in oklch, var(--primary) 12%, transparent); border: 1px solid color-mix(in oklch, var(--primary) 25%, transparent); border-radius: 0.25rem; color: var(--foreground); padding: 1px 2px; }
-.rbc-wrapper .rbc-event.rbc-selected { background: color-mix(in oklch, var(--primary) 25%, transparent); outline: 2px solid var(--primary); }
+.rbc-wrapper .rbc-event { background: color-mix(in oklch, var(--primary) 18%, var(--card)); border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent); border-radius: 0.25rem; color: var(--foreground); padding: 1px 2px; }
+.rbc-wrapper .rbc-event.rbc-selected { background: color-mix(in oklch, var(--primary) 32%, var(--card)); outline: 2px solid var(--primary); }
 .rbc-wrapper .rbc-current-time-indicator { background: var(--primary); }
 .rbc-wrapper .rbc-off-range-bg { background: var(--muted); }
 .rbc-wrapper .rbc-time-content { border-color: var(--border); }
 .rbc-wrapper .rbc-time-header-content { border-color: var(--border); }
 .rbc-wrapper .rbc-day-slot .rbc-time-slot { border-color: color-mix(in oklch, var(--border) 50%, transparent); }
+.rbc-wrapper .rbc-time-gutter .rbc-time-slot { display: flex; align-items: center; justify-content: center; }
+.rbc-wrapper .rbc-time-gutter .rbc-label { font-size: 0.6rem; font-family: var(--font-mono); color: var(--muted-foreground); text-align: center; line-height: 1; width: 100%; }
