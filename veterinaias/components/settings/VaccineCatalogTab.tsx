@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function VaccineCatalogTab() {
   const [vaccines, setVaccines] = useState<VaccineCatalog[]>([])
@@ -130,8 +131,20 @@ export function VaccineCatalogTab() {
                     <td className="px-4 py-3 text-right">
                       {v.active && (
                         <div className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil size={13} /></Button>
-                          <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => archive(v.id)}><Archive size={13} /></Button>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil size={13} /></Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Editar</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => archive(v.id)}><Archive size={13} /></Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Archivar</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       )}
                     </td>
