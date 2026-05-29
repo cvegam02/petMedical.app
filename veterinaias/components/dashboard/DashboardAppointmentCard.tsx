@@ -1,5 +1,6 @@
 'use client'
 import { Clock } from 'lucide-react'
+import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 
 export interface DashboardAppointment {
   id: string
@@ -12,14 +13,6 @@ export interface DashboardAppointment {
   assigned_to_profile: { full_name: string } | null
 }
 
-const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  scheduled: { label: 'Programada',     className: 'bg-muted text-muted-foreground border-border' },
-  confirmed: { label: 'Confirmada',     className: 'bg-primary/10 text-primary border-primary/20' },
-  completed: { label: 'Completada',     className: 'bg-primary/20 text-primary border-primary/30' },
-  cancelled: { label: 'Cancelada',      className: 'bg-destructive/10 text-destructive border-destructive/20' },
-  no_show:   { label: 'No se presentó', className: 'bg-orange-50 text-orange-600 border-orange-200' },
-}
-
 interface Props {
   appointment: DashboardAppointment
   onSelect: (apt: DashboardAppointment) => void
@@ -29,7 +22,7 @@ export function DashboardAppointmentCard({ appointment, onSelect }: Props) {
   const dateObj = new Date(appointment.scheduled_at)
   const time = dateObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
   const date = dateObj.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }).replace('.', '')
-  const status = STATUS_CONFIG[appointment.status] ?? STATUS_CONFIG.scheduled
+  const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
 
   return (
     <button
