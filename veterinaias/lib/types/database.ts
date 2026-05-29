@@ -89,6 +89,41 @@ export interface Pet {
   color: string | null
   microchip: string | null
   notes: string | null
+  sterilized: boolean
+  habitat: string | null
+  feeding: string | null
+  cohabitation: boolean
+  cohabitation_details: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface VaccineCatalog {
+  id: string
+  tenant_id: string
+  name: string
+  manufacturer: string | null
+  lot_number: string | null
+  stock_quantity: number
+  low_stock_threshold: number
+  active: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MedicationCatalog {
+  id: string
+  tenant_id: string
+  name: string
+  active_ingredient: string | null
+  description: string | null
+  dose_per_kg: number | null
+  dose_unit: string | null
+  concentration: string | null
+  default_route: string | null
+  active: boolean
+  notes: string | null
   created_at: string
   updated_at: string
 }
@@ -238,9 +273,29 @@ export type Database = {
         Relationships: []
       }
       pets: {
-        Row: { id: string; name: string; species_id: string; breed_id: string | null; sex: PetSex; date_of_birth: string | null; color: string | null; microchip: string | null; notes: string | null; created_at: string; updated_at: string }
-        Insert: { name: string; species_id: string; breed_id?: string | null; sex: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null }
-        Update: { name?: string; species_id?: string; breed_id?: string | null; sex?: PetSex; date_of_birth?: string | null; color?: string | null; microchip?: string | null; notes?: string | null; updated_at?: string }
+        Row: {
+          id: string; name: string; species_id: string; breed_id: string | null;
+          sex: PetSex; date_of_birth: string | null; color: string | null;
+          microchip: string | null; notes: string | null;
+          sterilized: boolean; habitat: string | null; feeding: string | null;
+          cohabitation: boolean; cohabitation_details: string | null;
+          created_at: string; updated_at: string
+        }
+        Insert: {
+          name: string; species_id: string; breed_id?: string | null;
+          sex: PetSex; date_of_birth?: string | null; color?: string | null;
+          microchip?: string | null; notes?: string | null;
+          sterilized?: boolean; habitat?: string | null; feeding?: string | null;
+          cohabitation?: boolean; cohabitation_details?: string | null
+        }
+        Update: {
+          name?: string; species_id?: string; breed_id?: string | null;
+          sex?: PetSex; date_of_birth?: string | null; color?: string | null;
+          microchip?: string | null; notes?: string | null;
+          sterilized?: boolean; habitat?: string | null; feeding?: string | null;
+          cohabitation?: boolean; cohabitation_details?: string | null;
+          updated_at?: string
+        }
         Relationships: []
       }
       medical_records: {
@@ -277,6 +332,18 @@ export type Database = {
         Row: { id: string; pet_id: string; token: string; created_by: string; expires_at: string; accessed_at: string | null; created_at: string }
         Insert: { pet_id: string; created_by: string; expires_at: string; accessed_at?: string | null }
         Update: { accessed_at?: string | null }
+        Relationships: []
+      }
+      vaccine_catalog: {
+        Row: { id: string; tenant_id: string; name: string; manufacturer: string | null; lot_number: string | null; stock_quantity: number; low_stock_threshold: number; active: boolean; notes: string | null; created_at: string; updated_at: string }
+        Insert: { tenant_id: string; name: string; manufacturer?: string | null; lot_number?: string | null; stock_quantity?: number; low_stock_threshold?: number; active?: boolean; notes?: string | null }
+        Update: { name?: string; manufacturer?: string | null; lot_number?: string | null; stock_quantity?: number; low_stock_threshold?: number; active?: boolean; notes?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      medication_catalog: {
+        Row: { id: string; tenant_id: string; name: string; active_ingredient: string | null; description: string | null; dose_per_kg: number | null; dose_unit: string | null; concentration: string | null; default_route: string | null; active: boolean; notes: string | null; created_at: string; updated_at: string }
+        Insert: { tenant_id: string; name: string; active_ingredient?: string | null; description?: string | null; dose_per_kg?: number | null; dose_unit?: string | null; concentration?: string | null; default_route?: string | null; active?: boolean; notes?: string | null }
+        Update: { name?: string; active_ingredient?: string | null; description?: string | null; dose_per_kg?: number | null; dose_unit?: string | null; concentration?: string | null; default_route?: string | null; active?: boolean; notes?: string | null; updated_at?: string }
         Relationships: []
       }
     }
