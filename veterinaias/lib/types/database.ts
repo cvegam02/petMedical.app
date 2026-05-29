@@ -128,6 +128,34 @@ export interface MedicationCatalog {
   updated_at: string
 }
 
+export interface PetVaccination {
+  id: string
+  pet_id: string
+  tenant_id: string
+  applied_by: string
+  medical_record_id: string | null
+  vaccine_catalog_id: string | null
+  vaccine_name: string
+  lot_number: string | null
+  application_date: string
+  next_due_date: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface PetDeworming {
+  id: string
+  pet_id: string
+  tenant_id: string
+  applied_by: string
+  medical_record_id: string | null
+  product_name: string
+  application_date: string
+  next_due_date: string | null
+  notes: string | null
+  created_at: string
+}
+
 export interface PetRegistration {
   id: string
   tenant_id: string
@@ -344,6 +372,18 @@ export type Database = {
         Row: { id: string; tenant_id: string; name: string; active_ingredient: string | null; description: string | null; dose_per_kg: number | null; dose_unit: string | null; concentration: string | null; default_route: string | null; active: boolean; notes: string | null; created_at: string; updated_at: string }
         Insert: { tenant_id: string; name: string; active_ingredient?: string | null; description?: string | null; dose_per_kg?: number | null; dose_unit?: string | null; concentration?: string | null; default_route?: string | null; active?: boolean; notes?: string | null }
         Update: { name?: string; active_ingredient?: string | null; description?: string | null; dose_per_kg?: number | null; dose_unit?: string | null; concentration?: string | null; default_route?: string | null; active?: boolean; notes?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      pet_vaccinations: {
+        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string; medical_record_id: string | null; vaccine_catalog_id: string | null; vaccine_name: string; lot_number: string | null; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
+        Insert: { pet_id: string; tenant_id: string; applied_by: string; medical_record_id?: string | null; vaccine_catalog_id?: string | null; vaccine_name: string; lot_number?: string | null; application_date: string; next_due_date?: string | null; notes?: string | null }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      pet_dewormings: {
+        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string; medical_record_id: string | null; product_name: string; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
+        Insert: { pet_id: string; tenant_id: string; applied_by: string; medical_record_id?: string | null; product_name: string; application_date: string; next_due_date?: string | null; notes?: string | null }
+        Update: Record<string, never>
         Relationships: []
       }
     }
