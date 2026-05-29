@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const createDewormingSchema = z.object({
+  product_name: z.string().min(1, 'Nombre del producto es requerido'),
+  application_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato YYYY-MM-DD'),
+  next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  notes: z.string().optional(),
+  medical_record_id: z.string().uuid().optional(),
+})
+
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+
+  const { data, error } = await (supabase as any)
+    .from('pet_dewormings')
+    .select('*, applied_by_profile:applied_by(full_name), tenant:tenant_id(name)')
+    .eq('pet_id', id)
+    .order('application_date', { ascending: false })
+
+  if (error) return NextResponse.json({ error: 'Error al obtener desparasitaciones' }, { status: 500 })
+  return NextResponse.json({ data })
+}
+
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+
+  const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
+  let body: unknown
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
+
+  const result = createDewormingSchema.safeParse(body)
+  if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
+
+  const { data, error } = await (supabase as any)
+    .from('pet_dewormings')
+    .insert({
+      ...result.data,
+      pet_id: id,
+      tenant_id: (profile as any).tenant_id,
+      applied_by: user.id,
+    })
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: 'Error al registrar desparasitación' }, { status: 500 })
+  return NextResponse.json({ data }, { status: 201 })
+}
