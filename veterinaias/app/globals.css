@@ -161,7 +161,7 @@
 .rbc-wrapper .rbc-day-slot .rbc-events-container { margin-right: 0; }
 .rbc-wrapper .rbc-day-slot .rbc-event { align-items: center; }
 .rbc-wrapper .rbc-day-slot .rbc-event-label { display: none; }
-.rbc-wrapper .rbc-time-header-content > .rbc-row ~ .rbc-row { display: none; }
+.rbc-wrapper .rbc-allday-cell { display: none; }
 .rbc-wrapper .rbc-time-gutter { min-width: 55px; }
 .rbc-wrapper .rbc-time-gutter .rbc-timeslot-group { position: relative; }
 .rbc-wrapper .rbc-time-gutter .rbc-label { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); display: block; font-size: 0.72rem; font-family: var(--font-sans); font-weight: 400; color: var(--muted-foreground); text-align: center; line-height: 1; padding: 0; }
