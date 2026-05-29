@@ -248,6 +248,8 @@ describe('PATCH /api/appointments/[id]', () => {
 // GET /api/appointments con ?from= y ?to=
 // ──────────────────────────────────────────────────────────
 describe('GET /api/appointments con ?from= y ?to=', () => {
+  beforeEach(() => vi.clearAllMocks())
+
   it('filtra por rango de fechas cuando from y to están presentes', async () => {
     const appointments = [
       { id: 'apt-range', status: 'confirmed', scheduled_at: '2026-06-15T10:00:00Z' },
@@ -273,5 +275,28 @@ describe('GET /api/appointments con ?from= y ?to=', () => {
     expect(res.status).toBe(200)
     expect(chain.gte).toHaveBeenCalledWith('scheduled_at', '2026-06-01T00:00:00Z')
     expect(chain.lte).toHaveBeenCalledWith('scheduled_at', '2026-06-30T23:59:59Z')
+  })
+
+  it('ignora from si to no está presente y usa el tab por defecto', async () => {
+    const todayApts = [{ id: 'apt-today', status: 'scheduled', scheduled_at: new Date().toISOString() }]
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
+      from: vi.fn().mockReturnValue(makeChain({
+        order: vi.fn().mockResolvedValue({ data: todayApts, error: null }),
+      })),
+    } as any)
+    const req = new NextRequest('http://localhost/api/appointments?from=2026-06-01T00:00:00Z')
+    const res = await GET(req)
+    expect(res.status).toBe(200)
+  })
+
+  it('retorna 400 con fecha malformada', async () => {
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: mockUser }, error: null }) },
+      from: vi.fn().mockReturnValue(makeChain()),
+    } as any)
+    const req = new NextRequest('http://localhost/api/appointments?from=not-a-date&to=also-wrong')
+    const res = await GET(req)
+    expect(res.status).toBe(400)
   })
 })

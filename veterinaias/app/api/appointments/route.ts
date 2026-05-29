@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { appointmentSchema } from '@/lib/validations/appointment'
 import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
@@ -19,10 +20,40 @@ export async function GET(req: NextRequest) {
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
   const tab = req.nextUrl.searchParams.get('tab') ?? 'hoy'
-  const from = req.nextUrl.searchParams.get('from')
-  const to = req.nextUrl.searchParams.get('to')
+  const fromRaw = req.nextUrl.searchParams.get('from')
+  const toRaw   = req.nextUrl.searchParams.get('to')
 
-  if (!VALID_TABS.includes(tab as typeof VALID_TABS[number]) && !(from && to)) {
+  const useRange = fromRaw !== null && toRaw !== null
+
+  let validatedFrom: string | null = null
+  let validatedTo: string | null = null
+
+  if (useRange) {
+    const rangeResult = z.object({
+      from: z.string().datetime({ message: 'from debe ser ISO 8601' }),
+      to:   z.string().datetime({ message: 'to debe ser ISO 8601' }),
+    }).safeParse({ from: fromRaw, to: toRaw })
+
+    if (!rangeResult.success) {
+      return NextResponse.json({ error: rangeResult.error.issues[0].message }, { status: 400 })
+    }
+
+    const fromDate = new Date(rangeResult.data.from)
+    const toDate   = new Date(rangeResult.data.to)
+    const diffDays = (toDate.getTime() - fromDate.getTime()) / 86_400_000
+
+    if (diffDays <= 0) {
+      return NextResponse.json({ error: 'from debe ser anterior a to' }, { status: 400 })
+    }
+    if (diffDays > 92) {
+      return NextResponse.json({ error: 'El rango no puede superar 92 días' }, { status: 400 })
+    }
+
+    validatedFrom = rangeResult.data.from
+    validatedTo   = rangeResult.data.to
+  }
+
+  if (!useRange && !VALID_TABS.includes(tab as typeof VALID_TABS[number])) {
     return NextResponse.json({ error: 'Tab inválido' }, { status: 400 })
   }
 
@@ -41,10 +72,10 @@ export async function GET(req: NextRequest) {
     `)
     .eq('tenant_id', profile.tenant_id)
 
-  if (from && to) {
+  if (useRange && validatedFrom && validatedTo) {
     query = query
-      .gte('scheduled_at', from)
-      .lte('scheduled_at', to)
+      .gte('scheduled_at', validatedFrom)
+      .lte('scheduled_at', validatedTo)
   } else if (tab === 'hoy') {
     query = query
       .gte('scheduled_at', todayStart.toISOString())
