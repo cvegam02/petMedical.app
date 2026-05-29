@@ -98,6 +98,7 @@ export function WalkInConsultationPage() {
           values={petValues}
           onChange={setPetValues}
           errors={petErrors}
+          onPetSelected={() => {}}
         />
 
         {petReady && (
