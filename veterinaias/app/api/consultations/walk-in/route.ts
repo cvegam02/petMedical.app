@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { walkInConsultationSchema } from '@/lib/validations/medical-record'
+import {
+  walkInConsultationSchema,
+  walkInConsultationExistingPetSchema,
+} from '@/lib/validations/medical-record'
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerClient()
@@ -20,6 +23,60 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
   }
 
+  // ── Existing-pet path ────────────────────────────────────────────────────
+  if (body !== null && typeof body === 'object' && 'existingPetId' in body) {
+    const result = walkInConsultationExistingPetSchema.safeParse(body)
+    if (!result.success) {
+      return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
+    }
+
+    const { existingPetId, record: recordData } = result.data
+
+    // Verify pet exists
+    const { data: petCheck, error: petCheckError } = await supabase
+      .from('pets')
+      .select('id')
+      .eq('id', existingPetId)
+      .single()
+
+    if (petCheckError || !petCheck) {
+      return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
+    }
+
+    const { prescriptions, weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm, ...rest } = recordData
+
+    const { data: record, error: recordError } = await supabase
+      .from('medical_records')
+      .insert({
+        ...rest,
+        pet_id: existingPetId,
+        weight_kg: weight_kg ?? null,
+        temperature_celsius: temperature_celsius ?? null,
+        heart_rate_bpm: heart_rate_bpm ?? null,
+        respiratory_rate_bpm: respiratory_rate_bpm ?? null,
+        tenant_id: profile.tenant_id,
+        created_by: user.id,
+      })
+      .select('id')
+      .single()
+
+    if (recordError) return NextResponse.json({ error: 'Error al crear la consulta' }, { status: 500 })
+
+    if (prescriptions && prescriptions.length > 0) {
+      const { error: presError } = await supabase
+        .from('prescriptions')
+        .insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))
+
+      if (presError) {
+        await supabase.from('medical_records').delete().eq('id', record.id)
+        return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
+      }
+    }
+
+    return NextResponse.json({ petId: existingPetId, recordId: record.id }, { status: 201 })
+  }
+
+  // ── New-pet path (existing behavior unchanged) ───────────────────────────
   const result = walkInConsultationSchema.safeParse(body)
   if (!result.success) {
     return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
@@ -28,12 +85,11 @@ export async function POST(req: NextRequest) {
   const { pet: petData, record: recordData, owner: ownerInput } = result.data
 
   // Step 1: Create pet
-  const { data: pet, error: petError } = await supabase
-    .from('pets')
+  const { data: pet, error: petError } = await (supabase.from('pets') as any)
     .insert({
       name: petData.name,
       species_id: petData.species_id,
-      breed_id: petData.breed_id ?? null,
+      breed: petData.breed ?? null,
       sex: petData.sex,
       date_of_birth: petData.date_of_birth ?? null,
     })
@@ -61,7 +117,6 @@ export async function POST(req: NextRequest) {
     ownerId = placeholder.id
     ownerWasCreated = true
   } else if ('id' in ownerInput) {
-    // Verify existing owner belongs to this tenant
     const { data: ownerCheck } = await (supabase.from('owners') as any)
       .select('id')
       .eq('id', ownerInput.id)
