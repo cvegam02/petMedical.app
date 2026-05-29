@@ -45,7 +45,7 @@ export type AddendumFormValues = z.infer<typeof addendumSchema>
 export const walkInPetSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido'),
   species_id: z.string().uuid('Especie es requerida'),
-  breed_id: z.string().uuid().optional(),
+  breed: z.string().optional(),
   sex: z.enum(['male', 'female', 'unknown']).default('unknown'),
   date_of_birth: z.preprocess(
     v => (v === '' ? undefined : v),
@@ -96,3 +96,10 @@ export type WalkInPetValues = z.infer<typeof walkInPetSchema>
 export type WalkInRecordValues = z.infer<typeof walkInRecordSchema>
 export type WalkInOwnerValue = z.infer<typeof walkInOwnerSchema>
 export type WalkInConsultationValues = z.infer<typeof walkInConsultationSchema>
+
+export const walkInConsultationExistingPetSchema = z.object({
+  existingPetId: z.string().uuid('Pet ID inválido'),
+  record: walkInRecordSchema,
+})
+
+export type WalkInConsultationExistingPetValues = z.infer<typeof walkInConsultationExistingPetSchema>
