@@ -12,6 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateInput } from '@/components/ui/date-input'
 import { FormSection } from '@/components/ui/form-section'
 import { BreedCombobox } from '@/components/ui/breed-combobox'
+import { FreeTextCombobox } from '@/components/ui/free-text-combobox'
+
+const HABITAT_OPTIONS = ['Interior', 'Exterior', 'Terreno campestre']
+const FEEDING_OPTIONS = ['Croquetas', 'Comida blanda', 'Comida para humanos']
 
 interface Species { id: string; name: string }
 
@@ -143,6 +147,61 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
           <div className="space-y-1">
             <Label htmlFor="notes">Notas internas</Label>
             <Input id="notes" {...register('notes')} placeholder="Alergias, temperamento, observaciones..." />
+          </div>
+        </FormSection>
+
+        <FormSection title="Información de vida">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label>Dónde vive</Label>
+              <FreeTextCombobox
+                value={watch('habitat')}
+                onChange={v => setValue('habitat', v)}
+                options={HABITAT_OPTIONS}
+                placeholder="ej. Interior, Exterior..."
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Alimentación</Label>
+              <FreeTextCombobox
+                value={watch('feeding')}
+                onChange={v => setValue('feeding', v)}
+                options={FEEDING_OPTIONS}
+                placeholder="ej. Croquetas..."
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="sterilized"
+              {...register('sterilized')}
+              className="rounded border-border"
+            />
+            <Label htmlFor="sterilized" className="cursor-pointer">Esterilizado/a</Label>
+          </div>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="cohabitation"
+                {...register('cohabitation')}
+                className="rounded border-border"
+              />
+              <Label htmlFor="cohabitation" className="cursor-pointer">Convive con otras mascotas</Label>
+            </div>
+            {watch('cohabitation') && (
+              <div className="space-y-1 ml-6">
+                <Label htmlFor="cohabitation_details">Descripción de convivencia</Label>
+                <textarea
+                  id="cohabitation_details"
+                  {...register('cohabitation_details')}
+                  rows={2}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground/50"
+                  placeholder="ej. 2 perros y 1 gato, conviven sin conflictos en casa..."
+                />
+              </div>
+            )}
           </div>
         </FormSection>
 

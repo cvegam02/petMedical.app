@@ -23,7 +23,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const [petResult, regResult] = await Promise.all([
     (supabase.from('pets') as any)
       .select(`
-        id, name, sex, date_of_birth, color, microchip, notes, created_at,
+        id, name, sex, date_of_birth, color, microchip, notes, created_at, sterilized, habitat, feeding, cohabitation, cohabitation_details,
         species:species_id(name),
         breed,
         medical_records(
@@ -135,6 +135,20 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           <div className="mt-4 pt-4 border-t border-border/60">
             <p className="label-overline text-muted-foreground/50 mb-1.5">Notas internas</p>
             <p className="text-sm text-muted-foreground italic leading-relaxed">{pet.notes}</p>
+          </div>
+        )}
+
+        {(pet.sterilized || pet.habitat || pet.feeding || pet.cohabitation) && (
+          <div className="mt-4 pt-4 border-t border-border/60">
+            <p className="label-overline text-muted-foreground/50 mb-2">Información de vida</p>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+              {pet.habitat && <p><span className="text-muted-foreground">Dónde vive: </span>{pet.habitat}</p>}
+              {pet.feeding && <p><span className="text-muted-foreground">Alimentación: </span>{pet.feeding}</p>}
+              <p><span className="text-muted-foreground">Esterilizado: </span>{pet.sterilized ? 'Sí' : 'No'}</p>
+              {pet.cohabitation && pet.cohabitation_details && (
+                <p className="col-span-2"><span className="text-muted-foreground">Convive con: </span>{pet.cohabitation_details}</p>
+              )}
+            </div>
           </div>
         )}
       </div>
