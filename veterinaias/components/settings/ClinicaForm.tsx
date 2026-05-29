@@ -20,6 +20,20 @@ export function ClinicaForm({ name, address, phone, logoUrl: initialLogoUrl }: C
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  function formatPhone(value: string) {
+    // Only digits, limit to 10
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setForm(f => ({ ...f, phone: formatted }))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
@@ -138,7 +152,7 @@ export function ClinicaForm({ name, address, phone, logoUrl: initialLogoUrl }: C
       </div>
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground">Teléfono de contacto</label>
-        <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="+52 55 1234 5678" />
+        <Input value={form.phone} onChange={handlePhoneChange} placeholder="555 123 4567" />
       </div>
       <Button type="submit" disabled={saving} size="sm">
         {saving ? 'Guardando...' : 'Guardar cambios'}

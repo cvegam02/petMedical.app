@@ -40,20 +40,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {/* Sidebar */}
         <aside className="w-56 h-[calc(100dvh-3px)] sticky top-0 flex flex-col bg-secondary border-r border-border shrink-0">
 
-          {/* Tenant identity */}
-          <div className="px-4 h-14 flex items-center gap-2.5 shrink-0">
-            {tenantLogoUrl ? (
-              <div className="w-[50px] h-[50px] rounded-lg border border-border bg-white overflow-hidden flex items-center justify-center shrink-0">
-                <Image src={tenantLogoUrl} alt={tenantName} width={50} height={50} className="object-contain" unoptimized />
-              </div>
-            ) : (
-              <div className="w-[50px] h-[50px] rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-primary/80">
-                  {tenantName.slice(0, 2).toUpperCase() || '?'}
-                </span>
-              </div>
-            )}
-            <p className="text-sm font-semibold text-foreground tracking-tight leading-tight truncate">{tenantName}</p>
+          {/* Brand */}
+          <div className="px-4 h-14 flex items-center shrink-0">
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              <Image src="/icon.png" alt="petMedical.app" width={55} height={55} className="rounded-md shrink-0" />
+              <p className="text-base font-medium text-foreground tracking-tight leading-none">
+                pet<span className="font-bold">Medical</span>.app
+              </p>
+            </Link>
           </div>
 
           {/* Divider */}
@@ -63,24 +57,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <nav className="flex-1 overflow-y-auto px-3 py-3">
             <SidebarNav role={profile?.role ?? ''} />
           </nav>
-
-          {/* petMedical.app brand */}
-          <div className="mx-4 border-t border-border" />
-          <div className="px-4 py-3 shrink-0">
-            <Link href="/dashboard" className="flex items-center gap-2 opacity-50 hover:opacity-80 transition-opacity">
-              <Image src="/icon.png" alt="petMedical.app" width={20} height={20} className="rounded-sm shrink-0" />
-              <p className="text-[11px] font-medium text-foreground tracking-tight leading-none">
-                pet<span className="font-semibold">Medical</span>.app
-              </p>
-            </Link>
-          </div>
         </aside>
 
         {/* Content column */}
         <div className="flex-1 flex flex-col overflow-hidden">
 
           {/* Topbar */}
-          <header className="h-14 shrink-0 sticky top-0 z-20 bg-white border-b border-border shadow-sm flex items-center px-6">
+          <header className="h-14 shrink-0 sticky top-0 z-20 bg-white border-b border-border shadow-sm flex items-center px-6 relative">
+
+            {/* Center — clinic identity */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {tenantLogoUrl ? (
+                <div className="w-[55px] h-[55px] rounded-md border border-border bg-white overflow-hidden shrink-0 flex items-center justify-center">
+                  <Image src={tenantLogoUrl} alt={tenantName} width={55} height={55} className="object-contain" unoptimized />
+                </div>
+              ) : null}
+              <p className="text-sm font-semibold text-foreground tracking-tight">{tenantName}</p>
+            </div>
 
             {/* Right — user info + logout */}
             <div className="flex-1 flex items-center justify-end gap-2.5">
