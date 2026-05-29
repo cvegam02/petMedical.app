@@ -161,5 +161,5 @@
 .rbc-wrapper .rbc-day-slot .rbc-events-container { margin-right: 0; }
 .rbc-wrapper .rbc-day-slot .rbc-event { align-items: center; }
 .rbc-wrapper .rbc-day-slot .rbc-event-label { display: none; }
-.rbc-wrapper .rbc-time-gutter .rbc-time-slot { display: flex; align-items: center; justify-content: center; }
-.rbc-wrapper .rbc-time-gutter .rbc-label { font-size: 0.72rem; font-family: var(--font-sans); font-weight: 400; color: var(--muted-foreground); text-align: center; line-height: 1; width: 100%; }
+.rbc-wrapper .rbc-time-gutter { min-width: 56px; }
+.rbc-wrapper .rbc-time-gutter .rbc-label { display: block; font-size: 0.72rem; font-family: var(--font-sans); font-weight: 400; color: var(--muted-foreground); text-align: center; line-height: 1; padding: 0; }
