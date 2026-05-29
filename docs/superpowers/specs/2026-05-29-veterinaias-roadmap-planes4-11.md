@@ -94,11 +94,13 @@ El sistema tiene implementados los Planes 1–3 (fundación, dueños/mascotas/ex
 |-------|------|-------|
 | `id` | UUID PK | |
 | `tenant_id` | UUID FK → tenants | |
-| `name` | TEXT NOT NULL | ej. "Amoxicilina" |
+| `name` | TEXT NOT NULL | nombre comercial, ej. "Amoxil" |
+| `active_ingredient` | TEXT NULLABLE | principio activo, ej. "Amoxicilina trihidratada" — requerido en receta por NOM-064-ZOO-2000 |
 | `description` | TEXT | presentación, indicaciones generales |
 | `dose_per_kg` | NUMERIC NULLABLE | ej. `100` para 100mg/kg — opcional, no todos los medicamentos tienen regla de dosis |
 | `dose_unit` | TEXT | `'mg'`, `'ml'`, `'UI'`, etc. |
 | `concentration` | TEXT | ej. `'500mg/ml'` — ayuda a convertir dosis a volumen |
+| `default_route` | TEXT NULLABLE | vía de administración por defecto: `'oral'`, `'IV'`, `'IM'`, `'SC'`, `'tópica'`, etc. — pre-llena la receta, editable por el vet |
 | `active` | BOOLEAN DEFAULT true | |
 | `notes` | TEXT | |
 | `created_at` | TIMESTAMPTZ | |
@@ -218,6 +220,7 @@ Dos columnas nuevas, todo lo existente sin cambios:
 |-------------|------|-------|
 | `medication_catalog_id` | UUID FK NULLABLE → medication_catalog | null en recetas existentes o entrada libre |
 | `suggested_dose` | TEXT NULLABLE | dosis calculada, guardada como referencia histórica |
+| `route_of_administration` | TEXT NULLABLE | vía de administración — pre-llenada desde `default_route` del catálogo, editable; requerida en receta por NOM-064-ZOO-2000 |
 
 ### 6.2 UI en el formulario de consulta
 
