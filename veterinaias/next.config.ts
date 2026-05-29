@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  async redirects() {
+    return [
+      { source: '/dashboard/settings', destination: '/dashboard/settings/clinica', permanent: false },
+    ]
+  },
 };
 
 export default nextConfig;
