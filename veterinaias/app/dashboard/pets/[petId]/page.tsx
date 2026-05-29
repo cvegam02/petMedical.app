@@ -25,7 +25,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
       .select(`
         id, name, sex, date_of_birth, color, microchip, notes, created_at,
         species:species_id(name),
-        breed:breed_id(name),
+        breed,
         medical_records(
           id, reason, diagnosis, weight_kg, created_at,
           created_by_profile:created_by(full_name),
@@ -49,7 +49,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const pet = petResult.data
   const owner = regResult?.data?.owner ?? null
   const species = pet.species as any
-  const breed = pet.breed as any
+  const breed = pet.breed as string | null
   const records = (pet.medical_records as any[]) ?? []
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
 
@@ -89,7 +89,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              {breed?.name || 'Raza no definida'}
+              {breed || 'Raza no definida'}
               {pet.sex ? ` · ${SEX_LABELS[pet.sex] ?? pet.sex}` : ''}
               {pet.color ? ` · ${pet.color}` : ''}
             </p>
@@ -146,7 +146,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Expediente Clínico</p>
           </div>
-          <h2 className="text-lg font-bold tracking-tight text-foreground">Consultas realizadas</h2>
+          <h2 className="text-lg font-bold font-heading text-foreground">Consultas realizadas</h2>
         </div>
         <Link
           href={`/dashboard/pets/${petId}/records/new`}

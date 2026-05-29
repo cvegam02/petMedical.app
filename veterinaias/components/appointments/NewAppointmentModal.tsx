@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { X, CalendarIcon } from 'lucide-react'
+import { X, CalendarIcon, Search, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
@@ -45,17 +45,27 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   const [pets, setPets] = useState<{ id: string; name: string; species: { name: string } | null }[]>([])
   const [selectedPetId, setSelectedPetId] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isSearchingOwner, setIsSearchingOwner] = useState(false)
+  const [isLoadingPets, setIsLoadingPets] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const preloadedRef = useRef(false)
 
   // First visit mode
   const [petName, setPetName] = useState('')
 
   const modalRef = useRef<HTMLDivElement>(null)
 
-  const timeSlots = useMemo(
-    () => selectedDate ? generateTimeSlots(businessHours, selectedDate) : [],
-    [selectedDate, businessHours]
-  )
+  const timeSlots = useMemo(() => {
+    if (!selectedDate) return []
+    // Ensure we have all required fields for generateTimeSlots
+    const config = {
+      days: businessHours?.days ?? [1, 2, 3, 4, 5, 6],
+      start: businessHours?.start ?? '09:00',
+      end: businessHours?.end ?? '18:00',
+      slot_interval: businessHours?.slot_interval ?? 30
+    }
+    return generateTimeSlots(config, selectedDate)
+  }, [selectedDate, businessHours])
 
   // Escape key
   useEffect(() => {
@@ -72,8 +82,9 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
   // Owner search debounce
   useEffect(() => {
-    if (ownerQuery.length < 2) { setOwnerResults([]); return }
+    if (ownerQuery.length < 1) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
+    setIsSearchingOwner(true)
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/owners?q=${encodeURIComponent(ownerQuery)}`)
@@ -82,19 +93,39 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
         setShowSuggestions(true)
       } catch {
         setOwnerResults([])
+      } finally {
+        setIsSearchingOwner(false)
       }
-    }, 300)
+    }, 150)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [ownerQuery])
 
   // Load pets when owner is selected
   useEffect(() => {
     if (!selectedOwner) { setPets([]); return }
+    setIsLoadingPets(true)
     fetch(`/api/pets?ownerId=${selectedOwner.id}`)
       .then(r => r.json())
       .then(json => setPets(json.data ?? []))
       .catch(() => setPets([]))
+      .finally(() => setIsLoadingPets(false))
   }, [selectedOwner])
+
+  async function preloadOwners() {
+    if (preloadedRef.current) { setShowSuggestions(true); return }
+    preloadedRef.current = true
+    setIsSearchingOwner(true)
+    try {
+      const res = await fetch('/api/owners?limit=5')
+      const json = await res.json()
+      setOwnerResults(json.data ?? [])
+      setShowSuggestions(true)
+    } catch {
+      setOwnerResults([])
+    } finally {
+      setIsSearchingOwner(false)
+    }
+  }
 
   function reset() {
     setMode('registered')
@@ -110,6 +141,9 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setSelectedPetId('')
     setPetName('')
     setShowSuggestions(false)
+    setIsSearchingOwner(false)
+    setIsLoadingPets(false)
+    preloadedRef.current = false
   }
 
   function handleClose() {
@@ -233,26 +267,35 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 <>
                   <div className="relative space-y-1">
                     <Label htmlFor="owner_search">Dueño <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="owner_search"
-                      value={ownerQuery}
-                      onChange={e => {
-                        setOwnerQuery(e.target.value)
-                        setSelectedOwner(null)
-                        setSelectedPetId('')
-                      }}
-                      onFocus={() => ownerResults.length > 0 && setShowSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                      placeholder="Buscar por nombre o teléfono..."
-                      autoComplete="off"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+                        {isSearchingOwner
+                          ? <Loader2 size={14} className="animate-spin" />
+                          : <Search size={14} />
+                        }
+                      </span>
+                      <Input
+                        id="owner_search"
+                        value={ownerQuery}
+                        onChange={e => {
+                          setOwnerQuery(e.target.value)
+                          setSelectedOwner(null)
+                          setSelectedPetId('')
+                        }}
+                        onFocus={preloadOwners}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                        placeholder="Buscar por nombre o teléfono..."
+                        autoComplete="off"
+                        className="pl-9"
+                      />
+                    </div>
                     {showSuggestions && ownerResults.length > 0 && (
                       <ul className="absolute z-10 top-full mt-1 w-full bg-card border border-border rounded-lg shadow-md max-h-48 overflow-y-auto">
                         {ownerResults.map(o => (
                           <li key={o.id}>
                             <button
                               type="button"
-                              className="w-full text-left px-4 py-2.5 text-sm hover:bg-accent transition-colors"
+                              className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors"
                               onMouseDown={() => {
                                 setSelectedOwner(o)
                                 setOwnerQuery(o.full_name)
@@ -275,13 +318,19 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                     <Select
                       value={selectedPetId}
                       onValueChange={v => setSelectedPetId(v ?? '')}
-                      disabled={!selectedOwner || pets.length === 0}
+                      disabled={!selectedOwner || isLoadingPets || pets.length === 0}
+                      items={Object.fromEntries(pets.map(p => [
+                        p.id,
+                        `${p.name}${p.species ? ` (${p.species.name})` : ''}`
+                      ]))}
                     >
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
                             !selectedOwner
                               ? 'Selecciona un dueño primero'
+                              : isLoadingPets
+                              ? 'Cargando mascotas...'
                               : pets.length === 0
                               ? 'Sin mascotas registradas'
                               : 'Selecciona una mascota'
@@ -327,12 +376,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                   </Label>
                   <Popover open={datePickerOpen} onOpenChange={(open) => setDatePickerOpen(open)}>
                     <PopoverTrigger
-                      render={
-                        <button
-                          type="button"
-                          className="flex h-9 w-full items-center justify-start gap-2 rounded-sm border border-input bg-transparent px-2.5 py-2 text-sm font-normal transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                        />
-                      }
+                      className="flex h-9 w-full items-center justify-start gap-2 rounded-sm border border-input bg-transparent px-2.5 py-2 text-sm font-normal transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     >
                       <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
                       {selectedDate
@@ -345,14 +389,17 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                         mode="single"
                         selected={selectedDate}
                         onSelect={(date) => {
-                          setSelectedDate(date)
-                          setSelectedTime('')
-                          setDatePickerOpen(false)
+                          if (date) {
+                            setSelectedDate(date)
+                            setSelectedTime('')
+                            setDatePickerOpen(false)
+                          }
                         }}
                         disabled={(date) => {
                           const today = new Date()
                           today.setHours(0, 0, 0, 0)
-                          return date < today || !businessHours.days.includes(date.getDay())
+                          const availableDays = businessHours?.days ?? [1, 2, 3, 4, 5, 6]
+                          return date < today || !availableDays.includes(date.getDay())
                         }}
                       />
                     </PopoverContent>
@@ -366,6 +413,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                     value={selectedTime}
                     onValueChange={v => setSelectedTime(v ?? '')}
                     disabled={!selectedDate || timeSlots.length === 0}
+                    items={Object.fromEntries(timeSlots.map(slot => [slot, slot]))}
                   >
                     <SelectTrigger>
                       <SelectValue
@@ -396,6 +444,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                   <Select
                     value={assignedTo}
                     onValueChange={v => setAssignedTo(v ?? '')}
+                    items={{ "": "Sin asignar", ...Object.fromEntries(team.map(m => [m.id, m.full_name])) }}
                   >
                     <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
                     <SelectContent>

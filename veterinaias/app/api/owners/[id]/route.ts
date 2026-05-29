@@ -27,7 +27,7 @@ export async function GET(
       pet:pet_id(
         id, name, sex, date_of_birth, color, microchip, notes, created_at,
         species:species_id(id, name),
-        breed:breed_id(id, name)
+        breed
       )
     `)
     .eq('owner_id', id)

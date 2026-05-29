@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { NextAppointmentCard } from '@/components/dashboard/NextAppointmentCard'
 import type { DashboardAppointment } from '@/components/dashboard/DashboardAppointmentCard'
 
@@ -39,6 +39,17 @@ describe('NextAppointmentCard', () => {
     render(<NextAppointmentCard appointment={apt} />)
     const link = screen.getByRole('link', { name: /iniciar consulta/i })
     expect(link).toHaveAttribute('href', '/dashboard/pets/pet-1/records/new?appointmentId=apt-1')
+  })
+
+  it('llama a onSelect al hacer click en la tarjeta', () => {
+    const onSelect = vi.fn()
+    render(<NextAppointmentCard appointment={apt} onSelect={onSelect} />)
+    
+    // El botón es el contenedor principal ahora
+    const cardButton = screen.getByRole('button', { name: /siguiente consulta/i })
+    fireEvent.click(cardButton)
+    
+    expect(onSelect).toHaveBeenCalledWith(apt)
   })
 
   it('funciona con cita scheduled', () => {

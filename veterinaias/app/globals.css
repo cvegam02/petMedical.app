@@ -134,6 +134,10 @@
   h1 {
     @apply font-heading;
   }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground/50;
+  }
 }
 
 @layer utilities {

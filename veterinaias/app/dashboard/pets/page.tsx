@@ -9,7 +9,7 @@ interface Pet {
   sex: string
   date_of_birth: string | null
   species: { name: string } | null
-  breed: { name: string } | null
+  breed: string | null
   owner: { id: string; full_name: string } | null
 }
 
@@ -84,8 +84,8 @@ export default function PetsPage() {
           ))}
         </div>
       ) : pets.length === 0 ? (
-        <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
-          <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
+        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border/60 bg-zinc-50/50">
+          <div className="w-14 h-14 rounded-xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
             <PawPrint size={20} className="text-muted-foreground/25" />
           </div>
           <p className="font-bold text-foreground text-lg tracking-tight">
@@ -106,7 +106,7 @@ export default function PetsPage() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] border border-border shadow-xl shadow-primary/[0.02] overflow-hidden">
+        <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
           {/* Table header */}
           <div className="flex items-center gap-6 px-8 py-4 bg-muted/30 border-b border-border/60">
             <p className="label-overline text-muted-foreground/60 w-1/3">Paciente / ID</p>
@@ -149,7 +149,7 @@ function PetRow({ pet }: { pet: Pet }) {
     >
       {/* Column 1: Identity */}
       <div className="flex items-center gap-4 w-1/3 min-w-0">
-        <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+        <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
           <Icon size={16} strokeWidth={1.8} />
         </div>
         <div className="min-w-0">
@@ -164,7 +164,7 @@ function PetRow({ pet }: { pet: Pet }) {
       <div className="flex flex-col gap-1 w-1/4 min-w-0">
         <p className="text-[11px] font-medium text-muted-foreground truncate">{pet.species?.name ?? '—'}</p>
         {pet.breed && (
-          <p className="text-[11px] text-muted-foreground/60 truncate">{pet.breed.name}</p>
+          <p className="text-[11px] text-muted-foreground/60 truncate">{pet.breed}</p>
         )}
       </div>
 
@@ -179,7 +179,7 @@ function PetRow({ pet }: { pet: Pet }) {
 
       {/* Action */}
       <div className="shrink-0 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-zinc-300 group-hover:text-primary transition-all shadow-sm">
+        <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center text-zinc-300 group-hover:text-primary transition-all shadow-sm">
           <ChevronRight size={14} strokeWidth={3} />
         </div>
       </div>

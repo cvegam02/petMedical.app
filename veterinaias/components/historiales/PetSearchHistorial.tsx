@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Search, X } from 'lucide-react'
 
 interface PetResult {
   id: string
@@ -55,16 +54,29 @@ export function PetSearchHistorial() {
     }
   }, [query])
 
+  function clear() {
+    setQuery('')
+  }
+
   return (
     <div className="max-w-xl space-y-4">
       <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none" />
+        <input
+          type="text"
           placeholder="Buscar mascota por nombre..."
           value={query}
           onChange={e => setQuery(e.target.value)}
-          className="pl-8"
+          className="w-full pl-9 pr-9 py-2.5 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
         />
+        {query && (
+          <button
+            onClick={clear}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          >
+            <X size={13} />
+          </button>
+        )}
       </div>
 
       {!searched && !loading && (

@@ -4,7 +4,7 @@ export const petSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido'),
   owner_id: z.string().uuid('Dueño es requerido'),
   species_id: z.string().uuid('Especie es requerida'),
-  breed_id: z.string().uuid().optional(),
+  breed: z.string().optional(),
   sex: z.enum(['male', 'female', 'unknown']),
   date_of_birth: z.preprocess(
     v => (v === '' ? undefined : v),

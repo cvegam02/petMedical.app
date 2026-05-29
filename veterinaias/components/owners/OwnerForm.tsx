@@ -16,10 +16,24 @@ interface OwnerFormProps {
 
 export function OwnerForm({ defaultValues, ownerId }: OwnerFormProps) {
   const router = useRouter()
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<OwnerFormValues>({
+  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<OwnerFormValues>({
     resolver: zodResolver(ownerSchema),
     defaultValues: defaultValues ?? {},
   })
+
+  const phoneValue = watch('phone')
+
+  function formatPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setValue('phone', formatted)
+  }
 
   const onSubmit = async (values: OwnerFormValues) => {
     const url = ownerId ? `/api/owners/${ownerId}` : '/api/owners'
@@ -46,7 +60,13 @@ export function OwnerForm({ defaultValues, ownerId }: OwnerFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label htmlFor="phone">Teléfono <span className="text-destructive">*</span></Label>
-              <Input id="phone" {...register('phone')} />
+              <Input 
+                id="phone" 
+                {...register('phone')} 
+                value={phoneValue || ''}
+                onChange={handlePhoneChange}
+                placeholder="555 123 4567"
+              />
               {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone.message}</p>}
             </div>
             <div className="space-y-1">

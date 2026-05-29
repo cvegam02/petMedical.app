@@ -8,10 +8,12 @@ export async function GET(req: NextRequest) {
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const q = req.nextUrl.searchParams.get('q')
+  const limitParam = req.nextUrl.searchParams.get('limit')
+  const limit = Math.min(Math.max(parseInt(limitParam ?? '20', 10) || 20, 1), 50)
   let query = (supabase.from('owners') as any)
-    .select('id, full_name, email, phone, created_at')
+    .select('id, full_name, email, phone, created_at, pet_registrations(pets(id, name))')
     .order('full_name')
-    .limit(50)
+    .limit(limit)
 
   if (q && q.trim()) {
     const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
@@ -19,8 +21,18 @@ export async function GET(req: NextRequest) {
   }
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: 'Error al obtener dueños' }, { status: 500 })
-  return NextResponse.json({ data })
+  if (error) {
+    console.error('Error fetching owners:', error)
+    return NextResponse.json({ error: 'Error al obtener dueños' }, { status: 500 })
+  }
+
+  // Map the data to flatten the pets structure
+  const mappedData = (data as any[]).map(owner => ({
+    ...owner,
+    pets: owner.pet_registrations?.map((reg: any) => reg.pets).filter(Boolean) || []
+  }))
+
+  return NextResponse.json({ data: mappedData })
 }
 
 export async function POST(req: NextRequest) {

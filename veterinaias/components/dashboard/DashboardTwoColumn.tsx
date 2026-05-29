@@ -26,12 +26,12 @@ interface Props {
   role: string
 }
 
-const STATUS_CONFIG: Record<string, { accent: string; badge: string; label: string }> = {
-  scheduled: { accent: 'border-l-amber-400',   badge: 'bg-amber-100 text-amber-800 border border-amber-300',   label: 'Sin confirmar' },
-  confirmed:  { accent: 'border-l-primary',     badge: 'bg-primary/10 text-primary border border-primary/30',  label: 'Confirmada' },
-  completed:  { accent: 'border-l-emerald-400', badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', label: 'Completada' },
-  cancelled:  { accent: 'border-l-zinc-300',    badge: 'bg-muted text-muted-foreground border border-border',  label: 'Cancelada' },
-  no_show:    { accent: 'border-l-zinc-300',    badge: 'bg-muted text-muted-foreground border border-border',  label: 'No presentó' },
+const STATUS_CONFIG: Record<string, { stripe: string; badge: string; label: string }> = {
+  scheduled: { stripe: 'bg-amber-400',   badge: 'bg-amber-50 text-amber-800 border border-amber-200',      label: 'Sin confirmar' },
+  confirmed:  { stripe: 'bg-primary',    badge: 'bg-primary/10 text-primary border border-primary/20',     label: 'Confirmada' },
+  completed:  { stripe: 'bg-emerald-400',badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200',label: 'Completada' },
+  cancelled:  { stripe: 'bg-zinc-200',   badge: 'bg-muted text-muted-foreground border border-border',     label: 'Cancelada' },
+  no_show:    { stripe: 'bg-zinc-200',   badge: 'bg-muted text-muted-foreground border border-border',     label: 'No presentó' },
 }
 
 const ACTIVE = ['scheduled', 'confirmed']
@@ -100,7 +100,7 @@ export function DashboardTwoColumn({
             <Stethoscope size={17} className="text-emerald-700" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Consulta sin cita</p>
+            <p className="text-sm font-semibold text-foreground">Nueva Consulta</p>
             <p className="text-xs text-muted-foreground">Paciente walk-in</p>
           </div>
         </Link>
@@ -188,47 +188,54 @@ export function DashboardTwoColumn({
             ) : (
               <div className="space-y-1.5">
                 {todayAppointments.map(apt => {
-                  const cfg = STATUS_CONFIG[apt.status] ?? { dot: 'bg-zinc-300', label: apt.status }
+                  const cfg = STATUS_CONFIG[apt.status] ?? { stripe: 'bg-zinc-300', badge: 'bg-muted text-muted-foreground border border-border', label: apt.status }
                   const time = new Date(apt.scheduled_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                   const done = !ACTIVE.includes(apt.status)
+                  const isNext = apt.id === nextAppointment?.id
                   return (
                     <button
                       key={apt.id}
                       type="button"
                       onClick={() => setSelected(apt)}
-                      className={`w-full text-left flex items-center gap-4 pl-4 pr-4 py-3 rounded-xl border-y border-r border-l-4 transition-all hover:shadow-sm ${cfg.accent} ${
+                      className={`w-full text-left flex items-stretch rounded-xl border overflow-hidden transition-all hover:shadow-sm ${
                         done
-                          ? 'border-y-border/40 border-r-border/40 bg-muted/10 opacity-60 hover:opacity-80'
-                          : apt.id === nextAppointment?.id
-                          ? 'border-y-primary/20 border-r-primary/20 bg-primary/5'
+                          ? 'border-border/40 bg-muted/10 opacity-60 hover:opacity-80'
+                          : isNext
+                          ? 'border-primary/30 bg-primary/[0.03]'
                           : apt.status === 'scheduled'
-                          ? 'border-y-amber-200 border-r-amber-200 bg-amber-50/40'
-                          : 'border-y-border border-r-border bg-card hover:border-r-primary/30 hover:border-y-primary/30'
+                          ? 'border-amber-200/80 bg-amber-50/30'
+                          : 'border-border bg-card hover:border-primary/30'
                       }`}
                     >
-                      <span className="text-sm font-mono text-muted-foreground w-11 shrink-0 tabular-nums">{time}</span>
-                      <div className="flex-1 min-w-0">
+                      <div className={`w-1 shrink-0 ${cfg.stripe} ${done ? 'opacity-40' : ''}`} />
+                      <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
+                        <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
+                        {apt.duration_minutes && (
+                          <span className="text-[10px] text-muted-foreground mt-0.5">{apt.duration_minutes}m</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 px-3 py-3">
                         <p className={`text-sm font-semibold leading-none ${done ? 'text-muted-foreground' : 'text-foreground'}`}>
                           {apt.pet?.name ?? '—'}
                           {apt.pet?.species && (
-                            <span className="font-normal text-muted-foreground ml-1.5">
-                              {apt.pet.species.name}
-                            </span>
+                            <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
                           )}
                         </p>
                         {apt.owner && (
                           <p className="text-xs text-muted-foreground mt-0.5">{apt.owner.full_name}</p>
                         )}
                       </div>
-                      {apt.id === nextAppointment?.id ? (
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-md shrink-0 bg-primary text-primary-foreground">
-                          Siguiente
-                        </span>
-                      ) : (
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md shrink-0 ${cfg.badge}`}>
-                          {cfg.label}
-                        </span>
-                      )}
+                      <div className="flex items-center px-3 py-3 shrink-0">
+                        {isNext ? (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-primary text-primary-foreground">
+                            Siguiente
+                          </span>
+                        ) : (
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.badge}`}>
+                            {cfg.label}
+                          </span>
+                        )}
+                      </div>
                     </button>
                   )
                 })}
@@ -247,7 +254,7 @@ export function DashboardTwoColumn({
               </div>
               <div className="space-y-1.5">
                 {futureAppointments.map(apt => {
-                  const cfg = STATUS_CONFIG[apt.status] ?? { dot: 'bg-zinc-300', label: apt.status }
+                  const cfg = STATUS_CONFIG[apt.status] ?? { stripe: 'bg-zinc-300', badge: 'bg-muted text-muted-foreground border border-border', label: apt.status }
                   const date = new Date(apt.scheduled_at).toLocaleDateString('es-MX', {
                     weekday: 'short', day: 'numeric', month: 'short',
                   })
@@ -257,21 +264,28 @@ export function DashboardTwoColumn({
                       key={apt.id}
                       type="button"
                       onClick={() => setSelected(apt)}
-                      className={`w-full text-left flex items-center gap-4 pl-4 pr-4 py-3 rounded-xl border-y border-r border-l-4 bg-card hover:shadow-sm transition-all ${cfg.accent} border-y-border border-r-border hover:border-y-primary/30 hover:border-r-primary/30`}
+                      className="w-full text-left flex items-stretch rounded-xl border border-border bg-card overflow-hidden transition-all hover:shadow-sm hover:border-primary/30"
                     >
-                      <div className="flex-1 min-w-0">
+                      <div className={`w-1 shrink-0 ${cfg.stripe}`} />
+                      <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
+                        <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
+                        {apt.duration_minutes && (
+                          <span className="text-[10px] text-muted-foreground mt-0.5">{apt.duration_minutes}m</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 px-3 py-3">
                         <p className="text-sm font-semibold text-foreground leading-none">
                           {apt.pet?.name ?? '—'}
                           {apt.pet?.species && (
                             <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
                           )}
                         </p>
-                        {apt.owner && (
-                          <p className="text-xs text-muted-foreground mt-0.5">{apt.owner.full_name}</p>
-                        )}
+                        <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                          {apt.owner?.full_name && <span>{apt.owner.full_name} · </span>}
+                          {date}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-muted-foreground capitalize tabular-nums">{date} · {time}</span>
+                      <div className="flex items-center px-3 py-3 shrink-0">
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.badge}`}>{cfg.label}</span>
                       </div>
                     </button>

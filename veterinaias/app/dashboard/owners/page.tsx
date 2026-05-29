@@ -56,8 +56,8 @@ export default function OwnersPage() {
           ))}
         </div>
       ) : owners.length === 0 ? (
-        <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
-          <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
+        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border/60 bg-zinc-50/50">
+          <div className="w-14 h-14 rounded-xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
             <Users size={22} className="text-muted-foreground/25" />
           </div>
           <p className="font-bold text-foreground text-lg tracking-tight">Directorio sin registros</p>
@@ -73,12 +73,12 @@ export default function OwnersPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] border border-border shadow-xl shadow-primary/[0.02] overflow-hidden">
+        <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
           {/* Table Header Labels */}
           <div className="flex items-center gap-6 px-8 py-4 bg-muted/30 border-b border-border/60">
             <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest w-1/3">Cliente / ID</p>
             <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest w-1/4">Información de Contacto</p>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest flex-1">Pacientes Asociados</p>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest flex-1">Mascotas Registradas</p>
             <div className="w-8 shrink-0" /> {/* Spacer for arrow */}
           </div>
 

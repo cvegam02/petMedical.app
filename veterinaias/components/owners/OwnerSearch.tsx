@@ -33,17 +33,17 @@ export function OwnerSearch({ onResults, onLoadingChange }: OwnerSearchProps) {
   }
 
   return (
-    <div className="relative max-w-lg group">
+    <div className="relative max-w-lg">
       <Search
         size={14}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none"
       />
       <input
         type="text"
         placeholder="Buscar por nombre, teléfono o email..."
         value={query}
         onChange={e => setQuery(e.target.value)}
-        className="w-full pl-9 pr-9 py-2.5 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all shadow-sm"
+        className="w-full pl-9 pr-9 py-2.5 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
       />
       {query && (
         <button

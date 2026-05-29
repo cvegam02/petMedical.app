@@ -8,14 +8,22 @@ export default async function EditPetPage({ params }: { params: Promise<{ petId:
   const { petId } = await params
   const supabase = await createClient()
 
-  const { data: pet, error } = await (supabase.from('pets') as any)
-    .select('id, name, owner_id, species_id, breed_id, sex, date_of_birth, color, microchip, notes, owner:owner_id(id, full_name)')
-    .eq('id', petId)
-    .single()
+  const [petResult, regResult] = await Promise.all([
+    (supabase.from('pets') as any)
+      .select('id, name, species_id, breed, sex, date_of_birth, color, microchip, notes')
+      .eq('id', petId)
+      .single(),
+    (supabase.from('pet_registrations') as any)
+      .select('owner_id, owner:owner_id(id, full_name)')
+      .eq('pet_id', petId)
+      .maybeSingle(),
+  ])
 
-  if (error || !pet) notFound()
+  if (petResult.error || !petResult.data) notFound()
 
-  const owner = pet.owner as any
+  const pet = petResult.data
+  const registration = regResult.data
+  const owner = registration?.owner as any
 
   return (
     <FormPageLayout
@@ -33,12 +41,12 @@ export default async function EditPetPage({ params }: { params: Promise<{ petId:
       }
     >
       <PetForm
-        ownerId={pet.owner_id}
+        ownerId={registration?.owner_id ?? ''}
         petId={pet.id}
         defaultValues={{
           name: pet.name,
           species_id: pet.species_id,
-          breed_id: pet.breed_id ?? undefined,
+          breed: pet.breed ?? undefined,
           sex: pet.sex as 'male' | 'female' | 'unknown',
           date_of_birth: pet.date_of_birth ?? undefined,
           color: pet.color ?? undefined,

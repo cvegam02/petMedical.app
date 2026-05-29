@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { X, Clock, Calendar, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button'
+import { NextAppointmentCard } from './NextAppointmentCard'
 import { DashboardAppointmentCard } from './DashboardAppointmentCard'
 import type { DashboardAppointment } from './DashboardAppointmentCard'
 export type { DashboardAppointment }
@@ -21,10 +22,11 @@ const STATUS_LABELS: Record<string, string> = {
 const ACTIVE_STATUSES = ['scheduled', 'confirmed']
 
 interface Props {
+  nextAppointment?: DashboardAppointment | null
   appointments: DashboardAppointment[]
 }
 
-export function AppointmentQuickModal({ appointments }: Props) {
+export function AppointmentQuickModal({ nextAppointment, appointments }: Props) {
   const router = useRouter()
   const [selected, setSelected] = useState<DashboardAppointment | null>(null)
   const [loading, setLoading] = useState<string | null>(null)
@@ -60,10 +62,15 @@ export function AppointmentQuickModal({ appointments }: Props) {
 
   return (
     <>
-      <div className="space-y-2">
-        {appointments.map(apt => (
-          <DashboardAppointmentCard key={apt.id} appointment={apt} onSelect={setSelected} />
-        ))}
+      <div className="space-y-3">
+        {nextAppointment && <NextAppointmentCard appointment={nextAppointment} onSelect={setSelected} />}
+        {appointments.length > 0 && (
+          <div className="space-y-2">
+            {appointments.map(apt => (
+              <DashboardAppointmentCard key={apt.id} appointment={apt} onSelect={setSelected} />
+            ))}
+          </div>
+        )}
       </div>
 
       {selected && (

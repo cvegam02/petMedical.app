@@ -31,7 +31,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
     >
       {/* Column 1: Identity */}
       <div className="flex items-center gap-4 w-1/3 min-w-0">
-        <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+        <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
           <span className="text-[11px] font-bold tracking-tight">{initials}</span>
         </div>
         <div className="min-w-0">
@@ -77,7 +77,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
 
       {/* Action Area */}
       <div className="shrink-0 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center text-zinc-300 group-hover:text-primary transition-all shadow-sm">
+        <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center text-zinc-300 group-hover:text-primary transition-all shadow-sm">
           <ChevronRight size={14} strokeWidth={3} />
         </div>
       </div>

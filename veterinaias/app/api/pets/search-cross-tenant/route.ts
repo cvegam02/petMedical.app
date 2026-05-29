@@ -9,17 +9,26 @@ export async function GET(req: NextRequest) {
   const phone     = req.nextUrl.searchParams.get('phone') || undefined
   const petName   = req.nextUrl.searchParams.get('name') || undefined
   const speciesId = req.nextUrl.searchParams.get('species_id') || undefined
-  const breedId   = req.nextUrl.searchParams.get('breed_id') || undefined
+  const breed     = req.nextUrl.searchParams.get('breed') || undefined
 
-  if (!phone && !petName && !speciesId && !breedId) {
+  if (!phone && !petName && !speciesId && !breed) {
     return NextResponse.json({ error: 'Se requiere al menos un parámetro de búsqueda' }, { status: 400 })
   }
 
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant asignado' }, { status: 403 })
+
   const { data, error } = await (supabase as any).rpc('search_pets_cross_tenant', {
+    p_tenant_id:  profile.tenant_id,
     p_phone:      phone      ?? null,
     p_pet_name:   petName    ?? null,
     p_species_id: speciesId  ?? null,
-    p_breed_id:   breedId    ?? null,
+    p_breed:      breed      ?? null,
   })
 
   if (error) return NextResponse.json({ error: 'Error al buscar historial' }, { status: 500 })

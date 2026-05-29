@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MedicalRecordForm } from '@/components/medical-records/MedicalRecordForm'
 import type { IncompletePatient } from '@/components/medical-records/MedicalRecordForm'
+import { PetBanner } from '@/components/medical-records/PetBanner'
 
 export default async function MedicalRecordNewPage({
   params,
@@ -16,7 +17,7 @@ export default async function MedicalRecordNewPage({
   const supabase = await createClient()
 
   const { data: pet, error } = await (supabase.from('pets') as any)
-    .select('id, name')
+    .select('id, name, sex, date_of_birth, notes, breed, species:species_id(name)')
     .eq('id', petId)
     .single()
 
@@ -24,6 +25,11 @@ export default async function MedicalRecordNewPage({
     console.error('Pet not found or error:', error)
     notFound()
   }
+
+  const { data: registration } = await (supabase.from('pet_registrations') as any)
+    .select('owner:owner_id(full_name)')
+    .eq('pet_id', petId)
+    .maybeSingle()
 
   // Detect incomplete profile (stub owner created during first-visit scheduling)
   let incompletePatient: IncompletePatient | null = null
@@ -80,11 +86,24 @@ export default async function MedicalRecordNewPage({
       <p className="text-sm text-muted-foreground mb-6">
         Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
       </p>
-      <MedicalRecordForm
-        petId={petId}
-        appointmentId={appointmentId}
-        incompletePatient={incompletePatient}
-      />
+      <div className="sticky top-0 z-10">
+        <PetBanner
+          name={pet.name}
+          species={(pet.species as any)?.name}
+          breed={pet.breed}
+          sex={pet.sex}
+          dateOfBirth={pet.date_of_birth}
+          notes={pet.notes}
+          ownerName={(registration?.owner as any)?.full_name}
+        />
+      </div>
+      <div className="mt-4">
+        <MedicalRecordForm
+          petId={petId}
+          appointmentId={appointmentId}
+          incompletePatient={incompletePatient}
+        />
+      </div>
     </div>
   )
 }

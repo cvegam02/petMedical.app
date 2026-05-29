@@ -9,7 +9,7 @@ interface PetCardProps {
     date_of_birth: string | null
     color: string | null
     species: { name: string } | null
-    breed: { name: string } | null
+    breed: string | null
   }
 }
 
@@ -35,7 +35,7 @@ export function PetCard({ pet }: PetCardProps) {
       className="group relative flex items-center gap-4 p-4 bg-white rounded-xl border border-border/50 hover:border-primary/40 active:scale-[0.98] transition-all duration-200"
     >
       {/* Species Icon */}
-      <div className="w-10 h-10 rounded-full bg-muted/30 flex items-center justify-center shrink-0 border border-border/50 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
+      <div className="w-10 h-10 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 border border-border/50 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
         <Icon size={18} className="text-muted-foreground/60 group-hover:text-primary transition-colors" />
       </div>
 
@@ -51,7 +51,7 @@ export function PetCard({ pet }: PetCardProps) {
         </div>
         <p className="text-[11px] text-muted-foreground mt-2 truncate tracking-tight">
           <span className="font-bold text-muted-foreground/40 uppercase text-[9px] tracking-wider">{pet.species?.name ?? ''}</span>
-          {pet.breed ? ` · ${pet.breed.name}` : ''}
+          {pet.breed ? ` · ${pet.breed}` : ''}
           <span className="mx-1.5 text-border">/</span>
           {SEX_LABELS[pet.sex] ?? pet.sex}
         </p>

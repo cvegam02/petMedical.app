@@ -4,20 +4,16 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { CalendarIcon } from 'lucide-react'
 import { petSchema, type PetFormValues } from '@/lib/validations/pet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DateInput } from '@/components/ui/date-input'
 import { FormSection } from '@/components/ui/form-section'
+import { BreedCombobox } from '@/components/ui/breed-combobox'
 
 interface Species { id: string; name: string }
-interface Breed { id: string; name: string }
 
 interface PetFormProps {
   ownerId: string
@@ -28,9 +24,7 @@ interface PetFormProps {
 export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
   const router = useRouter()
   const [species, setSpecies] = useState<Species[]>([])
-  const [breeds, setBreeds] = useState<Breed[]>([])
-  const [dobOpen, setDobOpen] = useState(false)
-
+  const [breedSuggestions, setBreedSuggestions] = useState<string[]>([])
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<PetFormValues>({
     resolver: zodResolver(petSchema) as any,
     defaultValues: { ...defaultValues, owner_id: ownerId, sex: defaultValues?.sex ?? 'unknown' },
@@ -46,11 +40,12 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
   }, [])
 
   useEffect(() => {
+    setBreedSuggestions([])
     if (!selectedSpeciesId) return
     fetch(`/api/species/${selectedSpeciesId}/breeds`)
       .then(r => r.json())
-      .then(j => setBreeds(j.data ?? []))
-      .catch(() => setBreeds([]))
+      .then(j => setBreedSuggestions((j.data ?? []).map((b: { name: string }) => b.name)))
+      .catch(() => setBreedSuggestions([]))
   }, [selectedSpeciesId])
 
   const onSubmit = async (values: PetFormValues) => {
@@ -79,7 +74,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
               <Label>Especie <span className="text-destructive">*</span></Label>
               <Select
                 value={watch('species_id') || ''}
-                onValueChange={(v) => { if (v != null) { setValue('species_id', v as string); setValue('breed_id', undefined as any) } }}
+                onValueChange={(v) => { if (v != null) { setValue('species_id', v as string); setValue('breed', undefined as any) } }}
                 items={Object.fromEntries(species.map(s => [s.id, s.name]))}
               >
                 <SelectTrigger>
@@ -93,23 +88,15 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4">
-            {breeds.length > 0 && (
-              <div className="space-y-1">
-                <Label>Raza</Label>
-                <Select
-                  value={watch('breed_id') || ''}
-                  onValueChange={(v) => { if (v != null) setValue('breed_id', v as string) }}
-                  items={Object.fromEntries(breeds.map(b => [b.id, b.name]))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sin especificar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {breeds.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-1">
+              <Label>Raza</Label>
+              <BreedCombobox
+                value={watch('breed')}
+                onChange={v => setValue('breed', v)}
+                suggestions={breedSuggestions}
+                disabled={!selectedSpeciesId}
+              />
+            </div>
             <div className="space-y-1">
               <Label>Sexo <span className="text-destructive">*</span></Label>
               <Select
@@ -134,28 +121,11 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Fecha de nacimiento</Label>
-              <Popover open={dobOpen} onOpenChange={(open) => setDobOpen(open)}>
-                <PopoverTrigger
-                  className="flex h-9 w-full items-center justify-start gap-2 rounded-md border border-input bg-background px-3 text-sm font-normal text-foreground shadow-xs hover:bg-accent"
-                >
-                  <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
-                  {watch('date_of_birth')
-                    ? format(new Date(watch('date_of_birth')! + 'T12:00:00'), 'd MMM yyyy', { locale: es })
-                    : <span className="text-muted-foreground">Selecciona una fecha</span>
-                  }
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={watch('date_of_birth') ? new Date(watch('date_of_birth')! + 'T12:00:00') : undefined}
-                    onSelect={(date) => {
-                      if (date) setValue('date_of_birth', format(date, 'yyyy-MM-dd'))
-                      setDobOpen(false)
-                    }}
-                    disabled={(date) => date > new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
+              <DateInput
+                value={watch('date_of_birth')}
+                onChange={v => setValue('date_of_birth', v ?? '')}
+                disabled={(date) => date > new Date()}
+              />
               {errors.date_of_birth && <p className="text-destructive text-xs mt-1">{errors.date_of_birth.message}</p>}
             </div>
             <div className="space-y-1">

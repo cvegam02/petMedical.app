@@ -22,7 +22,7 @@ import {
 } from '@/lib/validations/medical-record'
 
 const TEXTAREA_CLASS =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground'
+  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground/50'
 
 const DEFAULT_PET: WalkInPetValues = {
   name: '',

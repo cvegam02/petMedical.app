@@ -23,6 +23,17 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [newEmail, setNewEmail] = useState('')
+
+  function formatPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewPhone(formatPhone(e.target.value))
+  }
   const [nameError, setNameError] = useState('')
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const preloadedRef = useRef(false)
@@ -180,8 +191,8 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
                 <Input
                   id="new_owner_phone"
                   value={newPhone}
-                  onChange={e => setNewPhone(e.target.value)}
-                  placeholder="55-1234-5678"
+                  onChange={handlePhoneChange}
+                  placeholder="555 123 4567"
                 />
               </div>
               <div className="space-y-1">

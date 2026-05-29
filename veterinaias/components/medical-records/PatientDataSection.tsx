@@ -4,12 +4,14 @@ import { UserRound } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { BreedCombobox } from '@/components/ui/breed-combobox'
+import { DateInput } from '@/components/ui/date-input'
 
 interface Species { id: string; name: string }
 
 export interface PatientDataValues {
   owner: { id: string; full_name: string; phone: string; email: string }
-  pet: { id: string; species_id: string; sex: string; date_of_birth: string }
+  pet: { id: string; species_id: string; sex: string; date_of_birth: string; breed: string }
 }
 
 interface PatientDataSectionProps {
@@ -26,6 +28,19 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
   const [speciesId, setSpeciesId] = useState(initialPet.species_id ?? '')
   const [sex, setSex] = useState(initialPet.sex ?? 'unknown')
   const [dateOfBirth, setDateOfBirth] = useState(initialPet.date_of_birth ?? '')
+  const [breed, setBreed] = useState('')
+  const [breedSuggestions, setBreedSuggestions] = useState<string[]>([])
+
+  function formatPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOwnerPhone(formatPhone(e.target.value))
+  }
 
   useEffect(() => {
     fetch('/api/species')
@@ -35,11 +50,20 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
   }, [])
 
   useEffect(() => {
+    setBreedSuggestions([])
+    if (!speciesId) return
+    fetch(`/api/species/${speciesId}/breeds`)
+      .then(r => r.json())
+      .then(j => setBreedSuggestions((j.data ?? []).map((b: { name: string }) => b.name)))
+      .catch(() => {})
+  }, [speciesId])
+
+  useEffect(() => {
     onChange({
       owner: { id: initialOwner.id, full_name: ownerName, phone: ownerPhone, email: ownerEmail },
-      pet: { id: initialPet.id, species_id: speciesId, sex, date_of_birth: dateOfBirth },
+      pet: { id: initialPet.id, species_id: speciesId, sex, date_of_birth: dateOfBirth, breed },
     })
-  }, [ownerName, ownerPhone, ownerEmail, speciesId, sex, dateOfBirth]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ownerName, ownerPhone, ownerEmail, speciesId, sex, dateOfBirth, breed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <section className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -79,8 +103,8 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               <Input
                 id="patient_owner_phone"
                 value={ownerPhone}
-                onChange={e => setOwnerPhone(e.target.value)}
-                placeholder="55-1234-5678"
+                onChange={handlePhoneChange}
+                placeholder="555 123 4567"
                 className="bg-white border-zinc-200 rounded-2xl"
               />
             </div>
@@ -121,6 +145,17 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                Raza
+              </Label>
+              <BreedCombobox
+                value={breed || undefined}
+                onChange={v => setBreed(v ?? '')}
+                suggestions={breedSuggestions}
+                disabled={!speciesId}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                 Sexo
               </Label>
               <Select value={sex} onValueChange={v => setSex(v ?? 'unknown')} items={{ male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }}>
@@ -135,15 +170,13 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="patient_pet_dob" className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                 Fecha de nacimiento
               </Label>
-              <Input
-                id="patient_pet_dob"
-                type="date"
-                value={dateOfBirth}
-                onChange={e => setDateOfBirth(e.target.value)}
-                className="bg-white border-zinc-200 rounded-2xl"
+              <DateInput
+                value={dateOfBirth || undefined}
+                onChange={v => setDateOfBirth(v ?? '')}
+                disabled={(date) => date > new Date()}
               />
             </div>
           </div>

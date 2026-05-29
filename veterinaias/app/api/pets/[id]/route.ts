@@ -20,7 +20,7 @@ export async function GET(
       .select(`
         id, name, sex, date_of_birth, color, microchip, notes, created_at, updated_at,
         species:species_id(id, name),
-        breed:breed_id(id, name),
+        breed,
         medical_records(
           id, reason, diagnosis, treatment, notes,
           weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
@@ -72,10 +72,10 @@ export async function PATCH(
     return NextResponse.json({ error: 'No hay campos para actualizar' }, { status: 422 })
   }
 
-  const { date_of_birth, breed_id, ...rest } = result.data
+  const { date_of_birth, breed, ...rest } = result.data
   const update: Record<string, unknown> = { ...rest }
   if (date_of_birth !== undefined) update.date_of_birth = date_of_birth || null
-  if (breed_id !== undefined) update.breed_id = breed_id || null
+  if (breed !== undefined) update.breed = breed || null
 
   const { data, error } = await (supabase.from('pets') as any)
     .update(update)

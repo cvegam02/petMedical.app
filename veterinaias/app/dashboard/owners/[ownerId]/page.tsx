@@ -25,7 +25,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
       pet:pet_id(
         id, name, sex, date_of_birth, color, microchip,
         species:species_id(id, name),
-        breed:breed_id(id, name),
+        breed,
         medical_records(created_at)
       )
     `)
@@ -101,7 +101,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Pacientes</p>
           </div>
-          <h2 className="text-lg font-bold tracking-tight text-foreground">Mascotas registradas</h2>
+          <h2 className="text-lg font-bold font-heading text-foreground">Mascotas registradas</h2>
         </div>
         <Link
           href={`/dashboard/owners/${ownerId}/pets/new`}
@@ -164,7 +164,7 @@ function PetPatientCard({ pet, lastVisit }: { pet: any; lastVisit?: string }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-none">{pet.name}</p>
         <p className="text-xs text-muted-foreground mt-1 truncate">
-          {pet.breed?.name || 'Raza no definida'} · {pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : '—'}
+          {pet.breed || 'Raza no definida'} · {pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : '—'}
         </p>
       </div>
       <div className="text-right shrink-0">

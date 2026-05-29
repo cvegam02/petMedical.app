@@ -169,9 +169,16 @@ Cualquier cambio que afecte comportamiento, datos, APIs, reglas de negocio o arq
 Cambios visuales que no modifican logica (estilos, layouts, componentes, animaciones, copy):
 
 ```
-1. impeccable        → si el cambio requiere criterio de disenio
-2. agent-browser     → verificar en browser
+1. taste-design          → si el sistema de diseno del proyecto aun no existe o necesita actualizarse
+2. ui-ux-pro-max         → para diseno de experiencia, flujo de pantallas o decisiones de UX complejas
+3. emil-design-eng       → para construir o refinar componentes UI de alta calidad
+4. frontend-design       → construccion de componentes UI production-grade
+5. impeccable            → polish final: criterio de diseno, micro-interacciones, consistencia visual
+6. web-design-guidelines → auditar accesibilidad y guidelines de Vercel
+7. agent-browser         → verificar en browser
 ```
+No todos los pasos son obligatorios — usar solo los que aplican al cambio. Para un retoque de color basta `impeccable` + `agent-browser`. Para una pantalla nueva completa usar el flujo completo.
+
 No usar subagentes de revision por codigo, no usar writing-plans, no usar brainstorming salvo que el cambio de UI implique decision de producto no trivial.
 
 ### Cambios triviales (una sola linea, typo, rename, config)
