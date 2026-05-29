@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { wahaSessionName, wahaGetSession, wahaSendText } from '@/lib/waha'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -13,6 +14,16 @@ export async function POST(req: NextRequest) {
     .single() as any
 
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin tenant' }, { status: 403 })
+
+  // Verificar que la sesión WAHA esté activa
+  const sessionName = wahaSessionName(profile.tenant_id)
+  const session = await wahaGetSession(sessionName)
+
+  if (!session || session.status !== 'WORKING') {
+    return NextResponse.json({
+      error: 'WhatsApp no conectado. Ve a Configuración → Integraciones para conectar.',
+    }, { status: 400 })
+  }
 
   let body: any
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
@@ -35,10 +46,13 @@ export async function POST(req: NextRequest) {
   const shareUrl = `${proto}://${host}/r/${shared.token}`
 
   const clinicName: string = profile.tenants?.name ?? 'tu clínica'
-  const cleanPhone = phone.replace(/\D/g, '')
-
   const message = `Hola 👋 Te compartimos el resumen de la consulta de *${pet_name ?? 'tu mascota'}* en *${clinicName}*:\n\n${shareUrl}\n\n_Este enlace expira en ${expiryDays} días._`
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
 
-  return NextResponse.json({ success: true, share_url: shareUrl, wa_url: waUrl })
+  const sent = await wahaSendText(sessionName, phone, message)
+
+  if (!sent) {
+    return NextResponse.json({ error: 'No se pudo enviar el mensaje por WhatsApp' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true, share_url: shareUrl })
 }
