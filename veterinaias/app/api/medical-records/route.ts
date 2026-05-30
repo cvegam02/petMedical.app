@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       if (!v.vaccine_name?.trim()) continue
       const { vaccine_catalog_id, ...vaccinationRest } = v
 
-      await (supabase as any).from('pet_vaccinations').insert({
+      const { error: vacError } = await (supabase as any).from('pet_vaccinations').insert({
         ...vaccinationRest,
         pet_id: rest.pet_id,
         tenant_id: profile.tenant_id,
@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
         medical_record_id: record.id,
         ...(vaccine_catalog_id ? { vaccine_catalog_id } : {}),
       })
+      if (vacError) return NextResponse.json({ error: vacError.message }, { status: 500 })
 
       // Decrementar stock si viene del catálogo
       if (vaccine_catalog_id) {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
             .update({ stock_quantity: catalogItem.stock_quantity - 1 })
             .eq('id', vaccine_catalog_id)
             .eq('tenant_id', profile.tenant_id)
+            .gt('stock_quantity', 0)
         }
       }
     }
@@ -95,7 +97,8 @@ export async function POST(req: NextRequest) {
         medical_record_id: record.id,
       }))
     if (dewormingRows.length > 0) {
-      await (supabase as any).from('pet_dewormings').insert(dewormingRows)
+      const { error: dewError } = await (supabase as any).from('pet_dewormings').insert(dewormingRows)
+      if (dewError) return NextResponse.json({ error: dewError.message }, { status: 500 })
     }
   }
 

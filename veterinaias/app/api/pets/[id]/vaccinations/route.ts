@@ -38,6 +38,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
+  // Verify pet exists
+  const { data: pet } = await supabase.from('pets').select('id').eq('id', id).single()
+  if (!pet) return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
+
   const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
   if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
   const tenantId = (profile as any).tenant_id as string
@@ -79,6 +83,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         .update({ stock_quantity: vaccine.stock_quantity - 1 })
         .eq('id', vaccine_catalog_id)
         .eq('tenant_id', tenantId)
+        .gt('stock_quantity', 0)
     }
   }
 

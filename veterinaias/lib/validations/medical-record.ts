@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const vaccinationEntrySchema = z.object({
   vaccine_name: z.string().min(1),
-  vaccine_catalog_id: z.string().optional(),
+  vaccine_catalog_id: z.string().uuid().optional(),
   lot_number: z.string().optional(),
   application_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
