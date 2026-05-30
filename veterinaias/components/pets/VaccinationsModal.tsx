@@ -48,6 +48,7 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
   const [catalogVaccines, setCatalogVaccines] = useState<VaccineCatalog[]>([])
   const [addOpen, setAddOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isHistorical, setIsHistorical] = useState(false)
 
   const { register, handleSubmit, setValue, watch, reset, formState: { isSubmitting } } = useForm<VaccinationFormValues>({
     resolver: zodResolver(vaccinationFormSchema) as any,
@@ -95,6 +96,7 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
     if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
     toast.success('Vacunación registrada')
     setAddOpen(false)
+    setIsHistorical(false)
     reset({ application_date: TODAY })
     loadVaccinations()
   }
@@ -146,10 +148,38 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
           </div>
         )}
 
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <Dialog open={addOpen} onOpenChange={open => { if (!open) setIsHistorical(false); setAddOpen(open) }}>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Registrar vacuna</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
+
+              {/* Tipo de registro */}
+              <div className="flex rounded-lg border border-border overflow-hidden text-sm">
+                <button
+                  type="button"
+                  onClick={() => setIsHistorical(false)}
+                  className={`flex-1 px-3 py-2 font-medium transition-colors ${
+                    !isHistorical ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Vacuna nueva
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsHistorical(true); setValue('next_due_date', undefined) }}
+                  className={`flex-1 px-3 py-2 font-medium transition-colors border-l border-border ${
+                    isHistorical ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Registro de carnet
+                </button>
+              </div>
+              {isHistorical && (
+                <p className="text-xs text-muted-foreground -mt-2">
+                  Solo registra la fecha en que se aplicó. No se asigna próxima fecha.
+                </p>
+              )}
+
               <div className="space-y-1">
                 <Label>Vacuna <span className="text-destructive">*</span></Label>
                 <FreeTextCombobox
@@ -163,22 +193,24 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
                 <Label>Lote</Label>
                 <Input {...register('lot_number')} placeholder="Se pre-llena si seleccionas del catálogo" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className={isHistorical ? '' : 'grid grid-cols-2 gap-3'}>
                 <div className="space-y-1">
                   <Label>Fecha de aplicación <span className="text-destructive">*</span></Label>
                   <Input type="date" {...register('application_date')} />
                 </div>
-                <div className="space-y-1">
-                  <Label>Próxima fecha</Label>
-                  <Input type="date" {...register('next_due_date')} />
-                </div>
+                {!isHistorical && (
+                  <div className="space-y-1">
+                    <Label>Próxima fecha</Label>
+                    <Input type="date" {...register('next_due_date')} />
+                  </div>
+                )}
               </div>
               <div className="space-y-1">
                 <Label>Notas</Label>
                 <Input {...register('notes')} placeholder="Reacción, observaciones..." />
               </div>
               <div className="flex gap-2 justify-end pt-2">
-                <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
+                <Button type="button" variant="outline" onClick={() => { setIsHistorical(false); setAddOpen(false) }}>Cancelar</Button>
                 <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Guardando...' : 'Guardar'}</Button>
               </div>
             </form>
