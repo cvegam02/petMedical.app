@@ -15,6 +15,8 @@ export interface TenantSettings {
   confirmation_reminder_days: number
   share_link_expiry_days: number
   business_hours: BusinessHoursConfig
+  prescription_footer_note?: string
+  prescription_validity_days?: number
 }
 
 export interface Tenant {
@@ -38,6 +40,8 @@ export interface UserProfile {
   role: UserRole | null
   full_name: string
   phone: string | null
+  professional_license: string | null
+  professional_address: string | null
   is_super_admin: boolean
   created_at: string
   updated_at: string
@@ -269,9 +273,9 @@ export type Database = {
         Relationships: []
       }
       user_profiles: {
-        Row: { id: string; tenant_id: string | null; role: UserRole | null; full_name: string; phone: string | null; is_super_admin: boolean; created_at: string; updated_at: string }
-        Insert: { id: string; tenant_id?: string | null; role?: UserRole | null; full_name: string; phone?: string | null; is_super_admin?: boolean }
-        Update: { tenant_id?: string | null; role?: UserRole | null; full_name?: string; phone?: string | null; is_super_admin?: boolean; updated_at?: string }
+        Row: { id: string; tenant_id: string | null; role: UserRole | null; full_name: string; phone: string | null; professional_license: string | null; professional_address: string | null; is_super_admin: boolean; created_at: string; updated_at: string }
+        Insert: { id: string; tenant_id?: string | null; role?: UserRole | null; full_name: string; phone?: string | null; professional_license?: string | null; professional_address?: string | null; is_super_admin?: boolean }
+        Update: { tenant_id?: string | null; role?: UserRole | null; full_name?: string; phone?: string | null; professional_license?: string | null; professional_address?: string | null; is_super_admin?: boolean; updated_at?: string }
         Relationships: []
       }
       invitations: {
