@@ -50,7 +50,7 @@ const BLANK = '________________'
 export function PrescriptionDocument({ clinic, vet, patient, owner, record, prescriptions, footerNote, validityDays }: PrescriptionData) {
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="LETTER" style={styles.page}>
         {/* Header: clinic + RECETA */}
         <View style={styles.header}>
           <View>
