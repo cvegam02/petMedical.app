@@ -72,24 +72,23 @@ export async function POST(req: NextRequest) {
 
     if (recordError) return NextResponse.json({ error: 'Error al crear la consulta' }, { status: 500 })
 
-    // Save Related Data (Prescriptions, Vaccinations, Dewormings)
+    // Save Related Data
     const tasks: Promise<any>[] = []
 
     if (prescriptions && prescriptions.length > 0) {
-      tasks.push(Promise.resolve(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
+      tasks.push(Promise.resolve((supabase.from('prescriptions') as any).insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
     }
     if (vaccinations && vaccinations.length > 0) {
-      tasks.push(Promise.resolve(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id })))))
+      tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: user.id })))))
     }
     if (dewormings && dewormings.length > 0) {
-      tasks.push(Promise.resolve(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id })))))
+      tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: user.id })))))
     }
 
     if (tasks.length > 0) {
       const results = await Promise.all(tasks)
       const failed = results.find(r => r.error)
       if (failed) {
-        // Rollback record if something failed
         await supabase.from('medical_records').delete().eq('id', record.id)
         return NextResponse.json({ error: 'Error al guardar datos complementarios' }, { status: 500 })
       }
@@ -217,13 +216,13 @@ export async function POST(req: NextRequest) {
   const tasks: Promise<any>[] = []
 
   if (prescriptions && prescriptions.length > 0) {
-    tasks.push(Promise.resolve(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
+    tasks.push(Promise.resolve((supabase.from('prescriptions') as any).insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
   }
   if (vaccinations && vaccinations.length > 0) {
-    tasks.push(Promise.resolve(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id })))))
+    tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: user.id })))))
   }
   if (dewormings && dewormings.length > 0) {
-    tasks.push(Promise.resolve(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id })))))
+    tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: user.id })))))
   }
 
   if (tasks.length > 0) {
