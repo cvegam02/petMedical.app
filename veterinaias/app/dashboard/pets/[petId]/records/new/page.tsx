@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { MedicalRecordForm } from '@/components/medical-records/MedicalRecordForm'
 import type { IncompletePatient } from '@/components/medical-records/MedicalRecordForm'
-import { PetBanner } from '@/components/medical-records/PetBanner'
+import { ExpandablePetBanner } from '@/components/medical-records/ExpandablePetBanner'
 
 export default async function MedicalRecordNewPage({
   params,
@@ -91,7 +91,8 @@ export default async function MedicalRecordNewPage({
         Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
       </p>
       <div className="sticky top-0 z-10">
-        <PetBanner
+        <ExpandablePetBanner
+          petId={petId}
           name={pet.name}
           species={(pet.species as any)?.name}
           breed={pet.breed}

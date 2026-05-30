@@ -99,6 +99,8 @@ export const walkInRecordSchema = z.object({
     z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),
+  vaccinations: z.array(vaccinationEntrySchema).default([]),
+  dewormings: z.array(dewormingEntrySchema).default([]),
 })
 
 const existingOwnerSchema = z.object({ id: z.string().uuid() })

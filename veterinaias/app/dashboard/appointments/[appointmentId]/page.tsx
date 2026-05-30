@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { StatusActions } from '@/components/appointments/StatusActions'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { PetExpedienteModal } from '@/components/pets/PetExpedienteModal'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 
 export default async function AppointmentDetailPage({
@@ -205,9 +206,15 @@ export default async function AppointmentDetailPage({
           <section className="bg-card rounded-2xl border border-border/60 p-6 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <p className="label-overline text-muted-foreground/50 font-mono">Paciente</p>
-              <Link href={`/dashboard/pets/${pet?.id}`} className="text-[10px] text-primary hover:underline font-bold uppercase tracking-tighter">
-                Ver expediente
-              </Link>
+              <PetExpedienteModal
+                petId={pet?.id ?? ''}
+                petName={pet?.name ?? ''}
+                trigger={
+                  <button className="text-[10px] text-primary hover:underline font-bold uppercase tracking-tighter cursor-pointer">
+                    Ver expediente
+                  </button>
+                }
+              />
             </div>
             
             <div className="flex items-center gap-4">

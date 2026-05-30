@@ -17,22 +17,22 @@ export default async function SuperAdminPage() {
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Tenants</h1>
       </div>
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b">
+          <thead className="bg-muted border-b">
             <tr>
               {['Nombre', 'Tipo', 'Estado', 'Creado'].map(h => (
-                <th key={h} className="text-left px-4 py-3 font-medium text-slate-600">{h}</th>
+                <th key={h} className="text-left px-4 py-3 font-medium text-muted-foreground">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {tenants?.map((t: any) => (
-              <tr key={t.id} className="border-b last:border-0 hover:bg-slate-50">
+              <tr key={t.id} className="border-b last:border-0 hover:bg-muted">
                 <td className="px-4 py-3 font-medium">{t.name}</td>
                 <td className="px-4 py-3"><Badge variant="outline">{t.type}</Badge></td>
                 <td className="px-4 py-3"><Badge>{t.subscription_status}</Badge></td>
-                <td className="px-4 py-3 text-slate-500">{new Date(t.created_at).toLocaleDateString('es')}</td>
+                <td className="px-4 py-3 text-muted-foreground">{new Date(t.created_at).toLocaleDateString('es')}</td>
               </tr>
             ))}
           </tbody>

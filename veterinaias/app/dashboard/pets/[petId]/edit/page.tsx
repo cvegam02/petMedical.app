@@ -10,7 +10,7 @@ export default async function EditPetPage({ params }: { params: Promise<{ petId:
 
   const [petResult, regResult] = await Promise.all([
     (supabase.from('pets') as any)
-      .select('id, name, species_id, breed, sex, date_of_birth, color, microchip, notes')
+      .select('id, name, species_id, breed, sex, date_of_birth, color, microchip, notes, sterilized, habitat, feeding, cohabitation, cohabitation_details')
       .eq('id', petId)
       .single(),
     (supabase.from('pet_registrations') as any)
@@ -52,6 +52,11 @@ export default async function EditPetPage({ params }: { params: Promise<{ petId:
           color: pet.color ?? undefined,
           microchip: pet.microchip ?? undefined,
           notes: pet.notes ?? undefined,
+          sterilized: pet.sterilized ?? undefined,
+          habitat: pet.habitat ?? undefined,
+          feeding: pet.feeding ?? undefined,
+          cohabitation: pet.cohabitation ?? undefined,
+          cohabitation_details: pet.cohabitation_details ?? undefined,
         }}
       />
     </FormPageLayout>

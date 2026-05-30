@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Plus } from 'lucide-react'
+import { Plus, Stethoscope, ClipboardList, Syringe, Pill, Save } from 'lucide-react'
 import { medicalRecordSchema, type MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { PatientDataSection, type PatientDataValues } from './PatientDataSection'
 import { PrescriptionsFields } from './PrescriptionsFields'
@@ -104,7 +104,7 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
         }
       }
 
-      const [recordRes] = await Promise.all(tasks) as [Response, ...unknown[]]
+      const [recordRes] = await (Promise.all(tasks) as Promise<[Response, ...unknown[]]>)
       const json = await recordRes.json()
       if (!recordRes.ok) { toast.error(json.error ?? 'Error al guardar el expediente'); return }
 
@@ -135,96 +135,156 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border">
-        <FormSection title="Triaje">
-          <div className="space-y-1">
-            <Label htmlFor="reason">Motivo de consulta <span className="text-destructive">*</span></Label>
+      <div className="bg-white border border-border shadow-xl shadow-primary/[0.01] rounded-2xl overflow-hidden divide-y divide-border/60">
+        <FormSection 
+          title={
+            <div className="flex items-center gap-2">
+              <Stethoscope size={16} className="text-primary/60" />
+              <span>Triaje</span>
+            </div>
+          }
+        >
+          <div className="space-y-1.5">
+            <Label htmlFor="reason" className="text-[13px] font-bold">Motivo de consulta <span className="text-destructive">*</span></Label>
             <Input
               id="reason"
               {...register('reason')}
               placeholder="Ej. Control de vacunas, pérdida de apetito..."
+              className="bg-muted/30 focus:bg-white transition-all"
             />
-            {errors.reason && <p className="text-destructive text-xs mt-1">{errors.reason.message}</p>}
+            {errors.reason && <p className="text-destructive text-[11px] font-medium mt-1">{errors.reason.message}</p>}
           </div>
-          <div className="grid grid-cols-4 gap-3 mt-4">
-            <div className="space-y-1">
-              <Label htmlFor="weight_kg">Peso (kg)</Label>
+          <div className="grid grid-cols-4 gap-4 mt-6">
+            <div className="space-y-1.5">
+              <Label htmlFor="weight_kg" className="text-[12px] font-bold">Peso (kg)</Label>
               <Input id="weight_kg" type="number" step="0.01" placeholder="0.0"
+                className="bg-muted/30 focus:bg-white transition-all font-mono"
                 {...register('weight_kg', { valueAsNumber: true })} />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="temperature_celsius">Temp (°C)</Label>
-              <Input id="temperature_celsius" type="number" step="0.1" placeholder="0.0"
+            <div className="space-y-1.5">
+              <Label htmlFor="temperature_celsius" className="text-[12px] font-bold">Temp (°C)</Label>
+              <Input id="temperature_celsius" type="number" step="0.1" placeholder="38.5"
+                className="bg-muted/30 focus:bg-white transition-all font-mono"
                 {...register('temperature_celsius', { valueAsNumber: true })} />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="heart_rate_bpm">FC (lpm)</Label>
-              <Input id="heart_rate_bpm" type="number" placeholder="0"
+            <div className="space-y-1.5">
+              <Label htmlFor="heart_rate_bpm" className="text-[12px] font-bold">FC (lpm)</Label>
+              <Input id="heart_rate_bpm" type="number" placeholder="80"
+                className="bg-muted/30 focus:bg-white transition-all font-mono"
                 {...register('heart_rate_bpm', { valueAsNumber: true })} />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="respiratory_rate_bpm">FR (rpm)</Label>
-              <Input id="respiratory_rate_bpm" type="number" placeholder="0"
+            <div className="space-y-1.5">
+              <Label htmlFor="respiratory_rate_bpm" className="text-[12px] font-bold">FR (rpm)</Label>
+              <Input id="respiratory_rate_bpm" type="number" placeholder="20"
+                className="bg-muted/30 focus:bg-white transition-all font-mono"
                 {...register('respiratory_rate_bpm', { valueAsNumber: true })} />
             </div>
           </div>
         </FormSection>
 
-        <FormSection title="Evaluación">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="diagnosis">Diagnóstico</Label>
+        <FormSection 
+          title={
+            <div className="flex items-center gap-2">
+              <ClipboardList size={16} className="text-primary/60" />
+              <span>Evaluación Clínica</span>
+            </div>
+          }
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1.5">
+              <Label htmlFor="diagnosis" className="text-[13px] font-bold text-foreground">Diagnóstico</Label>
               <Textarea id="diagnosis" {...register('diagnosis')} rows={4}
+                className="bg-muted/30 focus:bg-white transition-all resize-none"
                 placeholder="Cuadro clínico observado..." />
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="treatment">Tratamiento</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="treatment" className="text-[13px] font-bold text-foreground">Tratamiento</Label>
               <Textarea id="treatment" {...register('treatment')} rows={4}
+                className="bg-muted/30 focus:bg-white transition-all resize-none"
                 placeholder="Procedimientos realizados o indicados..." />
             </div>
           </div>
-          <div className="space-y-1 mt-4">
-            <Label htmlFor="notes">Notas internas</Label>
+          <div className="space-y-1.5 mt-6">
+            <Label htmlFor="notes" className="text-[13px] font-bold text-foreground/70">Notas internas</Label>
             <Textarea id="notes" {...register('notes')} rows={2}
+              className="bg-muted/30 focus:bg-white transition-all resize-none text-[13px]"
               placeholder="Notas confidenciales para el equipo..." />
           </div>
         </FormSection>
 
-        <FormSection title="Vacunas y Desparasitación">
-          <div className="space-y-4">
+        <FormSection 
+          title={
+            <div className="flex items-center gap-2">
+              <Syringe size={16} className="text-primary/60" />
+              <span>Prevención</span>
+            </div>
+          }
+        >
+          <div className="space-y-6">
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Vacunas aplicadas</p>
+              <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-3">Vacunas aplicadas</p>
               <VaccinationsField control={control as any} setValue={setValue as any} />
             </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Desparasitaciones</p>
+            <div className="pt-4 border-t border-border/40">
+              <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-3">Desparasitaciones</p>
               <DewormingsField control={control as any} setValue={setValue as any} />
             </div>
           </div>
         </FormSection>
 
-        <FormSection title="Recetas">
+        <FormSection 
+          title={
+            <div className="flex items-center gap-2">
+              <Pill size={16} className="text-primary/60" />
+              <span>Prescripción</span>
+            </div>
+          }
+        >
           {!showPrescriptions ? (
             <button
               type="button"
               onClick={() => setShowPrescriptions(true)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="group flex items-center gap-2.5 px-4 py-3 rounded-xl border border-dashed border-border/60 text-sm text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/[0.02] transition-all duration-300"
             >
-              <Plus size={14} />
-              Agregar receta
+              <Plus size={16} className="group-hover:scale-110 transition-transform" />
+              <span className="font-semibold">Agregar medicamentos a la receta</span>
             </button>
           ) : (
-            <PrescriptionsFields control={control as any} setValue={setValue} />
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <PrescriptionsFields control={control as any} setValue={setValue} />
+            </div>
           )}
         </FormSection>
 
-        <div className="px-5 py-4 bg-muted/30 flex items-center gap-3">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Procesando...' : 'Finalizar consulta'}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancelar
-          </Button>
+        <div className="px-8 py-5 bg-muted/20 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              type="submit" 
+              size="lg"
+              disabled={isSubmitting}
+              className="shadow-md shadow-primary/20"
+            >
+              {isSubmitting ? (
+                'Procesando...'
+              ) : (
+                <>
+                  <Save size={16} className="mr-2" />
+                  Finalizar consulta
+                </>
+              )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="lg"
+              onClick={() => router.back()}
+            >
+              Cancelar
+            </Button>
+          </div>
+          <p className="hidden md:block text-[10px] font-mono text-muted-foreground/60 uppercase tracking-widest text-right">
+            El registro médico será<br />inmutable tras guardar
+          </p>
         </div>
       </div>
     </form>
