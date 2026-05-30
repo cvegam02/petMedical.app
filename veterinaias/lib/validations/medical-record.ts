@@ -1,5 +1,21 @@
 import { z } from 'zod'
 
+export const vaccinationEntrySchema = z.object({
+  vaccine_name: z.string().min(1),
+  vaccine_catalog_id: z.string().optional(),
+  lot_number: z.string().optional(),
+  application_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  notes: z.string().optional(),
+})
+
+export const dewormingEntrySchema = z.object({
+  product_name: z.string().min(1),
+  application_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  notes: z.string().optional(),
+})
+
 export const prescriptionSchema = z.object({
   medication_name: z.string().min(1, 'Nombre del medicamento es requerido'),
   dosage: z.string().min(1, 'Dosis es requerida'),
@@ -31,6 +47,8 @@ export const medicalRecordSchema = z.object({
     z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),
+  vaccinations: z.array(vaccinationEntrySchema).default([]),
+  dewormings: z.array(dewormingEntrySchema).default([]),
   appointment_id: z.string().uuid().optional(),
 })
 
@@ -41,6 +59,8 @@ export const addendumSchema = z.object({
 export type MedicalRecordFormValues = z.infer<typeof medicalRecordSchema>
 export type PrescriptionFormValues = z.infer<typeof prescriptionSchema>
 export type AddendumFormValues = z.infer<typeof addendumSchema>
+export type VaccinationEntryValues = z.infer<typeof vaccinationEntrySchema>
+export type DewormingEntryValues = z.infer<typeof dewormingEntrySchema>
 
 export const walkInPetSchema = z.object({
   name: z.string().min(1, 'Nombre es requerido'),

@@ -8,6 +8,8 @@ import { Plus } from 'lucide-react'
 import { medicalRecordSchema, type MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { PatientDataSection, type PatientDataValues } from './PatientDataSection'
 import { PrescriptionsFields } from './PrescriptionsFields'
+import { VaccinationsField } from './VaccinationsField'
+import { DewormingsField } from './DewormingsField'
 import { FormSection } from '@/components/ui/form-section'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,12 +38,15 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<MedicalRecordFormValues>({
     resolver: zodResolver(medicalRecordSchema) as any,
     defaultValues: {
       pet_id: petId,
       prescriptions: [],
+      vaccinations: [],
+      dewormings: [],
       ...(appointmentId ? { appointment_id: appointmentId } : {}),
     },
   })
@@ -184,6 +189,19 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
             <Label htmlFor="notes">Notas internas</Label>
             <textarea id="notes" {...register('notes')} rows={2}
               className={TEXTAREA_CLASS} placeholder="Notas confidenciales para el equipo..." />
+          </div>
+        </FormSection>
+
+        <FormSection title="Vacunas y Desparasitación">
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Vacunas aplicadas</p>
+              <VaccinationsField control={control as any} setValue={setValue as any} />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Desparasitaciones</p>
+              <DewormingsField control={control as any} />
+            </div>
           </div>
         </FormSection>
 
