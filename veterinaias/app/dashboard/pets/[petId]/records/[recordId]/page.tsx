@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Printer } from 'lucide-react'
 import { RecordDetailClient } from '@/components/medical-records/RecordDetailClient'
 import { ShareConsultationModal } from '@/components/medical-records/ShareConsultationModal'
 
@@ -37,6 +38,7 @@ export default async function RecordDetailPage({
     .maybeSingle()
   const ownerPhone = (regData?.owner as any)?.phone ?? null
 
+  const hasPrescriptions = ((record.prescriptions as any[]) ?? []).length > 0
   const pet = record.pet as any
   const createdBy = record.created_by_profile as any
   const date = new Date(record.created_at).toLocaleDateString('es-MX', {
@@ -62,6 +64,17 @@ export default async function RecordDetailPage({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {hasPrescriptions && (
+              <a
+                href={`/api/medical-records/${recordId}/prescription/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <Printer size={14} />
+                Imprimir receta
+              </a>
+            )}
             <ShareConsultationModal
               recordId={recordId}
               ownerPhone={ownerPhone}
