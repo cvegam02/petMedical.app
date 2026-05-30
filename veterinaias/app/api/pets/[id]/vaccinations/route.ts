@@ -12,6 +12,9 @@ const createVaccinationSchema = z.object({
   next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
   notes: z.string().optional(),
   medical_record_id: z.string().uuid().optional(),
+  // Registro de carnet: vacuna histórica aplicada fuera del sistema.
+  // No se atribuye a un usuario ni se descuenta inventario.
+  is_historical: z.boolean().optional(),
 })
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -52,7 +55,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const result = createVaccinationSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
-  const { vaccine_catalog_id, ...rest } = result.data
+  const { vaccine_catalog_id, is_historical, ...rest } = result.data
 
   const { data, error } = await (supabase as any)
     .from('pet_vaccinations')
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       ...rest,
       pet_id: id,
       tenant_id: tenantId,
-      applied_by: user.id,
+      applied_by: is_historical ? null : user.id,
       ...(vaccine_catalog_id ? { vaccine_catalog_id } : {}),
     })
     .select()
@@ -68,8 +71,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (error) return NextResponse.json({ error: 'Error al registrar vacunación' }, { status: 500 })
 
-  // Decrementar stock si viene del catálogo
-  if (vaccine_catalog_id) {
+  // Decrementar stock si viene del catálogo y no es un registro histórico
+  if (vaccine_catalog_id && !is_historical) {
     const { data: vaccine } = await (supabase as any)
       .from('vaccine_catalog')
       .select('stock_quantity')

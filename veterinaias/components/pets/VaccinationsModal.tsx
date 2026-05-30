@@ -90,7 +90,7 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
     const res = await fetch(`/api/pets/${petId}/vaccinations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ ...values, is_historical: isHistorical }),
     })
     const json = await res.json()
     if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
@@ -138,8 +138,8 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
                     <td className="px-4 py-3">{v.next_due_date ? dueBadge(v.next_due_date) : <span className="text-muted-foreground">—</span>}</td>
                     <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{v.lot_number ?? '—'}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {v.applied_by_profile?.full_name ?? '—'}
-                      {v.tenant?.name ? <span className="block text-muted-foreground/60">{v.tenant.name}</span> : null}
+                      {v.applied_by_profile?.full_name ?? <span className="italic">Desconocido</span>}
+                      {v.applied_by_profile && v.tenant?.name ? <span className="block text-muted-foreground/60">{v.tenant.name}</span> : null}
                     </td>
                   </tr>
                 ))}

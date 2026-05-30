@@ -132,7 +132,7 @@ export interface PetVaccination {
   id: string
   pet_id: string
   tenant_id: string
-  applied_by: string
+  applied_by: string | null
   medical_record_id: string | null
   vaccine_catalog_id: string | null
   vaccine_name: string
@@ -389,8 +389,8 @@ export type Database = {
         Relationships: []
       }
       pet_vaccinations: {
-        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string; medical_record_id: string | null; vaccine_catalog_id: string | null; vaccine_name: string; lot_number: string | null; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
-        Insert: { pet_id: string; tenant_id: string; applied_by: string; medical_record_id?: string | null; vaccine_catalog_id?: string | null; vaccine_name: string; lot_number?: string | null; application_date: string; next_due_date?: string | null; notes?: string | null }
+        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string | null; medical_record_id: string | null; vaccine_catalog_id: string | null; vaccine_name: string; lot_number: string | null; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
+        Insert: { pet_id: string; tenant_id: string; applied_by?: string | null; medical_record_id?: string | null; vaccine_catalog_id?: string | null; vaccine_name: string; lot_number?: string | null; application_date: string; next_due_date?: string | null; notes?: string | null }
         Update: Record<string, never>
         Relationships: []
       }
