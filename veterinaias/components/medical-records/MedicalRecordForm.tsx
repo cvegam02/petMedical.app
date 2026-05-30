@@ -200,7 +200,7 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Desparasitaciones</p>
-              <DewormingsField control={control as any} />
+              <DewormingsField control={control as any} setValue={setValue as any} />
             </div>
           </div>
         </FormSection>

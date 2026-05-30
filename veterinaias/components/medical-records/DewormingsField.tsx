@@ -1,19 +1,22 @@
 'use client'
-import { useFieldArray, Control } from 'react-hook-form'
+import { useFieldArray, Control, useWatch, type UseFormSetValue } from 'react-hook-form'
 import type { MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DateInput } from '@/components/ui/date-input'
 import { Plus, Trash2 } from 'lucide-react'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
 interface DewormingsFieldProps {
   control: Control<MedicalRecordFormValues>
+  setValue: UseFormSetValue<MedicalRecordFormValues>
 }
 
-export function DewormingsField({ control }: DewormingsFieldProps) {
+export function DewormingsField({ control, setValue }: DewormingsFieldProps) {
   const { fields, append, remove } = useFieldArray({ control, name: 'dewormings' })
+  const dewormings = useWatch({ control, name: 'dewormings' })
 
   return (
     <div className="space-y-3">
@@ -26,11 +29,17 @@ export function DewormingsField({ control }: DewormingsFieldProps) {
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label className="text-xs">Fecha aplicación</Label>
-              <Input type="date" {...control.register(`dewormings.${index}.application_date`)} />
+              <DateInput
+                value={dewormings?.[index]?.application_date}
+                onChange={v => setValue(`dewormings.${index}.application_date`, v ?? '')}
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Próxima fecha</Label>
-              <Input type="date" {...control.register(`dewormings.${index}.next_due_date`)} />
+              <DateInput
+                value={dewormings?.[index]?.next_due_date}
+                onChange={v => setValue(`dewormings.${index}.next_due_date`, v ?? '')}
+              />
             </div>
           </div>
           <div className="flex items-center justify-between">

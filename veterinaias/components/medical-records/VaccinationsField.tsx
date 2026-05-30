@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FreeTextCombobox } from '@/components/ui/free-text-combobox'
+import { DateInput } from '@/components/ui/date-input'
 import { Plus, Trash2 } from 'lucide-react'
 
 const TODAY = new Date().toISOString().split('T')[0]
@@ -63,11 +64,17 @@ export function VaccinationsField({ control, setValue }: VaccinationsFieldProps)
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <Label className="text-xs">Fecha aplicación</Label>
-              <Input type="date" {...control.register(`vaccinations.${index}.application_date`)} />
+              <DateInput
+                value={vaccinations?.[index]?.application_date}
+                onChange={v => setValue(`vaccinations.${index}.application_date`, v ?? '')}
+              />
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Próxima fecha</Label>
-              <Input type="date" {...control.register(`vaccinations.${index}.next_due_date`)} />
+              <DateInput
+                value={vaccinations?.[index]?.next_due_date}
+                onChange={v => setValue(`vaccinations.${index}.next_due_date`, v ?? '')}
+              />
             </div>
           </div>
           <div className="flex items-center justify-between">
