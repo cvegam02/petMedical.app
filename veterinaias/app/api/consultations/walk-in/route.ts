@@ -76,13 +76,13 @@ export async function POST(req: NextRequest) {
     const tasks: Promise<any>[] = []
 
     if (prescriptions && prescriptions.length > 0) {
-      tasks.push(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id }))))
+      tasks.push(Promise.resolve(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
     }
     if (vaccinations && vaccinations.length > 0) {
-      tasks.push(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id }))))
+      tasks.push(Promise.resolve(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id })))))
     }
     if (dewormings && dewormings.length > 0) {
-      tasks.push(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id }))))
+      tasks.push(Promise.resolve(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id })))))
     }
 
     if (tasks.length > 0) {
@@ -217,13 +217,13 @@ export async function POST(req: NextRequest) {
   const tasks: Promise<any>[] = []
 
   if (prescriptions && prescriptions.length > 0) {
-    tasks.push(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id }))))
+    tasks.push(Promise.resolve(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
   }
   if (vaccinations && vaccinations.length > 0) {
-    tasks.push(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id }))))
+    tasks.push(Promise.resolve(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id })))))
   }
   if (dewormings && dewormings.length > 0) {
-    tasks.push(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id }))))
+    tasks.push(Promise.resolve(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id })))))
   }
 
   if (tasks.length > 0) {
