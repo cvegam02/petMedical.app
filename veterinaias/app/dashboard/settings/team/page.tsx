@@ -1,7 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { InviteUserForm } from '@/components/team/InviteUserForm'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  staff: 'Staff',
+  doctor: 'Doctor',
+  assistant: 'Asistente',
+}
 
 export default async function TeamPage() {
   const supabase = await createClient()
@@ -29,44 +35,64 @@ export default async function TeamPage() {
   const tenantType = profile?.tenants?.type ?? 'individual'
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Equipo</h1>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h2 className="text-base font-semibold text-foreground">Equipo</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Gestiona los miembros y accesos de tu clínica.</p>
+      </div>
 
-      <Card>
-        <CardHeader><CardTitle>Miembros activos</CardTitle></CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {members?.map((m: any) => (
-              <div key={m.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                <span className="font-medium">{m.full_name}</span>
-                <Badge variant="secondary">{m.role}</Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Miembros activos */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-foreground">Miembros activos</h3>
+        <div className="rounded-xl border border-border overflow-hidden">
+          {members && members.length > 0 ? (
+            <div className="divide-y divide-border/60">
+              {members.map((m: any) => (
+                <div key={m.id} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm font-medium text-foreground">{m.full_name}</span>
+                  <Badge variant="secondary" className="text-xs font-medium">
+                    {ROLE_LABELS[m.role] ?? m.role}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-4 py-6 text-sm text-muted-foreground text-center">
+              Sin miembros registrados.
+            </div>
+          )}
+        </div>
+      </div>
 
+      {/* Invitaciones pendientes */}
       {pendingInvites && pendingInvites.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle>Invitaciones pendientes</CardTitle></CardHeader>
-          <CardContent>
-            {pendingInvites.map((inv: any) => (
-              <div key={inv.id} className="flex items-center justify-between py-2">
-                <span className="text-slate-600">{inv.email}</span>
-                <Badge>{inv.role}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-foreground">Invitaciones pendientes</h3>
+          <div className="rounded-xl border border-border overflow-hidden">
+            <div className="divide-y divide-border/60">
+              {pendingInvites.map((inv: any) => (
+                <div key={inv.id} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm text-muted-foreground">{inv.email}</span>
+                  <Badge variant="secondary" className="text-xs font-medium">
+                    {ROLE_LABELS[inv.role] ?? inv.role}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
+      {/* Invitar nuevo usuario */}
       {canInvite && (
-        <Card>
-          <CardHeader><CardTitle>Invitar nuevo usuario</CardTitle></CardHeader>
-          <CardContent>
-            <InviteUserForm tenantType={tenantType} />
-          </CardContent>
-        </Card>
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-sm font-medium text-foreground">Invitar usuario</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">El usuario recibirá un email con un enlace de acceso.</p>
+          </div>
+          <InviteUserForm tenantType={tenantType} />
+        </div>
       )}
     </div>
   )
