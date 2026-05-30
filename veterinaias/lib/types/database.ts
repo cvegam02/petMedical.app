@@ -200,8 +200,12 @@ export interface MedicalRecord {
 export interface Prescription {
   id: string
   medical_record_id: string
+  medication_catalog_id: string | null
   medication_name: string
+  active_ingredient: string | null
   dosage: string
+  suggested_dose: string | null
+  route_of_administration: string | null
   frequency: string
   duration: string
   notes: string | null
@@ -333,9 +337,19 @@ export type Database = {
         Relationships: []
       }
       prescriptions: {
-        Row: { id: string; medical_record_id: string; medication_name: string; dosage: string; frequency: string; duration: string; notes: string | null; created_at: string }
-        Insert: { medical_record_id: string; medication_name: string; dosage: string; frequency: string; duration: string; notes?: string | null }
-        Update: { [key: string]: never }
+        Row: {
+          id: string; medical_record_id: string; medication_catalog_id: string | null;
+          medication_name: string; active_ingredient: string | null; dosage: string;
+          suggested_dose: string | null; route_of_administration: string | null;
+          frequency: string; duration: string; notes: string | null; created_at: string
+        }
+        Insert: {
+          medical_record_id: string; medication_catalog_id?: string | null;
+          medication_name: string; active_ingredient?: string | null; dosage: string;
+          suggested_dose?: string | null; route_of_administration?: string | null;
+          frequency: string; duration: string; notes?: string | null
+        }
+        Update: Record<string, never>
         Relationships: []
       }
       attachments: {
