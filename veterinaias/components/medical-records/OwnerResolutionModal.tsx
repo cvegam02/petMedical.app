@@ -1,9 +1,10 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { X, Search, Loader2, UserPlus } from 'lucide-react'
+import { Search, Loader2, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { WalkInOwnerValue } from '@/lib/validations/medical-record'
 
 interface Owner { id: string; full_name: string; phone: string | null }
@@ -82,32 +83,15 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
     onConfirm({ full_name: newName.trim(), phone: newPhone || undefined, email: newEmail || undefined })
   }
 
-  if (!isOpen) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      onClick={e => { if (e.target === e.currentTarget && !isSubmitting) onClose() }}
-      onKeyDown={e => { if (e.key === 'Escape' && !isSubmitting) onClose() }}
-      role="dialog"
-      aria-modal="true"
-      tabIndex={-1}
-    >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-        <div className="flex items-center justify-between px-6 pt-5 pb-4">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open && !isSubmitting) onClose() }}>
+      <DialogContent className="max-w-sm overflow-hidden p-0">
+        <DialogHeader className="flex-row items-center justify-between px-6 pt-5 pb-4 mb-0">
           <div>
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Finalizar consulta</p>
-            <h2 className="text-lg font-semibold text-foreground mt-0.5">¿A quién le pertenece?</h2>
+            <DialogTitle className="mt-0.5">¿A quién le pertenece?</DialogTitle>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors disabled:opacity-40"
-          >
-            <X size={16} />
-          </button>
-        </div>
+        </DialogHeader>
 
         {/* Mode tabs */}
         <div className="flex border-b border-border mx-6">
@@ -226,7 +210,7 @@ export function OwnerResolutionModal({ isOpen, onConfirm, onClose, isSubmitting 
             Guardar sin dueño por ahora
           </button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
