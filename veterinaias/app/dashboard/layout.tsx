@@ -65,12 +65,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="flex-1 flex flex-col overflow-hidden">
 
           {/* Topbar */}
-          <header className="h-14 shrink-0 sticky top-0 z-20 bg-white border-b border-border shadow-sm flex items-center px-6 relative">
+          <header className="h-14 shrink-0 sticky top-0 z-20 bg-card border-b border-border shadow-sm flex items-center px-6 relative">
 
             {/* Center — clinic identity */}
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
               {tenantLogoUrl ? (
-                <div className="w-[55px] h-[55px] rounded-md border border-border bg-white overflow-hidden shrink-0 flex items-center justify-center">
+                <div className="w-[55px] h-[55px] rounded-md border border-border bg-card overflow-hidden shrink-0 flex items-center justify-center">
                   <Image src={tenantLogoUrl} alt={tenantName} width={55} height={55} className="object-contain" unoptimized />
                 </div>
               ) : null}

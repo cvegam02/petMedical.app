@@ -353,7 +353,7 @@ export function PetExpedienteModal({ petId, petName, trigger }: PetExpedienteMod
                         <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest block">Medicamentos indicados</span>
                         <div className="grid grid-cols-1 gap-2">
                           {lastRecord.prescriptions.map((p) => (
-                            <div key={p.id} className="bg-white rounded-lg p-2.5 text-xs border border-border/50 flex flex-col gap-0.5">
+                            <div key={p.id} className="bg-card rounded-lg p-2.5 text-xs border border-border/50 flex flex-col gap-0.5">
                               <span className="font-semibold text-foreground">{p.medication_name} — {p.dosage}</span>
                               <span className="text-muted-foreground text-[11px]">{p.frequency} por {p.duration}</span>
                               {p.notes && <span className="text-muted-foreground/70 italic text-[10px] mt-0.5">"{p.notes}"</span>}

@@ -70,7 +70,7 @@ export default function PetsPage() {
           value={query}
           onChange={e => onSearch(e.target.value)}
           placeholder="Buscar mascota por nombre..."
-          className="w-full pl-12 pr-12 py-3.5 text-[15px] font-medium bg-white border border-border rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/[0.04] focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
+          className="w-full pl-12 pr-12 py-3.5 text-[15px] font-medium bg-card border border-border rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/[0.04] focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
         />
         {query && (
           <button
@@ -96,7 +96,7 @@ export default function PetsPage() {
       ) : loading ? (
         <div className="space-y-4">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-24 rounded-2xl bg-white border border-border/50 flex items-center px-6 gap-6">
+            <div key={i} className="h-24 rounded-2xl bg-card border border-border/50 flex items-center px-6 gap-6">
               <div className="w-14 h-14 rounded-xl bg-muted/40 animate-pulse" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 w-1/4 bg-muted/40 animate-pulse rounded" />
@@ -112,7 +112,7 @@ export default function PetsPage() {
         <div className="text-center py-24 rounded-[2rem] border-2 border-dashed border-border/60 bg-muted/[0.02]">
           <div className="relative w-20 h-20 mx-auto mb-6">
             <div className="absolute inset-0 bg-primary/5 rounded-2xl rotate-6 animate-pulse" />
-            <div className="absolute inset-0 bg-white border border-border shadow-sm rounded-2xl flex items-center justify-center">
+            <div className="absolute inset-0 bg-card border border-border shadow-sm rounded-2xl flex items-center justify-center">
               <PawPrint size={32} className="text-muted-foreground/20" />
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function PetsPage() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
+        <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
           {/* Enhanced Table Header */}
           <div className="flex items-center gap-6 px-10 py-5 bg-muted/20 border-b border-border/60">
             <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-1/3">Información del Paciente</p>

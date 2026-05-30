@@ -67,7 +67,7 @@ export function PetSearchHistorial() {
           placeholder="Buscar mascota por nombre..."
           value={query}
           onChange={e => setQuery(e.target.value)}
-          className="w-full pl-9 pr-9 py-2.5 text-sm bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
+          className="w-full pl-9 pr-9 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
         />
         {query && (
           <button

@@ -147,7 +147,7 @@ export default async function AppointmentDetailPage({
                   </div>
                   <Link
                     href={`/dashboard/pets/${pet?.id}/records/${medicalRecord.id}`}
-                    className={buttonVariants({ variant: 'outline', size: 'sm', className: 'bg-white' })}
+                    className={buttonVariants({ variant: 'outline', size: 'sm', className: 'bg-card' })}
                   >
                     Ver registro clínico
                   </Link>

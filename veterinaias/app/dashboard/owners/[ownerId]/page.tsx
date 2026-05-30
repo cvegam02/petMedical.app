@@ -54,7 +54,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
       </div>
 
       {/* Profile card */}
-      <div className="bg-white rounded-xl border border-border p-6 mb-8 shadow-sm">
+      <div className="bg-card rounded-xl border border-border p-6 mb-8 shadow-sm">
         <div className="flex items-start gap-5">
           <div className="w-11 h-11 rounded-lg bg-muted flex items-center justify-center shrink-0">
             <span className="text-sm font-bold text-muted-foreground">{initials}</span>
@@ -156,7 +156,7 @@ function PetPatientCard({ pet, lastVisit }: { pet: any; lastVisit?: string }) {
   return (
     <Link
       href={`/dashboard/pets/${pet.id}`}
-      className="group flex items-center gap-4 bg-white p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+      className="group flex items-center gap-4 bg-card p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
     >
       <div className="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 border border-border/50">
         <Icon size={20} strokeWidth={1.5} />

@@ -32,7 +32,7 @@ export function PetCard({ pet }: PetCardProps) {
   return (
     <Link
       href={`/dashboard/pets/${pet.id}`}
-      className="group relative flex items-center gap-4 p-4 bg-white rounded-xl border border-border/50 hover:border-primary/40 active:scale-[0.98] transition-all duration-200"
+      className="group relative flex items-center gap-4 p-4 bg-card rounded-xl border border-border/50 hover:border-primary/40 active:scale-[0.98] transition-all duration-200"
     >
       {/* Species Icon */}
       <div className="w-10 h-10 rounded-lg bg-muted/30 flex items-center justify-center shrink-0 border border-border/50 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">

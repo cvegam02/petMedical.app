@@ -135,7 +135,7 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
         </div>
       )}
 
-      <div className="bg-white border border-border shadow-xl shadow-primary/[0.01] rounded-2xl overflow-hidden divide-y divide-border/60">
+      <div className="bg-card border border-border shadow-xl shadow-primary/[0.01] rounded-2xl overflow-hidden divide-y divide-border/60">
         <FormSection 
           title={
             <div className="flex items-center gap-2">

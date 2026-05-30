@@ -37,7 +37,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
             href={href}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
               isActive
-                ? 'bg-white text-primary font-semibold shadow-sm border border-primary/10'
+                ? 'bg-card text-primary font-semibold shadow-sm border border-primary/10'
                 : 'text-foreground/55 hover:text-foreground hover:bg-white/60'
             }`}
           >

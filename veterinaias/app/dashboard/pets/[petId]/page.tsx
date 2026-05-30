@@ -79,7 +79,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
       </div>
 
       {/* Pet profile card */}
-      <div className="bg-white rounded-xl border border-border p-6 mb-8 shadow-sm">
+      <div className="bg-card rounded-xl border border-border p-6 mb-8 shadow-sm">
         <div className="flex items-start gap-5">
           <div className="w-11 h-11 rounded-lg bg-muted/50 border border-border/60 flex items-center justify-center text-muted-foreground/50 shrink-0">
             <Icon size={24} strokeWidth={1.5} />

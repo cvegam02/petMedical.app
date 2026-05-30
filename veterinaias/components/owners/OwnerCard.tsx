@@ -47,7 +47,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
           </div>
           {/* Badge de cantidad de mascotas si tiene más de 0 */}
           {pets.length > 0 && (
-            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white border border-border shadow-sm flex items-center justify-center animate-in zoom-in duration-500 delay-300">
+            <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-card border border-border shadow-sm flex items-center justify-center animate-in zoom-in duration-500 delay-300">
               <span className="text-[9px] font-bold text-primary">{pets.length}</span>
             </div>
           )}
@@ -96,7 +96,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
           pets.map((pet) => (
             <div 
               key={pet.id}
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-border group-hover:border-primary/20 group-hover:bg-primary/[0.02] transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-card border border-border group-hover:border-primary/20 group-hover:bg-primary/[0.02] transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             >
               <PawPrint size={10} className="text-primary/40 group-hover:text-primary transition-colors" />
               <span className="text-foreground/80 group-hover:text-foreground">{pet.name}</span>
