@@ -163,7 +163,7 @@ export default async function AppointmentsPage({
           )}
 
           {list.length === 0 ? (
-            <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
+            <div className="text-center py-20 rounded-[2rem] border-2 border-dashed border-border/60 bg-muted/10">
               <div className="w-14 h-14 rounded-2xl bg-white border border-border shadow-sm flex items-center justify-center mx-auto mb-5">
                 <CalendarDays size={22} className="text-muted-foreground/25" />
               </div>

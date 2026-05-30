@@ -87,10 +87,10 @@ export function DashboardTwoColumn({
 
         <Link
           href="/dashboard/records/new"
-          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-emerald-300 hover:shadow-sm transition-all group"
+          className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-green-300 hover:shadow-sm transition-all group"
         >
-          <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
-            <Stethoscope size={17} className="text-emerald-700" />
+          <div className="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center shrink-0 group-hover:bg-green-100 transition-colors">
+            <Stethoscope size={17} className="text-green-700" />
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">Nueva Consulta</p>
@@ -123,9 +123,9 @@ export function DashboardTwoColumn({
               <p className="text-xl font-bold text-foreground tabular-nums">{metrics.total}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">Hoy</p>
             </div>
-            <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-center">
-              <p className="text-xl font-bold text-emerald-700 tabular-nums">{metrics.completed}</p>
-              <p className="text-[10px] text-emerald-600 mt-0.5">Listas</p>
+            <div className="rounded-xl bg-green-50 border border-green-100 p-3 text-center">
+              <p className="text-xl font-bold text-green-700 tabular-nums">{metrics.completed}</p>
+              <p className="text-[10px] text-green-600 mt-0.5">Listas</p>
             </div>
             <div className="rounded-xl bg-amber-50 border border-amber-100 p-3 text-center">
               <p className="text-xl font-bold text-amber-700 tabular-nums">{metrics.pendingConfirm}</p>

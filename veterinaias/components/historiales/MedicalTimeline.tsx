@@ -9,7 +9,7 @@ interface MedicalTimelineProps {
 export function MedicalTimeline({ records }: MedicalTimelineProps) {
   if (records.length === 0) {
     return (
-      <div className="text-center py-16 rounded-[2rem] border-2 border-dashed border-border/60 bg-zinc-50/50">
+      <div className="text-center py-16 rounded-[2rem] border-2 border-dashed border-border/60 bg-muted/10">
         <p className="font-bold text-foreground text-lg tracking-tight">Sin consultas registradas</p>
         <p className="text-sm text-muted-foreground mt-2">Este paciente no tiene consultas en el historial aún.</p>
       </div>
