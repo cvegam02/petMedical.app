@@ -67,12 +67,12 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
 
   return (
     <section className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
-      <div className="flex items-center gap-4 pb-4 border-b border-zinc-100">
+      <div className="flex items-center gap-4 pb-4 border-b border-border">
         <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shadow-sm">
           <UserRound size={20} strokeWidth={2.5} />
         </div>
         <div>
-          <h3 className="text-base font-bold text-zinc-900 tracking-tight">00. Datos del Paciente</h3>
+          <h3 className="text-base font-bold text-foreground tracking-tight">00. Datos del Paciente</h3>
           <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">
             Perfil incompleto — completa antes de finalizar
           </p>
@@ -82,10 +82,10 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Owner fields */}
         <div className="space-y-4">
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Dueño</p>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Dueño</p>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label htmlFor="patient_owner_name" className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label htmlFor="patient_owner_name" className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Nombre completo
               </Label>
               <Input
@@ -93,11 +93,11 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
                 value={ownerName}
                 onChange={e => setOwnerName(e.target.value)}
                 placeholder="Nombre del dueño"
-                className="bg-white border-zinc-200 rounded-2xl"
+                className="bg-card border-border rounded-lg"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="patient_owner_phone" className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label htmlFor="patient_owner_phone" className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Teléfono
               </Label>
               <Input
@@ -105,11 +105,11 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
                 value={ownerPhone}
                 onChange={handlePhoneChange}
                 placeholder="555 123 4567"
-                className="bg-white border-zinc-200 rounded-2xl"
+                className="bg-card border-border rounded-lg"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="patient_owner_email" className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label htmlFor="patient_owner_email" className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Email
               </Label>
               <Input
@@ -118,7 +118,7 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
                 value={ownerEmail}
                 onChange={e => setOwnerEmail(e.target.value)}
                 placeholder="correo@ejemplo.com"
-                className="bg-white border-zinc-200 rounded-2xl"
+                className="bg-card border-border rounded-lg"
               />
             </div>
           </div>
@@ -126,14 +126,14 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
 
         {/* Pet fields */}
         <div className="space-y-4">
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Mascota</p>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Mascota</p>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Especie
               </Label>
               <Select value={speciesId} onValueChange={v => setSpeciesId(v ?? '')} items={Object.fromEntries(species.map(s => [s.id, s.name]))}>
-                <SelectTrigger className="bg-white border-zinc-200 rounded-2xl">
+                <SelectTrigger className="bg-card border-border rounded-lg">
                   <SelectValue placeholder="Seleccionar especie" />
                 </SelectTrigger>
                 <SelectContent>
@@ -144,7 +144,7 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               </Select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Raza
               </Label>
               <BreedCombobox
@@ -155,11 +155,11 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Sexo
               </Label>
               <Select value={sex} onValueChange={v => setSex(v ?? 'unknown')} items={{ male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }}>
-                <SelectTrigger className="bg-white border-zinc-200 rounded-2xl">
+                <SelectTrigger className="bg-card border-border rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -170,7 +170,7 @@ export function PatientDataSection({ initialOwner, initialPet, onChange }: Patie
               </Select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                 Fecha de nacimiento
               </Label>
               <DateInput
