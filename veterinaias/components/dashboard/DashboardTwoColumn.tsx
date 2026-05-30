@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope } from 'lucide-react'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
 import { AppointmentDetailDialog } from '@/components/appointments/AppointmentDetailDialog'
+import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 import type { DashboardAppointment } from './DashboardAppointmentCard'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
@@ -26,15 +27,9 @@ interface Props {
   role: string
 }
 
-const STATUS_CONFIG: Record<string, { stripe: string; badge: string; label: string }> = {
-  scheduled: { stripe: 'bg-amber-400',   badge: 'bg-amber-50 text-amber-800 border border-amber-200',      label: 'Sin confirmar' },
-  confirmed:  { stripe: 'bg-primary',    badge: 'bg-primary/10 text-primary border border-primary/20',     label: 'Confirmada' },
-  completed:  { stripe: 'bg-emerald-400',badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200',label: 'Completada' },
-  cancelled:  { stripe: 'bg-zinc-200',   badge: 'bg-muted text-muted-foreground border border-border',     label: 'Cancelada' },
-  no_show:    { stripe: 'bg-zinc-200',   badge: 'bg-muted text-muted-foreground border border-border',     label: 'No presentó' },
-}
-
 const ACTIVE = ['scheduled', 'confirmed']
+
+const STATUS_FALLBACK = { stripe: 'bg-muted-foreground/40', className: 'bg-muted text-muted-foreground border-border', label: '' }
 
 export function DashboardTwoColumn({
   greeting, firstName, today,
@@ -186,7 +181,7 @@ export function DashboardTwoColumn({
             ) : (
               <div className="space-y-1.5">
                 {todayAppointments.map(apt => {
-                  const cfg = STATUS_CONFIG[apt.status] ?? { stripe: 'bg-zinc-300', badge: 'bg-muted text-muted-foreground border border-border', label: apt.status }
+                  const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
                   const time = new Date(apt.scheduled_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                   const done = !ACTIVE.includes(apt.status)
                   const isNext = apt.id === nextAppointment?.id
@@ -229,7 +224,7 @@ export function DashboardTwoColumn({
                             Siguiente
                           </span>
                         ) : (
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.badge}`}>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.className}`}>
                             {cfg.label}
                           </span>
                         )}
@@ -252,7 +247,7 @@ export function DashboardTwoColumn({
               </div>
               <div className="space-y-1.5">
                 {futureAppointments.map(apt => {
-                  const cfg = STATUS_CONFIG[apt.status] ?? { stripe: 'bg-zinc-300', badge: 'bg-muted text-muted-foreground border border-border', label: apt.status }
+                  const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
                   const date = new Date(apt.scheduled_at).toLocaleDateString('es-MX', {
                     weekday: 'short', day: 'numeric', month: 'short',
                   })
@@ -284,7 +279,7 @@ export function DashboardTwoColumn({
                         </p>
                       </div>
                       <div className="flex items-center px-3 py-3 shrink-0">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.badge}`}>{cfg.label}</span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${cfg.className}`}>{cfg.label}</span>
                       </div>
                     </button>
                   )

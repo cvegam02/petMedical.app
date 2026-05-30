@@ -6,14 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { StatusActions } from '@/components/appointments/StatusActions'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-
-const STATUS_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"; className: string }> = {
-  scheduled: { label: 'Programada',     variant: 'outline',   className: 'bg-muted/50 text-muted-foreground border-border/50' },
-  confirmed: { label: 'Confirmada',     variant: 'secondary', className: 'bg-primary/10 text-primary border-primary/20' },
-  completed: { label: 'Completada',     variant: 'secondary', className: 'bg-primary/20 text-primary border-primary/30' },
-  cancelled: { label: 'Cancelada',      variant: 'destructive', className: 'bg-destructive/10 text-destructive border-destructive/20' },
-  no_show:   { label: 'No se presentó', variant: 'outline',   className: 'bg-orange-50 text-orange-600 border-orange-200' },
-}
+import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 
 export default async function AppointmentDetailPage({
   params,
@@ -51,7 +44,7 @@ export default async function AppointmentDetailPage({
     hour: '2-digit', minute: '2-digit',
   })
 
-  const status = STATUS_CONFIG[appointment.status] ?? STATUS_CONFIG.scheduled
+  const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -82,7 +75,7 @@ export default async function AppointmentDetailPage({
           </div>
           
           <div className="flex items-center gap-3">
-            <Badge variant={status.variant} className={`px-3 py-1 text-[11px] font-semibold uppercase tracking-wider border ${status.className}`}>
+            <Badge variant="outline" className={`px-3 py-1 text-[11px] font-semibold uppercase tracking-wider border ${status.className}`}>
               {status.label}
             </Badge>
           </div>
