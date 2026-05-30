@@ -82,7 +82,10 @@ export default async function PetHistorialPage({
       <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em] mb-1">Paciente</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Paciente</p>
+            </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">{pet.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {[pet.species?.name, pet.breed, ageStr, pet.microchip ? `Microchip: ${pet.microchip}` : null]

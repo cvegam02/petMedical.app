@@ -10,7 +10,13 @@ export default async function SuperAdminPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Tenants</h1>
+      <div className="space-y-1 mb-6">
+        <div className="flex items-center gap-2">
+          <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+          <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Super Admin</p>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tenants</h1>
+      </div>
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b">

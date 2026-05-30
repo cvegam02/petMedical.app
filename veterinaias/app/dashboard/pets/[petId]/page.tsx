@@ -86,7 +86,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl font-bold tracking-tight text-foreground">{pet.name}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">{pet.name}</h1>
               {species?.name && (
                 <span className="label-overline text-muted-foreground/50 border border-border px-2 py-0.5 rounded bg-muted/50">{species.name}</span>
               )}
