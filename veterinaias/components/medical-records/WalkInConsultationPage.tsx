@@ -42,7 +42,7 @@ export function WalkInConsultationPage() {
 
   const petReady = selectedPet !== null || (petValues.name.trim().length > 0 && petValues.species_id.length > 0)
 
-  const { register, handleSubmit, control, formState: { errors } } = useForm<WalkInRecordValues>({
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<WalkInRecordValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(walkInRecordSchema) as any,
     defaultValues: { prescriptions: [] },
@@ -226,7 +226,7 @@ export function WalkInConsultationPage() {
                     Agregar receta
                   </button>
                 ) : (
-                  <PrescriptionsFields control={control as any} />
+                  <PrescriptionsFields control={control as any} setValue={setValue as any} />
                 )}
               </FormSection>
 
