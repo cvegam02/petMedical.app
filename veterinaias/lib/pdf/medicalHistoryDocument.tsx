@@ -5,7 +5,7 @@ import {
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1a1a1a' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
-  clinicName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#0d6b6e' },
+  clinicName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#c1502e' },
   meta: { fontSize: 8, color: '#6b7280', marginTop: 2 },
   logo: { width: 60, height: 60 },
   section: { marginBottom: 16 },
@@ -161,7 +161,7 @@ export function MedicalHistoryDocument({ pet, owner, records, tenantName, tenant
         <Text
           style={styles.footer}
           render={({ pageNumber, totalPages }) =>
-            `Historial generado el ${generatedAt} | petMedical.app          Página ${pageNumber} de ${totalPages}`
+            `Historial generado el ${generatedAt} | MundoPet          Página ${pageNumber} de ${totalPages}`
           }
           fixed
         />

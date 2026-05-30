@@ -5,9 +5,9 @@ import {
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1a1a1a' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
-  clinicName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#0d6b6e' },
+  clinicName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#c1502e' },
   clinicMeta: { fontSize: 8, color: '#6b7280', marginTop: 2 },
-  rxLabel: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#0d6b6e' },
+  rxLabel: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: '#c1502e' },
   logo: { width: 55, height: 55 },
   vetBlock: { marginBottom: 14, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
   vetName: { fontSize: 11, fontFamily: 'Helvetica-Bold' },
