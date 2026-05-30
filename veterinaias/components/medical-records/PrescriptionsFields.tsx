@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useFieldArray, Control, useWatch } from 'react-hook-form'
+import { useFieldArray, Control, useWatch, type UseFormSetValue } from 'react-hook-form'
 import type { MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import type { MedicationCatalog } from '@/lib/types/database'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ const ROUTE_OPTIONS = ['Oral', 'IV', 'IM', 'SC', 'Tópica', 'Oftálmica', 'Ótic
 
 interface PrescriptionsFieldsProps {
   control: Control<MedicalRecordFormValues>
-  setValue: (name: string, value: unknown) => void
+  setValue: UseFormSetValue<MedicalRecordFormValues>
 }
 
 export function PrescriptionsFields({ control, setValue }: PrescriptionsFieldsProps) {
