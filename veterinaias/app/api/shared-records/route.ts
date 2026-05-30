@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: 'Error al crear link' }, { status: 500 })
 
   const proto = req.headers.get('x-forwarded-proto') ?? 'https'
-  const host = req.headers.get('host') ?? 'petmedical.app'
+  const host = req.headers.get('host') ?? 'mundopet.com.mx'
   const url = `${proto}://${host}/r/${shared.token}`
 
   return NextResponse.json({ token: shared.token, url, expires_at: expiresAt }, { status: 201 })
