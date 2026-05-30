@@ -133,13 +133,13 @@ export function VaccineCatalogTab() {
                         <div className="flex items-center justify-end gap-1">
                           <TooltipProvider>
                             <Tooltip>
-                              <TooltipTrigger asChild>
+                              <TooltipTrigger>
                                 <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil size={13} /></Button>
                               </TooltipTrigger>
                               <TooltipContent>Editar</TooltipContent>
                             </Tooltip>
                             <Tooltip>
-                              <TooltipTrigger asChild>
+                              <TooltipTrigger>
                                 <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => archive(v.id)}><Archive size={13} /></Button>
                               </TooltipTrigger>
                               <TooltipContent>Archivar</TooltipContent>
