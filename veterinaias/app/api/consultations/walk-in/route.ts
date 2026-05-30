@@ -44,7 +44,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
     }
 
-    const { prescriptions, weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm, ...rest } = recordData
+    const { 
+      prescriptions, 
+      vaccinations, 
+      dewormings, 
+      weight_kg, 
+      temperature_celsius, 
+      heart_rate_bpm, 
+      respiratory_rate_bpm, 
+      ...rest 
+    } = recordData
 
     const { data: record, error: recordError } = await supabase
       .from('medical_records')
@@ -63,21 +72,33 @@ export async function POST(req: NextRequest) {
 
     if (recordError) return NextResponse.json({ error: 'Error al crear la consulta' }, { status: 500 })
 
-    if (prescriptions && prescriptions.length > 0) {
-      const { error: presError } = await supabase
-        .from('prescriptions')
-        .insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))
+    // Save Related Data (Prescriptions, Vaccinations, Dewormings)
+    const tasks: Promise<any>[] = []
 
-      if (presError) {
+    if (prescriptions && prescriptions.length > 0) {
+      tasks.push(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id }))))
+    }
+    if (vaccinations && vaccinations.length > 0) {
+      tasks.push(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id }))))
+    }
+    if (dewormings && dewormings.length > 0) {
+      tasks.push(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, created_by: user.id }))))
+    }
+
+    if (tasks.length > 0) {
+      const results = await Promise.all(tasks)
+      const failed = results.find(r => r.error)
+      if (failed) {
+        // Rollback record if something failed
         await supabase.from('medical_records').delete().eq('id', record.id)
-        return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
+        return NextResponse.json({ error: 'Error al guardar datos complementarios' }, { status: 500 })
       }
     }
 
     return NextResponse.json({ petId: existingPetId, recordId: record.id }, { status: 201 })
   }
 
-  // ── New-pet path (existing behavior unchanged) ───────────────────────────
+  // ── New-pet path ────────────────────────────────────────────────────────
   const result = walkInConsultationSchema.safeParse(body)
   if (!result.success) {
     return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
@@ -159,7 +180,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Step 4: Create medical record
-  const { prescriptions, weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm, ...rest } = recordData
+  const { 
+    prescriptions, 
+    vaccinations, 
+    dewormings, 
+    weight_kg, 
+    temperature_celsius, 
+    heart_rate_bpm, 
+    respiratory_rate_bpm, 
+    ...rest 
+  } = recordData
 
   const { data: record, error: recordError } = await supabase
     .from('medical_records')
@@ -183,17 +213,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al crear la consulta' }, { status: 500 })
   }
 
-  if (prescriptions && prescriptions.length > 0) {
-    const { error: presError } = await supabase
-      .from('prescriptions')
-      .insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))
+  // Save Related Data
+  const tasks: Promise<any>[] = []
 
-    if (presError) {
+  if (prescriptions && prescriptions.length > 0) {
+    tasks.push(supabase.from('prescriptions').insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id }))))
+  }
+  if (vaccinations && vaccinations.length > 0) {
+    tasks.push(supabase.from('vaccinations').insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id }))))
+  }
+  if (dewormings && dewormings.length > 0) {
+    tasks.push(supabase.from('dewormings').insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, created_by: user.id }))))
+  }
+
+  if (tasks.length > 0) {
+    const results = await Promise.all(tasks)
+    const failed = results.find(r => r.error)
+    if (failed) {
       await supabase.from('medical_records').delete().eq('id', record.id)
       await (supabase.from('pet_registrations') as any).delete().eq('pet_id', petId)
       if (ownerWasCreated) await (supabase.from('owners') as any).delete().eq('id', ownerId)
       await supabase.from('pets').delete().eq('id', petId)
-      return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
+      return NextResponse.json({ error: 'Error al guardar datos complementarios' }, { status: 500 })
     }
   }
 
