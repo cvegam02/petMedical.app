@@ -17,8 +17,12 @@ export const dewormingEntrySchema = z.object({
 })
 
 export const prescriptionSchema = z.object({
+  medication_catalog_id: z.string().uuid().optional(),
   medication_name: z.string().min(1, 'Nombre del medicamento es requerido'),
+  active_ingredient: z.string().optional(),
   dosage: z.string().min(1, 'Dosis es requerida'),
+  suggested_dose: z.string().optional(),
+  route_of_administration: z.string().optional(),
   frequency: z.string().min(1, 'Frecuencia es requerida'),
   duration: z.string().min(1, 'Duración es requerida'),
   notes: z.string().optional(),
