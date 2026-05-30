@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { FreeTextCombobox } from '@/components/ui/free-text-combobox'
+import { DateInput } from '@/components/ui/date-input'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -196,12 +197,12 @@ export function VaccinationsModal({ petId, open, onOpenChange }: VaccinationsMod
               <div className={isHistorical ? '' : 'grid grid-cols-2 gap-3'}>
                 <div className="space-y-1">
                   <Label>Fecha de aplicación <span className="text-destructive">*</span></Label>
-                  <Input type="date" {...register('application_date')} />
+                  <DateInput value={watch('application_date')} onChange={v => setValue('application_date', v ?? '')} />
                 </div>
                 {!isHistorical && (
                   <div className="space-y-1">
                     <Label>Próxima fecha</Label>
-                    <Input type="date" {...register('next_due_date')} />
+                    <DateInput value={watch('next_due_date')} onChange={v => setValue('next_due_date', v ?? undefined)} />
                   </div>
                 )}
               </div>

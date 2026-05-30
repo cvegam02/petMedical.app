@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DateInput } from '@/components/ui/date-input'
 
 const TODAY = new Date().toISOString().split('T')[0]
 
@@ -45,7 +46,7 @@ export function DewormingsModal({ petId, open, onOpenChange }: DewormingsModalPr
   const [addOpen, setAddOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<DewormingFormValues>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { isSubmitting } } = useForm<DewormingFormValues>({
     resolver: zodResolver(dewormingFormSchema) as any,
     defaultValues: { application_date: TODAY },
   })
@@ -132,11 +133,11 @@ export function DewormingsModal({ petId, open, onOpenChange }: DewormingsModalPr
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>Fecha de aplicación <span className="text-destructive">*</span></Label>
-                  <Input type="date" {...register('application_date')} />
+                  <DateInput value={watch('application_date')} onChange={v => setValue('application_date', v ?? '')} />
                 </div>
                 <div className="space-y-1">
                   <Label>Próxima fecha</Label>
-                  <Input type="date" {...register('next_due_date')} />
+                  <DateInput value={watch('next_due_date')} onChange={v => setValue('next_due_date', v ?? undefined)} />
                 </div>
               </div>
               <div className="space-y-1">
