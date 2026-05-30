@@ -3,9 +3,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Clock, Calendar, Phone, X, Plus, Users, PawPrint, ChevronRight, ArrowRight, Stethoscope } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope } from 'lucide-react'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
+import { AppointmentDetailDialog } from '@/components/appointments/AppointmentDetailDialog'
 import type { DashboardAppointment } from './DashboardAppointmentCard'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
@@ -65,8 +65,6 @@ export function DashboardTwoColumn({
       setLoading(null)
     }
   }
-
-  const isActive = selected ? ACTIVE.includes(selected.status) : false
 
   return (
     <>
@@ -297,132 +295,13 @@ export function DashboardTwoColumn({
         </div>
       </div>
 
-      {/* Detail modal */}
-      {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setSelected(null) }}
-          onKeyDown={(e) => { if (e.key === 'Escape') setSelected(null) }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Detalle de cita"
-          tabIndex={-1}
-        >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-            {/* Header */}
-            <div className="px-6 pt-6 pb-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-md mb-2 ${STATUS_CONFIG[selected.status]?.badge ?? 'bg-muted text-muted-foreground'}`}>
-                    {STATUS_CONFIG[selected.status]?.label ?? selected.status}
-                  </span>
-                  <h2 className="text-2xl font-bold font-heading text-foreground leading-tight">
-                    {selected.pet?.name ?? '—'}
-                  </h2>
-                  {selected.pet?.species && (
-                    <p className="text-sm text-muted-foreground mt-0.5">{selected.pet.species.name}</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelected(null)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0 mt-0.5"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            {/* Info */}
-            <div className="px-6 py-4 border-t border-border/60 space-y-2.5">
-              <div className="flex items-center gap-2.5 text-sm">
-                <Calendar size={13} className="text-muted-foreground shrink-0" />
-                <span className="capitalize text-foreground">
-                  {new Date(selected.scheduled_at).toLocaleDateString('es-MX', {
-                    weekday: 'long', day: 'numeric', month: 'long',
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5 text-sm">
-                <Clock size={13} className="text-muted-foreground shrink-0" />
-                <span className="text-foreground font-medium tabular-nums">
-                  {new Date(selected.scheduled_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-                <span className="text-muted-foreground">· {selected.duration_minutes} min</span>
-              </div>
-              {selected.owner && (
-                <div className="flex items-center gap-2.5 text-sm">
-                  <Phone size={13} className="text-muted-foreground shrink-0" />
-                  <span className="font-medium text-foreground">{selected.owner.full_name}</span>
-                  {selected.owner.phone && (
-                    <a
-                      href={`tel:${selected.owner.phone}`}
-                      className="text-xs text-primary hover:underline tabular-nums"
-                    >
-                      {selected.owner.phone}
-                    </a>
-                  )}
-                </div>
-              )}
-              {selected.reason && (
-                <p className="text-sm text-muted-foreground italic pl-[21px]">{selected.reason}</p>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="px-6 pb-6 pt-4 border-t border-border/60">
-              {isActive ? (
-                <>
-                  <Link
-                    href={`/dashboard/pets/${selected.pet?.id}/records/new?appointmentId=${selected.id}`}
-                    className={`${buttonVariants({})} w-full justify-center gap-2 py-3 text-base font-semibold`}
-                  >
-                    Iniciar consulta
-                    <ArrowRight size={16} />
-                  </Link>
-
-                  {selected.status === 'scheduled' && (
-                    <Button
-                      variant="outline"
-                      className="w-full mt-2"
-                      onClick={() => transition('confirmed')}
-                      disabled={loading === 'confirmed'}
-                    >
-                      {loading === 'confirmed' ? 'Confirmando…' : 'Confirmar cita'}
-                    </Button>
-                  )}
-
-                  <div className="flex items-center justify-center gap-4 mt-4">
-                    <button
-                      type="button"
-                      onClick={() => transition('no_show')}
-                      disabled={loading === 'no_show'}
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
-                    >
-                      {loading === 'no_show' ? 'Guardando…' : 'No se presentó'}
-                    </button>
-                    <span className="text-border text-xs">·</span>
-                    <button
-                      type="button"
-                      onClick={() => transition('cancelled')}
-                      disabled={loading === 'cancelled'}
-                      className="text-xs text-destructive/60 hover:text-destructive transition-colors disabled:opacity-40"
-                    >
-                      {loading === 'cancelled' ? 'Guardando…' : 'Cancelar cita'}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-center text-muted-foreground py-1">
-                  {selected.status === 'completed' && 'Esta cita ya fue completada.'}
-                  {selected.status === 'cancelled' && 'Esta cita fue cancelada.'}
-                  {selected.status === 'no_show' && 'El paciente no se presentó.'}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <AppointmentDetailDialog
+        open={selected !== null}
+        onOpenChange={(open) => { if (!open) setSelected(null) }}
+        appointment={selected}
+        onTransition={transition}
+        loadingStatus={loading}
+      />
 
       <NewAppointmentModal
         isOpen={newApptOpen}
