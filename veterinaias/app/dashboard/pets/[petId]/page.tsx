@@ -4,6 +4,7 @@ import { MedicalRecordCard } from '@/components/medical-records/MedicalRecordCar
 import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeft, Plus, Cat, Dog, PawPrint, CalendarDays, Cpu, User, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { PetCartillaButtons } from '@/components/pets/PetCartillaButtons'
 
 const SEX_LABELS: Record<string, string> = { male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }
 
@@ -131,6 +132,12 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
             <p className="label-overline text-muted-foreground/50">Consultas</p>
             <p className="text-sm font-semibold text-foreground">{records.length}</p>
           </div>
+        </div>
+
+        {/* Cartilla */}
+        <div className="mt-4 pt-4 border-t border-border/60">
+          <p className="label-overline text-muted-foreground/50 mb-2">Cartilla</p>
+          <PetCartillaButtons petId={petId} />
         </div>
 
         {pet.notes && (
