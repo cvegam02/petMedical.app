@@ -48,7 +48,7 @@ export default function PetsPage() {
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Censo de Pacientes</p>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
             Mascotas
             <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[12px] font-mono px-2 py-0.5 rounded-md border border-border/50">
               {pets.length}

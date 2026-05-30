@@ -71,7 +71,7 @@ export default async function AppointmentDetailPage({
               <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
               <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Detalle de consulta</p>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {pet?.name ?? '—'}
             </h1>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
