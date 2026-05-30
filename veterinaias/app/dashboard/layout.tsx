@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { UserMenu } from '@/components/dashboard/UserMenu'
 import { Toaster } from 'sonner'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
+import { PawPrint } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -42,9 +43,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {/* Brand */}
           <div className="px-4 h-14 flex items-center shrink-0">
             <Link href="/dashboard" className="flex items-center gap-2.5">
-              <Image src="/icon.png" alt="petMedical.app" width={55} height={55} className="rounded-md shrink-0" />
+              <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                <PawPrint size={20} className="text-primary" strokeWidth={2} />
+              </div>
               <p className="text-base font-medium text-foreground tracking-tight leading-none">
-                pet<span className="font-bold">Medical</span>.app
+                Mundo<span className="font-bold">Pet</span>
               </p>
             </Link>
           </div>
