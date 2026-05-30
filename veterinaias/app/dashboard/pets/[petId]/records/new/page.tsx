@@ -82,7 +82,11 @@ export default async function MedicalRecordNewPage({
       >
         ← {pet.name}
       </Link>
-      <h1 className="text-xl font-semibold tracking-tight text-foreground mb-1">Nueva consulta</h1>
+      <div className="flex items-center gap-2 mb-1">
+        <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+        <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Expediente</p>
+      </div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground mb-1">Nueva consulta</h1>
       <p className="text-sm text-muted-foreground mb-6">
         Este registro será <strong>inmutable</strong> una vez guardado. Verifica la información antes de continuar.
       </p>

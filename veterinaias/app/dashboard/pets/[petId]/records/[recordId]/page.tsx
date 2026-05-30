@@ -57,8 +57,11 @@ export default async function RecordDetailPage({
       <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-1">Consulta</p>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">{record.reason}</h1>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
+              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Consulta</p>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{record.reason}</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {date}{createdBy?.full_name ? ` · Dr. ${createdBy.full_name}` : ''}
             </p>
