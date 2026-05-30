@@ -1,10 +1,11 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PrescriptionConfigForm } from '@/components/settings/PrescriptionConfigForm'
 
 export default async function SettingsRecetasPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('user_profiles')

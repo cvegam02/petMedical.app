@@ -47,6 +47,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: 'El expediente no tiene recetas' }, { status: 400 })
   }
 
+  if (!record.pet?.id) {
+    return NextResponse.json({ error: 'Expediente sin mascota asociada' }, { status: 400 })
+  }
+
   const { data: reg } = await (supabase as any)
     .from('pet_registrations')
     .select('owner:owner_id(full_name, address)')
