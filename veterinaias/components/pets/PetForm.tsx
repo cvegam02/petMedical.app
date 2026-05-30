@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { petSchema, type PetFormValues } from '@/lib/validations/pet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DateInput } from '@/components/ui/date-input'
@@ -59,6 +61,7 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const json = await res.json()
     if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
+    toast.success(petId ? 'Cambios guardados' : 'Mascota agregada')
     router.push(`/dashboard/owners/${ownerId}`)
     router.refresh()
   }
@@ -172,32 +175,21 @@ export function PetForm({ ownerId, petId, defaultValues }: PetFormProps) {
             </div>
           </div>
           <div className="mt-4 flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="sterilized"
-              {...register('sterilized')}
-              className="rounded border-border"
-            />
+            <Checkbox id="sterilized" {...register('sterilized')} />
             <Label htmlFor="sterilized" className="cursor-pointer">Esterilizado/a</Label>
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="cohabitation"
-                {...register('cohabitation')}
-                className="rounded border-border"
-              />
+              <Checkbox id="cohabitation" {...register('cohabitation')} />
               <Label htmlFor="cohabitation" className="cursor-pointer">Convive con otras mascotas</Label>
             </div>
             {watch('cohabitation') && (
               <div className="space-y-1 ml-6">
                 <Label htmlFor="cohabitation_details">Descripción de convivencia</Label>
-                <textarea
+                <Textarea
                   id="cohabitation_details"
                   {...register('cohabitation_details')}
                   rows={2}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground/50"
                   placeholder="ej. 2 perros y 1 gato, conviven sin conflictos en casa..."
                 />
               </div>

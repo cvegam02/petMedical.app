@@ -13,10 +13,8 @@ import { DewormingsField } from './DewormingsField'
 import { FormSection } from '@/components/ui/form-section'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-
-const TEXTAREA_CLASS =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring placeholder:text-muted-foreground/50'
 
 export interface IncompletePatient {
   owner: { id: string; full_name: string; phone: string | null; email: string | null }
@@ -176,19 +174,19 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label htmlFor="diagnosis">Diagnóstico</Label>
-              <textarea id="diagnosis" {...register('diagnosis')} rows={4}
-                className={TEXTAREA_CLASS} placeholder="Cuadro clínico observado..." />
+              <Textarea id="diagnosis" {...register('diagnosis')} rows={4}
+                placeholder="Cuadro clínico observado..." />
             </div>
             <div className="space-y-1">
               <Label htmlFor="treatment">Tratamiento</Label>
-              <textarea id="treatment" {...register('treatment')} rows={4}
-                className={TEXTAREA_CLASS} placeholder="Procedimientos realizados o indicados..." />
+              <Textarea id="treatment" {...register('treatment')} rows={4}
+                placeholder="Procedimientos realizados o indicados..." />
             </div>
           </div>
           <div className="space-y-1 mt-4">
             <Label htmlFor="notes">Notas internas</Label>
-            <textarea id="notes" {...register('notes')} rows={2}
-              className={TEXTAREA_CLASS} placeholder="Notas confidenciales para el equipo..." />
+            <Textarea id="notes" {...register('notes')} rows={2}
+              placeholder="Notas confidenciales para el equipo..." />
           </div>
         </FormSection>
 
