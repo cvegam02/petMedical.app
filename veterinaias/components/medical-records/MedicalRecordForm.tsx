@@ -216,7 +216,7 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
               Agregar receta
             </button>
           ) : (
-            <PrescriptionsFields control={control as any} />
+            <PrescriptionsFields control={control as any} setValue={setValue as any} />
           )}
         </FormSection>
 
