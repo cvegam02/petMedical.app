@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   if (sharedError) return NextResponse.json({ error: 'Error al generar link compartible' }, { status: 500 })
 
-  const appUrl = (process.env.APP_URL ?? 'https://petmedical.app').replace(/\/$/, '')
+  const appUrl = (process.env.APP_URL ?? 'https://mundopet.com.mx').replace(/\/$/, '')
   const shareUrl = `${appUrl}/r/${shared.token}`
 
   const clinicName: string = profile.tenants?.name ?? 'tu clínica'

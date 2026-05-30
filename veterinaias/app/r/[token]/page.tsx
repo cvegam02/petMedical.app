@@ -120,7 +120,7 @@ export default async function SharedRecordPage({ params }: { params: Promise<{ t
 
         <div className="mt-10 pt-5 border-t border-border text-center">
           <p className="text-xs text-muted-foreground">
-            {tenantName} · petMedical.app<br />
+            {tenantName} · MundoPet<br />
             Enlace válido hasta el {new Date(shared.expires_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}
           </p>
         </div>

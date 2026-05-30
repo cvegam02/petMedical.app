@@ -20,8 +20,8 @@ const lora = Lora({
 })
 
 export const metadata: Metadata = {
-  title: 'petMedical.app',
-  description: 'Plataforma de gestion veterinaria',
+  title: 'MundoPet',
+  description: 'Cuidado integral para tus mascotas',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
