@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
   // Verify pet exists
-  const { data: pet } = await supabase.from('pets').select('id').eq('id', id).single()
+  const { data: pet } = await (supabase as any).from('pets').select('id').eq('id', id).maybeSingle()
   if (!pet) return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
 
   const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
