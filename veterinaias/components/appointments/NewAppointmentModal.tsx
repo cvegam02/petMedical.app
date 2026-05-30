@@ -2,15 +2,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { X, CalendarIcon, Search, Loader2, TriangleAlert } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { Search, Loader2, TriangleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DateInput } from '@/components/ui/date-input'
 import { generateTimeSlots, combineDateAndTime, BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 
 interface TeamMember { id: string; full_name: string }
@@ -33,7 +31,6 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // Date/time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState('')
-  const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   // Shared fields
   const [reason, setReason] = useState('')
@@ -54,8 +51,6 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // First visit mode
   const [petName, setPetName] = useState('')
 
-  const modalRef = useRef<HTMLDivElement>(null)
-
   const timeSlots = useMemo(() => {
     if (!selectedDate) return []
     // Ensure we have all required fields for generateTimeSlots
@@ -67,19 +62,6 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     }
     return generateTimeSlots(config, selectedDate)
   }, [selectedDate, businessHours])
-
-  // Escape key
-  useEffect(() => {
-    if (!isOpen) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Focus modal on open
-  useEffect(() => {
-    if (isOpen) modalRef.current?.focus()
-  }, [isOpen])
 
   // Owner search debounce
   useEffect(() => {
@@ -132,7 +114,6 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setMode('registered')
     setSelectedDate(undefined)
     setSelectedTime('')
-    setDatePickerOpen(false)
     setReason('')
     setAssignedTo('')
     setOwnerQuery('')
@@ -199,33 +180,12 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     await submitAppointment(false)
   }
 
-  if (!isOpen) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={e => { if (e.target === e.currentTarget) handleClose() }}
-    >
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Nueva cita"
-        tabIndex={-1}
-        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto focus:outline-none"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-          <h2 className="text-base font-semibold text-foreground">Nueva cita</h2>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
-            aria-label="Cerrar"
-          >
-            <X size={18} />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(o) => { if (!o) handleClose() }}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Nueva cita</DialogTitle>
+        </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="px-6 pt-5 pb-2 space-y-6">
@@ -365,39 +325,20 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
               {/* Date + Time */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label>
-                    Fecha <span className="text-destructive">*</span>
-                  </Label>
-                  <Popover open={datePickerOpen} onOpenChange={(open) => setDatePickerOpen(open)}>
-                    <PopoverTrigger
-                      className="flex h-9 w-full items-center justify-start gap-2 rounded-sm border border-input bg-transparent px-2.5 py-2 text-sm font-normal transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                    >
-                      <CalendarIcon size={14} className="shrink-0 text-muted-foreground" />
-                      {selectedDate
-                        ? format(selectedDate, 'd MMM yyyy', { locale: es })
-                        : <span className="text-muted-foreground">Selecciona una fecha</span>
-                      }
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => {
-                          if (date) {
-                            setSelectedDate(date)
-                            setSelectedTime('')
-                            setDatePickerOpen(false)
-                          }
-                        }}
-                        disabled={(date) => {
-                          const today = new Date()
-                          today.setHours(0, 0, 0, 0)
-                          const availableDays = businessHours?.days ?? [1, 2, 3, 4, 5, 6]
-                          return date < today || !availableDays.includes(date.getDay())
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Fecha <span className="text-destructive">*</span></Label>
+                  <DateInput
+                    value={selectedDate ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` : undefined}
+                    onChange={v => {
+                      const d = v ? new Date(v + 'T12:00:00') : undefined
+                      setSelectedDate(d)
+                      setSelectedTime('')
+                    }}
+                    disabled={(date) => {
+                      const today = new Date(); today.setHours(0, 0, 0, 0)
+                      const availableDays = businessHours?.days ?? [1, 2, 3, 4, 5, 6]
+                      return date < today || !availableDays.includes(date.getDay())
+                    }}
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label>
@@ -502,7 +443,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
