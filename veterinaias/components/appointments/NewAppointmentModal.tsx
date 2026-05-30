@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { X, CalendarIcon, Search, Loader2 } from 'lucide-react'
+import { X, CalendarIcon, Search, Loader2, TriangleAlert } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [conflictWarning, setConflictWarning] = useState<{ message: string; appointments: { id: string; pet_name: string; owner_name: string }[] } | null>(null)
 
   // Date/time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -143,6 +144,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setShowSuggestions(false)
     setIsSearchingOwner(false)
     setIsLoadingPets(false)
+    setConflictWarning(null)
     preloadedRef.current = false
   }
 
@@ -151,8 +153,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     onClose()
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function submitAppointment(force = false) {
     if (!selectedDate || !selectedTime) { toast.error('Fecha y hora son requeridas'); return }
 
     if (mode === 'registered') {
@@ -166,35 +167,22 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     try {
       const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
 
-      if (mode === 'registered') {
-        const res = await fetch('/api/appointments', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            pet_id: selectedPetId,
-            owner_id: selectedOwner!.id,
-            scheduled_at: scheduledAtISO,
-            ...(reason ? { reason } : {}),
-            ...(assignedTo ? { assigned_to: assignedTo } : {}),
-          }),
-        })
-        const json = await res.json()
-        if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
-      } else {
-        const res = await fetch('/api/appointments/first-visit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            pet_name: petName.trim(),
-            scheduled_at: scheduledAtISO,
-            ...(reason ? { reason } : {}),
-            ...(assignedTo ? { assigned_to: assignedTo } : {}),
-          }),
-        })
-        const json = await res.json()
-        if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
+      const url = mode === 'registered' ? '/api/appointments' : '/api/appointments/first-visit'
+      const payload = mode === 'registered'
+        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      const json = await res.json()
+
+      if (res.status === 409 && json.conflict) {
+        setConflictWarning({ message: json.message, appointments: json.appointments })
+        return
       }
 
+      if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
+
+      setConflictWarning(null)
       toast.success('Cita creada')
       handleClose()
       router.refresh()
@@ -203,6 +191,12 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setConflictWarning(null)
+    await submitAppointment(false)
   }
 
   if (!isOpen) return null
@@ -411,7 +405,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                   </Label>
                   <Select
                     value={selectedTime}
-                    onValueChange={v => setSelectedTime(v ?? '')}
+                    onValueChange={v => { setSelectedTime(v ?? ''); setConflictWarning(null) }}
                     disabled={!selectedDate || timeSlots.length === 0}
                     items={Object.fromEntries(timeSlots.map(slot => [slot, slot]))}
                   >
@@ -458,6 +452,45 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
               )}
             </div>
           </div>
+
+          {/* Conflict warning */}
+          {conflictWarning && (
+            <div className="mx-6 mb-2 rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+              <div className="flex items-start gap-2.5">
+                <TriangleAlert size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-amber-900">{conflictWarning.message}</p>
+                  <ul className="mt-1.5 space-y-0.5">
+                    {conflictWarning.appointments.map(a => (
+                      <li key={a.id} className="text-xs text-amber-700">
+                        · {a.pet_name} — {a.owner_name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => submitAppointment(true)}
+                  disabled={isSubmitting}
+                  className="bg-amber-600 hover:bg-amber-700 text-white border-0"
+                >
+                  {isSubmitting ? 'Agendando...' : 'Agendar de todas formas'}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setConflictWarning(null)}
+                  className="border-amber-300 text-amber-800 hover:bg-amber-100"
+                >
+                  Elegir otra hora
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 mt-2">

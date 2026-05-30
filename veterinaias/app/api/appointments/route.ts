@@ -124,8 +124,33 @@ export async function POST(req: NextRequest) {
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
 
-  const result = appointmentSchema.safeParse(body)
+  const { force = false, ...appointmentBody } = body as Record<string, unknown>
+
+  const result = appointmentSchema.safeParse(appointmentBody)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
+
+  // Conflict check — skip if vet explicitly confirmed
+  if (!force) {
+    const { data: conflicts } = await (supabase.from('appointments') as any)
+      .select('id, scheduled_at, pet:pet_id(name), owner:owner_id(full_name)')
+      .eq('tenant_id', profile.tenant_id)
+      .eq('scheduled_at', result.data.scheduled_at)
+      .not('status', 'in', '("cancelled","no_show")')
+      .limit(3)
+
+    if (conflicts && conflicts.length > 0) {
+      return NextResponse.json({
+        conflict: true,
+        message: 'Ya existe una cita en ese horario',
+        appointments: conflicts.map((c: any) => ({
+          id: c.id,
+          pet_name: c.pet?.name ?? '—',
+          owner_name: c.owner?.full_name ?? '—',
+          scheduled_at: c.scheduled_at,
+        })),
+      }, { status: 409 })
+    }
+  }
 
   const { data, error } = await (supabase.from('appointments') as any)
     .insert({
