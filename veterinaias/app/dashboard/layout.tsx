@@ -1,10 +1,9 @@
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LogOut, ShieldCheck } from 'lucide-react'
+import { UserMenu } from '@/components/dashboard/UserMenu'
 import { Toaster } from 'sonner'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
-import { signOutAction } from '@/app/actions/auth'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -75,31 +74,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <p className="text-sm font-semibold text-foreground tracking-tight">{tenantName}</p>
             </div>
 
-            {/* Right — user info + logout */}
-            <div className="flex-1 flex items-center justify-end gap-2.5">
-              <div className="text-right leading-none">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name}</p>
-                <div className="flex items-center justify-end gap-1 mt-1">
-                  {profile?.role === 'admin' && <ShieldCheck size={9} className="text-primary/70" />}
-                  <p className="text-[10px] text-muted-foreground capitalize">{profile?.role}</p>
-                </div>
-              </div>
-
-              <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-                <span className="text-[11px] font-bold text-primary/80">{initials}</span>
-              </div>
-
-              <div className="w-px h-5 bg-border mx-0.5" />
-
-              <form action={signOutAction}>
-                <button
-                  type="submit"
-                  title="Cerrar sesión"
-                  className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors"
-                >
-                  <LogOut size={14} />
-                </button>
-              </form>
+            {/* Right — user menu */}
+            <div className="flex-1 flex items-center justify-end">
+              <UserMenu
+                fullName={profile?.full_name ?? ''}
+                role={profile?.role ?? ''}
+                initials={initials}
+              />
             </div>
           </header>
 
