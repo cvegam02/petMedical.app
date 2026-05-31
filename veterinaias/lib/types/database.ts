@@ -160,6 +160,8 @@ export interface PetDeworming {
   created_at: string
 }
 
+export type PetRegistrationStatus = 'active' | 'inactive' | 'deceased'
+
 export interface PetRegistration {
   id: string
   tenant_id: string
@@ -167,6 +169,9 @@ export interface PetRegistration {
   owner_id: string
   registered_at: string
   notes: string | null
+  status: PetRegistrationStatus
+  status_changed_at: string | null
+  date_of_death: string | null
 }
 
 export interface CrossTenantPetResult {
@@ -190,6 +195,7 @@ export interface MedicalRecord {
   appointment_id: string | null
   tenant_id: string
   created_by: string
+  attended_by: string | null
   reason: string
   diagnosis: string | null
   treatment: string | null
@@ -251,6 +257,7 @@ export interface Appointment {
   created_by: string | null
   created_at: string
   updated_at: string
+  appointment_type: 'consultation' | 'grooming'
 }
 
 export interface ShareToken {
@@ -303,9 +310,9 @@ export type Database = {
         Relationships: []
       }
       pet_registrations: {
-        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; registered_at: string; notes: string | null }
-        Insert: { tenant_id: string; pet_id: string; owner_id: string; notes?: string | null }
-        Update: { notes?: string | null }
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; registered_at: string; notes: string | null; status: PetRegistrationStatus; status_changed_at: string | null; date_of_death: string | null }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; notes?: string | null; status?: PetRegistrationStatus; status_changed_at?: string | null; date_of_death?: string | null }
+        Update: { notes?: string | null; status?: PetRegistrationStatus; status_changed_at?: string | null; date_of_death?: string | null }
         Relationships: []
       }
       pets: {
@@ -335,8 +342,8 @@ export type Database = {
         Relationships: []
       }
       medical_records: {
-        Row: { id: string; pet_id: string; appointment_id: string | null; tenant_id: string; created_by: string; reason: string; diagnosis: string | null; treatment: string | null; notes: string | null; weight_kg: number | null; temperature_celsius: number | null; heart_rate_bpm: number | null; respiratory_rate_bpm: number | null; created_at: string }
-        Insert: { pet_id: string; appointment_id?: string | null; tenant_id: string; created_by: string; reason: string; diagnosis?: string | null; treatment?: string | null; notes?: string | null; weight_kg?: number | null; temperature_celsius?: number | null; heart_rate_bpm?: number | null; respiratory_rate_bpm?: number | null }
+        Row: { id: string; pet_id: string; appointment_id: string | null; tenant_id: string; created_by: string; attended_by: string | null; reason: string; diagnosis: string | null; treatment: string | null; notes: string | null; weight_kg: number | null; temperature_celsius: number | null; heart_rate_bpm: number | null; respiratory_rate_bpm: number | null; created_at: string }
+        Insert: { pet_id: string; appointment_id?: string | null; tenant_id: string; created_by: string; attended_by?: string | null; reason: string; diagnosis?: string | null; treatment?: string | null; notes?: string | null; weight_kg?: number | null; temperature_celsius?: number | null; heart_rate_bpm?: number | null; respiratory_rate_bpm?: number | null }
         Update: { [key: string]: never }
         Relationships: []
       }
@@ -369,9 +376,9 @@ export type Database = {
         Relationships: []
       }
       appointments: {
-        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; medical_record_id: string | null; origin_record_id: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string }
-        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null }
-        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string }
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; medical_record_id: string | null; origin_record_id: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: 'consultation' | 'grooming' }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: 'consultation' | 'grooming' }
+        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: 'consultation' | 'grooming' }
         Relationships: []
       }
       share_tokens: {
@@ -404,8 +411,30 @@ export type Database = {
         Update: Record<string, never>
         Relationships: []
       }
+      grooming_service_catalog: {
+        Row: { id: string; tenant_id: string; name: string; duration_minutes: number | null; active: boolean; notes: string | null; created_at: string; updated_at: string }
+        Insert: { tenant_id: string; name: string; duration_minutes?: number | null; active?: boolean; notes?: string | null }
+        Update: { name?: string; duration_minutes?: number | null; active?: boolean; notes?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      grooming_sessions: {
+        Row: { id: string; tenant_id: string; pet_id: string; appointment_id: string | null; session_date: string; notes: string | null; created_by: string; created_at: string }
+        Insert: { tenant_id: string; pet_id: string; appointment_id?: string | null; session_date: string; notes?: string | null; created_by: string }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      grooming_session_services: {
+        Row: { id: string; session_id: string; tenant_id: string; service_catalog_id: string | null; service_name: string; created_at: string }
+        Insert: { session_id: string; tenant_id: string; service_catalog_id?: string | null; service_name: string }
+        Update: Record<string, never>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
   }
 }
+
+export type GroomingServiceCatalog = Database['public']['Tables']['grooming_service_catalog']['Row']
+export type GroomingSession = Database['public']['Tables']['grooming_sessions']['Row']
+export type GroomingSessionService = Database['public']['Tables']['grooming_session_services']['Row']
