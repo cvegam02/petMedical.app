@@ -61,6 +61,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>(Views.WEEK)
+  const [currentDate, setCurrentDate] = useState(new Date())
   const abortRef = useRef<AbortController | null>(null)
 
   const components = useMemo(() => ({ event: EventComponent }), [])
@@ -135,6 +136,8 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
         <Calendar<CalendarEvent>
           localizer={localizer}
           events={events}
+          date={currentDate}
+          onNavigate={setCurrentDate}
           view={currentView}
           onView={setCurrentView}
           views={[Views.WEEK, Views.MONTH]}

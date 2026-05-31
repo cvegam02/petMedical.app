@@ -56,11 +56,6 @@ export function OwnerCard({ owner }: OwnerCardProps) {
           <p className="font-bold text-foreground text-[15px] leading-tight tracking-tight truncate group-hover:text-primary transition-colors">
             {owner.full_name}
           </p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70 font-mono uppercase tracking-wider">
-              {owner.id.split('-')[0]}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -72,7 +67,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
           </div>
           <p className="text-[13px] font-bold font-mono tracking-tight tabular-nums">{owner.phone}</p>
         </div>
-        
+
         {owner.email ? (
           <div className="flex items-center gap-3 text-foreground/70">
             <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border/40">
@@ -94,7 +89,7 @@ export function OwnerCard({ owner }: OwnerCardProps) {
       <div className="flex-1 flex flex-wrap gap-2 items-center">
         {pets.length > 0 ? (
           pets.map((pet) => (
-            <div 
+            <div
               key={pet.id}
               className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg bg-card border border-border group-hover:border-primary/20 group-hover:bg-primary/[0.02] transition-all duration-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             >

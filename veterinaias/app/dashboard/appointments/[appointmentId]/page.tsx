@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Clock, Calendar, User, Info, FileText, Phone, Mail, PawPrint } from 'lucide-react'
+import { ChevronLeft, Clock, User, Info, FileText, Phone, Mail, PawPrint } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { StatusActions } from '@/components/appointments/StatusActions'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +19,7 @@ export default async function AppointmentDetailPage({
 
   const { data: appointment, error } = await (supabase.from('appointments') as any)
     .select(`
-      id, status, scheduled_at, duration_minutes, reason, notes, created_at,
+      id, status, scheduled_at, duration_minutes, reason, notes, created_at, appointment_type,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone, email),
       assigned_to_profile:assigned_to(id, full_name),
@@ -36,6 +36,10 @@ export default async function AppointmentDetailPage({
   const assignedTo = appointment.assigned_to_profile as any
   const createdBy = appointment.created_by_profile as any
   const medicalRecord = appointment.medical_record as any
+  const isGrooming = appointment.appointment_type === 'grooming'
+  const groomingServices = isGrooming && appointment.reason
+    ? appointment.reason.split(', ').filter(Boolean)
+    : []
 
   const dateObj = new Date(appointment.scheduled_at)
   const dateStr = dateObj.toLocaleDateString('es-MX', {
@@ -63,7 +67,7 @@ export default async function AppointmentDetailPage({
           <div className="space-y-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
-              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Detalle de consulta</p>
+              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">{isGrooming ? 'Detalle de estética' : 'Detalle de consulta'}</p>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {pet?.name ?? '—'}
@@ -112,13 +116,27 @@ export default async function AppointmentDetailPage({
                 </div>
 
                 <div className="sm:col-span-2 space-y-1.5">
-                  <p className="label-overline text-muted-foreground/50">Motivo de consulta</p>
-                  <div className="flex items-start gap-2 p-4 rounded-xl bg-muted/30 border border-border/40">
-                    <FileText size={16} className="text-muted-foreground/40 mt-0.5 shrink-0" />
-                    <p className="text-sm text-foreground leading-relaxed italic">
-                      {appointment.reason ? `"${appointment.reason}"` : 'No se especificó motivo.'}
-                    </p>
-                  </div>
+                  <p className="label-overline text-muted-foreground/50">{isGrooming ? 'Servicios' : 'Motivo de consulta'}</p>
+                  {isGrooming ? (
+                    groomingServices.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {groomingServices.map((svc: string) => (
+                          <span key={svc} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                            {svc}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Sin servicios especificados.</p>
+                    )
+                  ) : (
+                    <div className="flex items-start gap-2 p-4 rounded-xl bg-muted/30 border border-border/40">
+                      <FileText size={16} className="text-muted-foreground/40 mt-0.5 shrink-0" />
+                      <p className="text-sm text-foreground leading-relaxed italic">
+                        {appointment.reason ? `"${appointment.reason}"` : 'No se especificó motivo.'}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {appointment.notes && (
@@ -141,7 +159,7 @@ export default async function AppointmentDetailPage({
                       <FileText size={20} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground leading-none">Consulta Registrada</p>
+                      <p className="text-sm font-semibold text-foreground leading-none">{isGrooming ? 'Sesión de estética registrada' : 'Consulta registrada'}</p>
                       <p className="text-xs text-muted-foreground mt-1">Existe un registro clínico vinculado a esta cita.</p>
                     </div>
                   </div>
@@ -162,6 +180,7 @@ export default async function AppointmentDetailPage({
                 appointmentId={appointmentId}
                 petId={pet?.id ?? ''}
                 status={appointment.status}
+                appointmentType={appointment.appointment_type}
               />
             </div>
           </section>
