@@ -4,6 +4,8 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { createElement } from 'react'
 import { MedicalHistoryDocument } from '@/lib/pdf/medicalHistoryDocument'
 
+export const runtime = 'nodejs'
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ petId: string }> },
@@ -75,8 +77,8 @@ export async function GET(
         generatedAt,
       })
     )
-  } catch {
-    return NextResponse.json({ error: 'Error al generar el PDF' }, { status: 500 })
+  } catch (err) {
+    return NextResponse.json({ error: 'Error al generar el PDF', detail: (err as Error)?.message ?? String(err) }, { status: 500 })
   }
 
   const safeName = (pet.name as string)

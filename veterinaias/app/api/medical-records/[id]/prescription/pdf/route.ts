@@ -4,6 +4,8 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { createElement } from 'react'
 import { PrescriptionDocument, type PrescriptionData } from '@/lib/pdf/prescriptionDocument'
 
+export const runtime = 'nodejs'
+
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function calcAge(dob: string | null): string | null {
