@@ -2,6 +2,7 @@ export type TenantType = 'individual' | 'enterprise'
 export type UserRole = 'admin' | 'staff' | 'doctor' | 'assistant'
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'grace_period'
 export type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+export type AppointmentType = 'consultation' | 'grooming'
 export type PetSex = 'male' | 'female' | 'unknown'
 
 export interface BusinessHoursConfig {
@@ -257,7 +258,7 @@ export interface Appointment {
   created_by: string | null
   created_at: string
   updated_at: string
-  appointment_type: 'consultation' | 'grooming'
+  appointment_type: AppointmentType
 }
 
 export interface ShareToken {
@@ -376,9 +377,9 @@ export type Database = {
         Relationships: []
       }
       appointments: {
-        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; medical_record_id: string | null; origin_record_id: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: 'consultation' | 'grooming' }
-        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: 'consultation' | 'grooming' }
-        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: 'consultation' | 'grooming' }
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; medical_record_id: string | null; origin_record_id: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: AppointmentType }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: AppointmentType }
+        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: AppointmentType }
         Relationships: []
       }
       share_tokens: {

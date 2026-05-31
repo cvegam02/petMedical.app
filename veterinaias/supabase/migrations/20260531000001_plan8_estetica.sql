@@ -3,7 +3,7 @@
 -- 1. Grooming service catalog (per-tenant, no pricing in v1)
 CREATE TABLE IF NOT EXISTS grooming_service_catalog (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   duration_minutes INTEGER,
   active BOOLEAN NOT NULL DEFAULT true,
@@ -15,16 +15,20 @@ CREATE TABLE IF NOT EXISTS grooming_service_catalog (
 CREATE INDEX IF NOT EXISTS grooming_service_catalog_tenant_id_idx
   ON grooming_service_catalog(tenant_id);
 
+CREATE TRIGGER grooming_service_catalog_updated_at
+  BEFORE UPDATE ON grooming_service_catalog
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
 ALTER TABLE grooming_service_catalog ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_read_grooming_catalog" ON grooming_service_catalog
   FOR SELECT USING (tenant_id = auth_tenant_id());
 
-CREATE POLICY "tenant_insert_grooming_catalog" ON grooming_service_catalog
-  FOR INSERT WITH CHECK (tenant_id = auth_tenant_id());
+CREATE POLICY "admin_insert_grooming_catalog" ON grooming_service_catalog
+  FOR INSERT WITH CHECK (tenant_id = auth_tenant_id() AND auth_role() = 'admin');
 
-CREATE POLICY "tenant_update_grooming_catalog" ON grooming_service_catalog
-  FOR UPDATE USING (tenant_id = auth_tenant_id());
+CREATE POLICY "admin_update_grooming_catalog" ON grooming_service_catalog
+  FOR UPDATE USING (tenant_id = auth_tenant_id() AND auth_role() = 'admin');
 
 -- 2. Extend appointments with type
 ALTER TABLE appointments
@@ -45,6 +49,7 @@ CREATE TABLE IF NOT EXISTS grooming_sessions (
 
 CREATE INDEX IF NOT EXISTS grooming_sessions_tenant_id_idx ON grooming_sessions(tenant_id);
 CREATE INDEX IF NOT EXISTS grooming_sessions_pet_id_idx ON grooming_sessions(pet_id);
+CREATE INDEX IF NOT EXISTS grooming_sessions_appointment_id_idx ON grooming_sessions(appointment_id);
 
 ALTER TABLE grooming_sessions ENABLE ROW LEVEL SECURITY;
 
@@ -69,6 +74,9 @@ CREATE INDEX IF NOT EXISTS grooming_session_services_session_id_idx
 
 CREATE INDEX IF NOT EXISTS grooming_session_services_tenant_id_idx
   ON grooming_session_services(tenant_id);
+
+CREATE INDEX IF NOT EXISTS grooming_session_services_catalog_id_idx
+  ON grooming_session_services(service_catalog_id);
 
 ALTER TABLE grooming_session_services ENABLE ROW LEVEL SECURITY;
 
