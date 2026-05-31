@@ -86,7 +86,14 @@ export function GroomingSessionModal({
     const timeout = setTimeout(async () => {
       const res = await fetch(`/api/pets?q=${encodeURIComponent(petSearch)}&limit=5`)
       const json = await res.json()
-      setPetResults(json.data ?? [])
+      // API returns { id, name, species: { name } } — normalize to expected shape
+      setPetResults(
+        (json.data ?? []).map((p: any) => ({
+          pet_id: p.id,
+          name: p.name,
+          species_name: p.species?.name ?? '',
+        }))
+      )
       setShowPetResults(true)
     }, 200)
     return () => clearTimeout(timeout)
