@@ -37,7 +37,7 @@ Dos tipos de tenant con comportamiento distinto:
 
 **Aislamiento:** Row Level Security (RLS) de Supabase via `tenant_id`.
 
-**Excepcion — Expediente clinico:** `owners`, `pets`, `medical_records` son entidades de plataforma (sin `tenant_id`). Cualquier vet autenticado puede leer el historial completo de una mascota.
+**Identidad del paciente compartida, historial clínico AISLADO:** `pets` es identidad de plataforma — la misma mascota puede estar registrada en varias clínicas (`pet_registrations`). PERO el **historial clínico es privado por tenant**: `medical_records` (y `prescriptions`, `attachments`, `addendums`, `pet_vaccinations`, `pet_dewormings`) tienen `tenant_id` y su política RLS de `SELECT` está restringida a `tenant_id = auth_tenant_id()`. Cada clínica ve únicamente lo que ella creó; **no hay lectura cruzada de historiales entre clínicas**. El intercambio entre clínicas/dueño se hace explícitamente (exportar PDF o compartir por WhatsApp/correo). `owners` son tenant-scoped.
 
 **Super Admin:** flag `is_super_admin` en `user_profiles`. Ruta `/super-admin`, completamente separada de los tenants.
 

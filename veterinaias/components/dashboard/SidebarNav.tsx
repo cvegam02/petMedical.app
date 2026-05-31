@@ -1,14 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, PawPrint, Calendar, Settings2, ClipboardList } from 'lucide-react'
+import { Home, Users, PawPrint, Calendar, Settings2 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
   { href: '/dashboard/owners', icon: Users, label: 'Dueños' },
   { href: '/dashboard/pets', icon: PawPrint, label: 'Mascotas' },
   { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
-  { href: '/dashboard/historiales', icon: ClipboardList, label: 'Historiales' },
 ]
 
 const ADMIN_NAV_ITEMS = [

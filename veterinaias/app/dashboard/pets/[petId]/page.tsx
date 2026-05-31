@@ -5,6 +5,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeft, Plus, Cat, Dog, PawPrint, CalendarDays, Cpu, User, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { PetCartillaButtons } from '@/components/pets/PetCartillaButtons'
+import { PdfDownloadButton } from '@/components/historiales/PdfDownloadButton'
 
 const SEX_LABELS: Record<string, string> = { male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }
 
@@ -70,12 +71,15 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           <ChevronLeft size={14} />
           {owner?.full_name ?? 'Dueño'}
         </Link>
-        <Link
-          href={`/dashboard/pets/${petId}/edit`}
-          className={buttonVariants({ variant: 'outline', size: 'sm' })}
-        >
-          Editar mascota
-        </Link>
+        <div className="flex items-center gap-2">
+          <PdfDownloadButton petId={petId} />
+          <Link
+            href={`/dashboard/pets/${petId}/edit`}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          >
+            Editar mascota
+          </Link>
+        </div>
       </div>
 
       {/* Pet profile card */}
