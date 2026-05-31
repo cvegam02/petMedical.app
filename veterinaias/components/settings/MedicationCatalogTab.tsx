@@ -116,15 +116,11 @@ export function MedicationCatalogTab() {
                       <div className="flex items-center justify-end gap-1">
                         <TooltipProvider>
                           <Tooltip>
-                            <TooltipTrigger>
-                              <Button size="sm" variant="ghost" onClick={() => openEdit(m)}><Pencil size={13} /></Button>
-                            </TooltipTrigger>
+                            <TooltipTrigger render={<Button size="sm" variant="ghost" onClick={() => openEdit(m)}><Pencil size={13} /></Button>} />
                             <TooltipContent>Editar</TooltipContent>
                           </Tooltip>
                           <Tooltip>
-                            <TooltipTrigger>
-                              <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => archive(m.id)}><Archive size={13} /></Button>
-                            </TooltipTrigger>
+                            <TooltipTrigger render={<Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => archive(m.id)}><Archive size={13} /></Button>} />
                             <TooltipContent>Archivar</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
