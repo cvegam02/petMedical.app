@@ -86,7 +86,7 @@ export function DateInput({
           endMonth={new Date(toYear, 11)}
           disabled={disabled}
           locale={es}
-          defaultMonth={selected ?? new Date(toYear, 0)}
+          defaultMonth={selected ?? new Date()}
         />
       </PopoverContent>
     </Popover>
