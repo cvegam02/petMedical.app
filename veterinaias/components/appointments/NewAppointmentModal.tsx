@@ -52,6 +52,10 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   const [isLoadingPets, setIsLoadingPets] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const preloadedRef = useRef(false)
+  // Prevents the owner-search debounce from firing during programmatic pre-load
+  const skipOwnerSearchRef = useRef(false)
+  // When true, the selectedOwner effect skips fetching pets (pre-load handles it)
+  const skipPetFetchRef = useRef(false)
 
   // First visit mode
   const [petName, setPetName] = useState('')
@@ -71,6 +75,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // Owner search debounce
   useEffect(() => {
     if (ownerQuery.length < 1) return
+    if (skipOwnerSearchRef.current) { skipOwnerSearchRef.current = false; return }
     if (debounceRef.current) clearTimeout(debounceRef.current)
     setIsSearchingOwner(true)
     debounceRef.current = setTimeout(async () => {
@@ -88,13 +93,14 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [ownerQuery])
 
-  // Load pets when owner is selected
+  // Load pets when owner is selected (skipped when pre-load handles it directly)
   useEffect(() => {
     if (!selectedOwner) { setPets([]); return }
+    if (skipPetFetchRef.current) { skipPetFetchRef.current = false; return }
     setIsLoadingPets(true)
     fetch(`/api/pets?ownerId=${selectedOwner.id}`)
       .then(r => r.json())
-      .then(json => setPets(json.data ?? []))
+      .then(json => { setPets(json.data ?? []); setSelectedPetId('') })
       .catch(() => setPets([]))
       .finally(() => setIsLoadingPets(false))
   }, [selectedOwner])
@@ -133,6 +139,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setIsLoadingPets(false)
     setConflictWarning(null)
     preloadedRef.current = false
+    skipOwnerSearchRef.current = false
+    skipPetFetchRef.current = false
   }
 
   function handleClose() {
@@ -143,10 +151,15 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // Pre-load pet and owner when opened from a pet profile CTA
   useEffect(() => {
     if (!isOpen || !initialPet) return
+    // Block the owner-search debounce and the selectedOwner→pet-fetch effect
+    skipOwnerSearchRef.current = true
+    skipPetFetchRef.current = true
     setMode('registered')
     setAppointmentType(initialAppointmentType ?? 'consultation')
     setSelectedOwner({ id: initialPet.ownerId, full_name: initialPet.ownerName })
     setOwnerQuery(initialPet.ownerName)
+    setShowSuggestions(false)
+    // Fetch pets directly — don't rely on the selectedOwner effect chain
     setIsLoadingPets(true)
     fetch(`/api/pets?ownerId=${initialPet.ownerId}`)
       .then(r => r.json())
