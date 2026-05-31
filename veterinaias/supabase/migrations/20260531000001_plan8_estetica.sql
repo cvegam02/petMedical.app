@@ -67,6 +67,9 @@ CREATE TABLE IF NOT EXISTS grooming_session_services (
 CREATE INDEX IF NOT EXISTS grooming_session_services_session_id_idx
   ON grooming_session_services(session_id);
 
+CREATE INDEX IF NOT EXISTS grooming_session_services_tenant_id_idx
+  ON grooming_session_services(tenant_id);
+
 ALTER TABLE grooming_session_services ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_read_grooming_session_services" ON grooming_session_services
