@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PetCard } from '@/components/pets/PetCard'
 import { buttonVariants } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, Plus, Cat, Dog, PawPrint } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, Plus, Cat, Dog, PawPrint, CalendarDays, Stethoscope } from 'lucide-react'
 
 function getInitials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -34,6 +34,16 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
   const pets = (registrations ?? []).map((reg: any) => reg.pet).filter(Boolean)
   const initials = getInitials(owner.full_name)
 
+  const allRecords = pets.flatMap((p: any) => p.medical_records ?? [])
+  const totalConsultas = allRecords.length
+  const lastVisitTs = allRecords.length
+    ? Math.max(...allRecords.map((r: any) => new Date(r.created_at).getTime()))
+    : null
+  const lastVisitStr = lastVisitTs
+    ? new Date(lastVisitTs).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—'
+  const clienteDesde = new Date(owner.created_at).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
+
   return (
     <div className="max-w-4xl mx-auto pb-10">
       {/* Navigation */}
@@ -54,10 +64,10 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
       </div>
 
       {/* Profile card */}
-      <div className="bg-card rounded-xl border border-border p-6 mb-8 shadow-sm">
-        <div className="flex items-start gap-5">
-          <div className="w-11 h-11 rounded-lg bg-muted flex items-center justify-center shrink-0">
-            <span className="text-sm font-bold text-muted-foreground">{initials}</span>
+      <div className="bg-card rounded-xl border border-border mb-8 shadow-sm overflow-hidden">
+        <div className="flex items-start gap-5 p-6">
+          <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+            <span className="text-base font-bold text-primary/80">{initials}</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2.5 flex-wrap">
@@ -65,32 +75,39 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
               <span className="label-overline text-muted-foreground/50 border border-border px-2 py-0.5 rounded bg-muted/50">Responsable</span>
               <span className="label-overline text-muted-foreground/30 ml-auto font-mono">{owner.id.split('-')[0]}</span>
             </div>
-            <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-sm text-muted-foreground">
-              {owner.phone && (
-                <span className="flex items-center gap-1.5">
-                  <Phone size={12} className="text-muted-foreground/40 shrink-0" />
-                  {owner.phone}
-                </span>
-              )}
-              {owner.email && (
-                <span className="flex items-center gap-1.5">
-                  <Mail size={12} className="text-muted-foreground/40 shrink-0" />
-                  {owner.email}
-                </span>
-              )}
-              {owner.address && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin size={12} className="text-muted-foreground/40 shrink-0" />
-                  {owner.address}
-                </span>
-              )}
-              <span className="text-muted-foreground/40">·</span>
-              <span>Desde {new Date(owner.created_at).toLocaleDateString('es-MX', { year: 'numeric', month: 'long' })}</span>
-              <span className="font-medium text-foreground">
-                {pets.length} {pets.length === 1 ? 'mascota' : 'mascotas'}
-              </span>
-            </div>
+            {(owner.phone || owner.email || owner.address) ? (
+              <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-sm text-muted-foreground">
+                {owner.phone && (
+                  <span className="flex items-center gap-1.5">
+                    <Phone size={12} className="text-muted-foreground/40 shrink-0" />
+                    {owner.phone}
+                  </span>
+                )}
+                {owner.email && (
+                  <span className="flex items-center gap-1.5">
+                    <Mail size={12} className="text-muted-foreground/40 shrink-0" />
+                    {owner.email}
+                  </span>
+                )}
+                {owner.address && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin size={12} className="text-muted-foreground/40 shrink-0" />
+                    {owner.address}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-muted-foreground/50 italic">Sin datos de contacto</p>
+            )}
           </div>
+        </div>
+
+        {/* Metrics grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-border divide-x divide-border bg-muted/20">
+          <Metric icon={PawPrint} label="Mascotas" value={String(pets.length)} />
+          <Metric icon={Stethoscope} label="Consultas" value={String(totalConsultas)} />
+          <Metric icon={CalendarDays} label="Última visita" value={lastVisitStr} />
+          <Metric icon={CalendarDays} label="Cliente desde" value={clienteDesde} />
         </div>
       </div>
 
@@ -142,6 +159,18 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+function Metric({ icon: Icon, label, value }: { icon: typeof PawPrint; label: string; value: string }) {
+  return (
+    <div className="px-4 py-3.5">
+      <div className="flex items-center gap-1.5">
+        <Icon size={12} className="text-muted-foreground/40 shrink-0" strokeWidth={1.75} />
+        <p className="label-overline text-muted-foreground/50">{label}</p>
+      </div>
+      <p className="text-sm font-bold text-foreground mt-1 truncate">{value}</p>
     </div>
   )
 }
