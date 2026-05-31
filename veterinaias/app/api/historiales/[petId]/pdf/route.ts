@@ -37,6 +37,7 @@ export async function GET(
     (supabase.from('pets') as any)
       .select(`
         id, name, sex, date_of_birth, breed, microchip, color,
+        sterilized, habitat, feeding, cohabitation, cohabitation_details,
         species:species_id(name),
         owner:pet_registrations!inner(owner:owner_id(full_name, phone))
       `)
@@ -77,8 +78,8 @@ export async function GET(
         generatedAt,
       })
     )
-  } catch (err) {
-    return NextResponse.json({ error: 'Error al generar el PDF', detail: (err as Error)?.message ?? String(err) }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Error al generar el PDF' }, { status: 500 })
   }
 
   const safeName = (pet.name as string)

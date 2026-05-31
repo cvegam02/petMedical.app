@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
   clinicName: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: '#c1502e' },
   meta: { fontSize: 8, color: '#6b7280', marginTop: 2 },
-  logo: { width: 60, height: 60 },
+  logo: { width: 60, height: 60, objectFit: 'contain' },
   section: { marginBottom: 16 },
   sectionTitle: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#6b7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 },
   row: { flexDirection: 'row', gap: 24, marginBottom: 4 },
@@ -25,6 +25,8 @@ const styles = StyleSheet.create({
   rxName: { fontFamily: 'Helvetica-Bold', width: 120 },
   footer: { position: 'absolute', bottom: 24, left: 40, right: 40, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#9ca3af' },
 })
+
+const SEX_LABELS: Record<string, string> = { male: 'Macho', female: 'Hembra', unknown: 'Desconocido' }
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -68,14 +70,30 @@ export function MedicalHistoryDocument({ pet, owner, records, tenantName, tenant
             <Text style={styles.label}>Raza</Text><Text style={styles.value}>{pet.breed ?? '—'}</Text>
           </View>
           <View style={styles.row}>
-            <Text style={styles.label}>Sexo</Text><Text style={styles.value}>{pet.sex ?? '—'}</Text>
+            <Text style={styles.label}>Sexo</Text><Text style={styles.value}>{SEX_LABELS[pet.sex] ?? pet.sex ?? '—'}</Text>
             <Text style={styles.label}>Nacimiento</Text>
             <Text style={styles.value}>
               {pet.date_of_birth ? `${formatDate(pet.date_of_birth)} (${calcAge(pet.date_of_birth)})` : '—'}
             </Text>
           </View>
-          {pet.color && <View style={styles.row}><Text style={styles.label}>Color</Text><Text style={styles.value}>{pet.color}</Text></View>}
-          {pet.microchip && <View style={styles.row}><Text style={styles.label}>Microchip</Text><Text style={styles.value}>{pet.microchip}</Text></View>}
+          {(pet.color || pet.microchip) && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Color</Text><Text style={styles.value}>{pet.color ?? '—'}</Text>
+              <Text style={styles.label}>Microchip</Text><Text style={styles.value}>{pet.microchip ?? '—'}</Text>
+            </View>
+          )}
+          {(pet.sterilized != null || pet.habitat || pet.feeding) && (
+            <View style={styles.row}>
+              <Text style={styles.label}>Esterilizado</Text><Text style={styles.value}>{pet.sterilized == null ? '—' : pet.sterilized ? 'Sí' : 'No'}</Text>
+              <Text style={styles.label}>Dónde vive</Text><Text style={styles.value}>{pet.habitat ?? '—'}</Text>
+            </View>
+          )}
+          {pet.feeding && (
+            <View style={styles.row}><Text style={styles.label}>Alimentación</Text><Text style={styles.value}>{pet.feeding}</Text></View>
+          )}
+          {pet.cohabitation && pet.cohabitation_details && (
+            <View style={styles.row}><Text style={styles.label}>Convive con</Text><Text style={styles.value}>{pet.cohabitation_details}</Text></View>
+          )}
         </View>
 
         {/* Owner */}
