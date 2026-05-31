@@ -5,6 +5,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { ChevronLeft, Plus, Cat, Dog, PawPrint, CalendarDays, Cpu, User, ExternalLink, Home, Utensils, ShieldCheck, Users, StickyNote } from 'lucide-react'
 import Link from 'next/link'
 import { PetCartillaButtons } from '@/components/pets/PetCartillaButtons'
+import { PetServiceCTAs } from '@/components/pets/PetServiceCTAs'
 import { PdfDownloadButton } from '@/components/historiales/PdfDownloadButton'
 import { PetStatusControl } from '@/components/pets/PetStatusControl'
 import type { PetRegistrationStatus } from '@/lib/types/database'
@@ -51,7 +52,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) { redirect('/login'); return null }
 
-  const [petResult, regResult] = await Promise.all([
+  const [petResult, regResult, teamResult] = await Promise.all([
     (supabase.from('pets') as any)
       .select(`
         id, name, sex, date_of_birth, color, microchip, notes, created_at, sterilized, habitat, feeding, cohabitation, cohabitation_details,
@@ -72,6 +73,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
       .select('status, date_of_death, owner:owner_id(id, full_name, email, phone)')
       .eq('pet_id', petId)
       .maybeSingle(),
+    supabase.from('user_profiles').select('id, full_name').not('tenant_id', 'is', null),
   ])
 
   if (petResult.error?.code === 'PGRST116' || !petResult.data) notFound()
@@ -79,6 +81,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
 
   const pet = petResult.data
   const owner = regResult?.data?.owner ?? null
+  const team = (teamResult.data ?? []) as { id: string; full_name: string }[]
   const petStatus = (regResult?.data?.status ?? 'active') as PetRegistrationStatus
   const dateOfDeath = (regResult?.data?.date_of_death ?? null) as string | null
   const species = pet.species as any
@@ -110,6 +113,17 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           </Link>
         </div>
       </div>
+
+      {/* Service CTAs — above the hero */}
+      {owner && (
+        <PetServiceCTAs
+          petId={petId}
+          petName={pet.name}
+          ownerId={(owner as any).id}
+          ownerName={(owner as any).full_name ?? ''}
+          team={team}
+        />
+      )}
 
       {/* Pet profile card */}
       <div className="bg-card rounded-xl border border-border p-6 mb-8 shadow-sm">
@@ -176,9 +190,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
           </div>
         </div>
 
-        {/* Cartilla */}
+        {/* Cartilla de Salud */}
         <div className="mt-4 pt-4 border-t border-border/60">
-          <p className="label-overline text-muted-foreground/50 mb-2">Cartilla</p>
+          <p className="label-overline text-muted-foreground/50 mb-2">Cartilla de Salud</p>
           <PetCartillaButtons petId={petId} petName={pet.name} />
         </div>
 

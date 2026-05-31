@@ -15,6 +15,7 @@ export default async function MedicalRecordNewPage({
   const { petId } = await params
   const { appointmentId } = await searchParams
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: pet, error } = await (supabase.from('pets') as any)
     .select('id, name, sex, date_of_birth, notes, breed, species:species_id(name)')
@@ -25,6 +26,17 @@ export default async function MedicalRecordNewPage({
     console.error('Pet not found or error:', error)
     notFound()
   }
+
+  const { data: currentProfile } = await (supabase.from('user_profiles') as any)
+    .select('tenant_id')
+    .eq('id', user?.id ?? '')
+    .single()
+
+  const { data: vets } = await (supabase.from('user_profiles') as any)
+    .select('id, full_name')
+    .eq('tenant_id', currentProfile?.tenant_id ?? '')
+    .neq('role', 'assistant')
+    .order('full_name')
 
   const { data: registration } = await (supabase.from('pet_registrations') as any)
     .select('owner:owner_id(full_name)')
@@ -107,6 +119,8 @@ export default async function MedicalRecordNewPage({
           petId={petId}
           appointmentId={appointmentId}
           incompletePatient={incompletePatient}
+          vets={vets ?? []}
+          currentVetId={user?.id ?? ''}
         />
       </div>
     </div>

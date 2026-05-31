@@ -18,14 +18,18 @@ export interface NewAppointmentModalProps {
   onClose: () => void
   team: TeamMember[]
   businessHours?: BusinessHoursConfig
+  /** Pre-select a service type when opening from a service CTA */
+  initialAppointmentType?: 'consultation' | 'grooming'
+  /** Pre-select a pet and its owner when opening from a pet profile */
+  initialPet?: { petId: string; petName: string; ownerId: string; ownerName: string }
 }
 
 type Mode = 'registered' | 'first_visit'
 
-export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS }: NewAppointmentModalProps) {
+export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS, initialAppointmentType, initialPet }: NewAppointmentModalProps) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
-  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>('consultation')
+  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>(initialAppointmentType ?? 'consultation')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conflictWarning, setConflictWarning] = useState<{ message: string; appointments: { id: string; pet_name: string; owner_name: string }[] } | null>(null)
 
@@ -113,7 +117,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
   function reset() {
     setMode('registered')
-    setAppointmentType('consultation')
+    setAppointmentType(initialAppointmentType ?? 'consultation')
     setSelectedDate(undefined)
     setSelectedTime('')
     setReason('')
@@ -135,6 +139,24 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     reset()
     onClose()
   }
+
+  // Pre-load pet and owner when opened from a pet profile CTA
+  useEffect(() => {
+    if (!isOpen || !initialPet) return
+    setMode('registered')
+    setAppointmentType(initialAppointmentType ?? 'consultation')
+    setSelectedOwner({ id: initialPet.ownerId, full_name: initialPet.ownerName })
+    setOwnerQuery(initialPet.ownerName)
+    setIsLoadingPets(true)
+    fetch(`/api/pets?ownerId=${initialPet.ownerId}`)
+      .then(r => r.json())
+      .then(json => {
+        setPets(json.data ?? [])
+        setSelectedPetId(initialPet.petId)
+      })
+      .catch(() => setPets([]))
+      .finally(() => setIsLoadingPets(false))
+  }, [isOpen, initialPet?.petId, initialAppointmentType])
 
   async function submitAppointment(force = false) {
     if (!selectedDate || !selectedTime) { toast.error('Fecha y hora son requeridas'); return }
