@@ -25,6 +25,9 @@ type Mode = 'registered' | 'first_visit'
 export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS }: NewAppointmentModalProps) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
+  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>('consultation')
+  const [groomingCatalog, setGroomingCatalog] = useState<{ id: string; name: string }[]>([])
+  const [selectedGroomingServices, setSelectedGroomingServices] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conflictWarning, setConflictWarning] = useState<{ message: string; appointments: { id: string; pet_name: string; owner_name: string }[] } | null>(null)
 
@@ -62,6 +65,14 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     }
     return generateTimeSlots(config, selectedDate)
   }, [selectedDate, businessHours])
+
+  // Load grooming catalog when modal opens
+  useEffect(() => {
+    if (!isOpen) return
+    fetch('/api/catalog/grooming-services')
+      .then(r => r.json())
+      .then(json => setGroomingCatalog((json.data ?? []).filter((s: { id: string; name: string; active: boolean }) => s.active)))
+  }, [isOpen])
 
   // Owner search debounce
   useEffect(() => {
@@ -112,6 +123,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
   function reset() {
     setMode('registered')
+    setAppointmentType('consultation')
+    setSelectedGroomingServices([])
     setSelectedDate(undefined)
     setSelectedTime('')
     setReason('')
@@ -148,10 +161,14 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     try {
       const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
 
+      const groomingReason = appointmentType === 'grooming' && selectedGroomingServices.length > 0
+        ? selectedGroomingServices.join(', ')
+        : undefined
+
       const url = mode === 'registered' ? '/api/appointments' : '/api/appointments/first-visit'
       const payload = mode === 'registered'
-        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
-        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
 
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const json = await res.json()
@@ -189,6 +206,32 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
         <form onSubmit={handleSubmit}>
           <div className="px-6 pt-5 pb-2 space-y-6">
+            {/* Appointment type toggle */}
+            <div className="flex gap-1 p-1 bg-muted rounded-lg">
+              <button
+                type="button"
+                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                  appointmentType === 'consultation'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setAppointmentType('consultation')}
+              >
+                Consulta
+              </button>
+              <button
+                type="button"
+                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                  appointmentType === 'grooming'
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                onClick={() => setAppointmentType('grooming')}
+              >
+                Estética
+              </button>
+            </div>
+
             {/* Mode toggle */}
             <div className="flex gap-1 p-1 bg-muted rounded-lg">
               <button
@@ -364,15 +407,47 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="reason">Motivo</Label>
-                <Input
-                  id="reason"
-                  value={reason}
-                  onChange={e => setReason(e.target.value)}
-                  placeholder="Ej. Consulta general, vacunación..."
-                />
-              </div>
+              {appointmentType === 'consultation' ? (
+                <div className="space-y-1">
+                  <Label>Motivo (opcional)</Label>
+                  <Input
+                    placeholder="Motivo de la consulta"
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Label>Servicios (opcional)</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {groomingCatalog.map(s => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedGroomingServices(prev =>
+                            prev.includes(s.name)
+                              ? prev.filter(n => n !== s.name)
+                              : [...prev, s.name]
+                          )
+                        }
+                        className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                          selectedGroomingServices.includes(s.name)
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {s.name}
+                      </button>
+                    ))}
+                    {groomingCatalog.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        No hay servicios en el catálogo. Configúralos en Settings › Servicios.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
               {team.length > 0 && (
                 <div className="space-y-1">
                   <Label>Asignar a</Label>
