@@ -1,13 +1,17 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, PawPrint, Calendar, Settings2 } from 'lucide-react'
+import { Home, Users, PawPrint, Calendar, Settings2, Scissors } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
   { href: '/dashboard/owners', icon: Users, label: 'Dueños' },
   { href: '/dashboard/pets', icon: PawPrint, label: 'Mascotas' },
   { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
+]
+
+const SERVICES_NAV_ITEMS = [
+  { href: '/dashboard/servicios/estetica', icon: Scissors, label: 'Estética' },
 ]
 
 const ADMIN_NAV_ITEMS = [
@@ -55,6 +59,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
   return (
     <div className="flex flex-col gap-1">
       {renderItems(NAV_ITEMS)}
+      {renderItems(SERVICES_NAV_ITEMS, 'Servicios')}
       {role === 'admin' && renderItems(ADMIN_NAV_ITEMS, 'Administración')}
     </div>
   )
