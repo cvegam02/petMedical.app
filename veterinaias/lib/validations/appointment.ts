@@ -12,6 +12,7 @@ export const appointmentSchema = z.object({
   ),
   reason: z.string().optional(),
   notes: z.string().optional(),
+  appointment_type: z.enum(['consultation', 'grooming']).optional().default('consultation'),
 })
 
 export const updateAppointmentSchema = appointmentSchema
@@ -44,6 +45,7 @@ export const firstVisitSchema = z.object({
   reason: z.string().optional(),
   notes: z.string().optional(),
   assigned_to: z.string().uuid().optional().nullable(),
+  appointment_type: z.enum(['consultation', 'grooming']).optional().default('consultation'),
 })
 
 export type FirstVisitValues = z.infer<typeof firstVisitSchema>

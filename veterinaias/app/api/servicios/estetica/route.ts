@@ -83,8 +83,11 @@ export async function POST(req: NextRequest) {
     .from('grooming_session_services')
     .insert(serviceRows)
 
-  if (servicesError)
+  if (servicesError) {
+    // Clean up orphaned session to maintain immutability contract
+    await (supabase as any).from('grooming_sessions').delete().eq('id', session.id)
     return NextResponse.json({ error: 'Error al guardar servicios' }, { status: 500 })
+  }
 
   return NextResponse.json({ data: session }, { status: 201 })
 }
