@@ -30,6 +30,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
   const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>(initialAppointmentType ?? 'consultation')
+  const [groomingCatalog, setGroomingCatalog] = useState<{ id: string; name: string; duration_minutes: number | null }[]>([])
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conflictWarning, setConflictWarning] = useState<{ message: string; appointments: { id: string; pet_name: string; owner_name: string }[] } | null>(null)
 
@@ -71,6 +73,16 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     }
     return generateTimeSlots(config, selectedDate)
   }, [selectedDate, businessHours])
+
+  // Load grooming catalog when type is grooming and modal is open
+  useEffect(() => {
+    if (!isOpen || appointmentType !== 'grooming') return
+    if (groomingCatalog.length > 0) return
+    fetch('/api/catalog/grooming-services')
+      .then(r => r.json())
+      .then(json => setGroomingCatalog((json.data ?? []).filter((s: any) => s.active)))
+      .catch(() => {})
+  }, [isOpen, appointmentType])
 
   // Owner search debounce
   useEffect(() => {
@@ -124,6 +136,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   function reset() {
     setMode('registered')
     setAppointmentType(initialAppointmentType ?? 'consultation')
+    setSelectedServiceIds([])
     setSelectedDate(undefined)
     setSelectedTime('')
     setReason('')
@@ -185,10 +198,14 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     try {
       const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
 
+      const groomingReason = appointmentType === 'grooming'
+        ? groomingCatalog.filter(s => selectedServiceIds.includes(s.id)).map(s => s.name).join(', ')
+        : undefined
+
       const url = mode === 'registered' ? '/api/appointments' : '/api/appointments/first-visit'
       const payload = mode === 'registered'
-        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
-        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(reason ? { reason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
 
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const json = await res.json()
@@ -419,14 +436,59 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label>Motivo (opcional)</Label>
-                <Input
-                  placeholder="Motivo de la cita"
-                  value={reason}
-                  onChange={e => setReason(e.target.value)}
-                />
-              </div>
+              {appointmentType === 'consultation' ? (
+                <div className="space-y-1">
+                  <Label>Motivo (opcional)</Label>
+                  <Input
+                    placeholder="Motivo de la consulta"
+                    value={reason}
+                    onChange={e => setReason(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Servicios</Label>
+                  {groomingCatalog.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-2">
+                      No hay servicios en el catálogo. Configúralos en Configuración › Servicios.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {groomingCatalog.map(s => {
+                        const checked = selectedServiceIds.includes(s.id)
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() =>
+                              setSelectedServiceIds(prev =>
+                                checked ? prev.filter(id => id !== s.id) : [...prev, s.id]
+                              )
+                            }
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium text-left transition-colors ${
+                              checked
+                                ? 'bg-primary/10 border-primary/40 text-primary'
+                                : 'border-border text-foreground hover:bg-muted/50'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${checked ? 'bg-primary border-primary' : 'border-border'}`}>
+                              {checked && (
+                                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                  <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </span>
+                            {s.name}
+                            {s.duration_minutes && (
+                              <span className="ml-auto text-xs text-muted-foreground shrink-0">{s.duration_minutes}min</span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
               {team.length > 0 && (
                 <div className="space-y-1">
                   <Label>Asignar a</Label>
