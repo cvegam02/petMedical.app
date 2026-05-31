@@ -28,7 +28,7 @@ export default async function SharedRecordPage({ params }: { params: Promise<{ t
       id, reason, diagnosis, treatment, notes, created_at,
       weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
       pet:pet_id(name, species:species_id(name), breed),
-      created_by_profile:created_by(full_name),
+      created_by_profile:attended_by(full_name),
       prescriptions(id, medication_name, dosage, frequency, duration, notes)
     `)
     .eq('id', shared.record_id)

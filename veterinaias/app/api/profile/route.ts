@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { updateProfileSchema } from '@/lib/validations/profile'
+import { roleRequiresLicense } from '@/lib/auth/roles'
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient()
@@ -13,7 +14,24 @@ export async function PATCH(req: NextRequest) {
   const result = updateProfileSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
+  const { data: current } = await supabase
+    .from('user_profiles')
+    .select('role, professional_license, is_super_admin')
+    .eq('id', user.id)
+    .single() as any
+
   const { full_name, phone, professional_license, professional_address } = result.data
+
+  // La cédula es obligatoria para roles que ejercen como veterinario.
+  if (!current?.is_super_admin && roleRequiresLicense(current?.role)) {
+    const effectiveLicense = professional_license !== undefined
+      ? professional_license
+      : current?.professional_license
+    if (!effectiveLicense?.trim()) {
+      return NextResponse.json({ error: 'La cédula profesional es obligatoria' }, { status: 422 })
+    }
+  }
+
   const update: Record<string, unknown> = {}
   if (full_name !== undefined) update.full_name = full_name
   if (phone !== undefined) update.phone = phone || null

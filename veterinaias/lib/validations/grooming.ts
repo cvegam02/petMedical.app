@@ -24,9 +24,10 @@ export const groomingSessionSchema = z.object({
         service_catalog_id: z.string().uuid().optional(),
       })
     )
-    .min(1, 'Agrega al menos un servicio'),
+    .default([]),
   notes: z.string().optional(),
   appointment_id: z.string().uuid().optional(),
+  started_at: z.string().datetime().optional(),
 })
 
 export type GroomingServiceCatalogFormValues = z.infer<typeof groomingServiceCatalogSchema>

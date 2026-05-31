@@ -8,6 +8,7 @@ export interface DashboardAppointment {
   scheduled_at: string
   duration_minutes: number
   reason: string | null
+  appointment_type?: 'consultation' | 'grooming'
   pet: { id: string; name: string; species: { name: string } | null } | null
   owner: { id: string; full_name: string; phone: string | null } | null
   assigned_to_profile: { full_name: string } | null

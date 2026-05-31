@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   transpilePackages: ['react-big-calendar'],
@@ -11,7 +10,7 @@ const nextConfig: NextConfig = {
   // However, Next.js 15+ uses Turbopack by default for dev, but for build it's still being rolled out.
   async redirects() {
     return [
-      { source: '/dashboard/settings', destination: '/dashboard/settings/clinica', permanent: false },
+      { source: '/dashboard/settings', destination: '/dashboard/settings/team', permanent: false },
     ]
   },
 };

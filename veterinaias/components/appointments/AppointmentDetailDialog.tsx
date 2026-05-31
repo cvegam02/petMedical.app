@@ -1,6 +1,9 @@
 'use client'
+import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Clock, Phone } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Calendar, Clock, Phone, Scissors } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
@@ -25,10 +28,42 @@ export function AppointmentDetailDialog({
   onTransition,
   loadingStatus,
 }: AppointmentDetailDialogProps) {
+  const router = useRouter()
+  const [startingSession, setStartingSession] = useState(false)
+
   if (!appointment) return null
 
   const statusCfg = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
   const isActive = ACTIVE_STATUSES.includes(appointment.status)
+  const isGrooming = (appointment.appointment_type ?? 'consultation') === 'grooming'
+
+  async function handleStartGroomingSession() {
+    if (!appointment?.pet?.id) return
+    setStartingSession(true)
+    try {
+      const today = new Date().toISOString().split('T')[0]
+      const res = await fetch('/api/servicios/estetica', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pet_id: appointment.pet.id,
+          appointment_id: appointment.id,
+          session_date: today,
+          started_at: new Date().toISOString(),
+          services: [],
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) { toast.error(json.error ?? 'Error al iniciar sesión'); return }
+      toast.success('Sesión de estética iniciada')
+      onOpenChange(false)
+      router.refresh()
+    } catch {
+      toast.error('Error de red. Intenta de nuevo.')
+    } finally {
+      setStartingSession(false)
+    }
+  }
 
   // base-ui passes (open, eventDetails) — we only need the boolean
   function handleOpenChange(nextOpen: boolean) {
@@ -103,13 +138,24 @@ export function AppointmentDetailDialog({
         <div className="px-6 pb-6 pt-4 border-t border-border/60">
           {isActive ? (
             <>
-              <Link
-                href={`/dashboard/pets/${appointment.pet?.id}/records/new?appointmentId=${appointment.id}`}
-                className={`${buttonVariants({})} w-full justify-center gap-2 py-3 text-base font-semibold`}
-              >
-                Iniciar consulta
-                <ArrowRight size={16} />
-              </Link>
+              {isGrooming ? (
+                <Button
+                  className="w-full justify-center gap-2 py-3 text-base font-semibold"
+                  onClick={handleStartGroomingSession}
+                  disabled={startingSession}
+                >
+                  <Scissors size={16} />
+                  {startingSession ? 'Iniciando...' : 'Iniciar sesión de estética'}
+                </Button>
+              ) : (
+                <Link
+                  href={`/dashboard/pets/${appointment.pet?.id}/records/new?appointmentId=${appointment.id}`}
+                  className={`${buttonVariants({})} w-full justify-center gap-2 py-3 text-base font-semibold`}
+                >
+                  Iniciar consulta
+                  <ArrowRight size={16} />
+                </Link>
+              )}
 
               {appointment.status === 'scheduled' && (
                 <Button

@@ -162,7 +162,7 @@ export function GroomingServiceCatalogTab() {
               {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
             </div>
             <div className="space-y-1">
-              <Label>Duración estimada (min)</Label>
+              <Label>Duración estimada (min) <span className="text-muted-foreground font-normal text-xs">— solo informativo</span></Label>
               <Input
                 type="number"
                 min={1}

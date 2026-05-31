@@ -1,9 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { roleRequiresLicense } from '@/lib/auth/roles'
 
 const PUBLIC_ROUTES = ['/login', '/register', '/accept-invite']
 const SUPER_ADMIN_ROUTES = ['/super-admin']
 const ONBOARDING_ROUTE = '/onboarding'
+const PROFILE_ROUTE = '/dashboard/perfil'
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next({ request })
@@ -40,7 +42,7 @@ export async function proxy(request: NextRequest) {
   // Check tenant and super admin status
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
-    .select('tenant_id, is_super_admin')
+    .select('tenant_id, is_super_admin, role, professional_license')
     .eq('id', user.id)
     .single()
 
@@ -68,6 +70,19 @@ export async function proxy(request: NextRequest) {
   // Has tenant but on onboarding: redirect to dashboard
   if (profile.tenant_id && pathname === ONBOARDING_ROUTE) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Gate de cédula: un veterinario aplicable no puede usar el dashboard sin
+  // haber capturado su cédula. La página de perfil queda exenta para evitar loop.
+  if (
+    pathname.startsWith('/dashboard') &&
+    pathname !== PROFILE_ROUTE &&
+    roleRequiresLicense(profile.role) &&
+    !profile.professional_license?.trim()
+  ) {
+    const url = new URL(PROFILE_ROUTE, request.url)
+    url.searchParams.set('complete', 'cedula')
+    return NextResponse.redirect(url)
   }
 
   return response

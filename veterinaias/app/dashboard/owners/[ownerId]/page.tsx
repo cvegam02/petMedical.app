@@ -73,7 +73,6 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">{owner.full_name}</h1>
               <span className="label-overline text-muted-foreground/50 border border-border px-2 py-0.5 rounded bg-muted/50">Responsable</span>
-              <span className="label-overline text-muted-foreground/30 ml-auto font-mono">{owner.id.split('-')[0]}</span>
             </div>
             {(owner.phone || owner.email || owner.address) ? (
               <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 text-sm text-muted-foreground">

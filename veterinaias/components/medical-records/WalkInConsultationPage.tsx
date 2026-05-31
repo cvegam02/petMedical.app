@@ -14,6 +14,7 @@ import { PrescriptionsFields } from './PrescriptionsFields'
 import { VaccinationsField } from './VaccinationsField'
 import { DewormingsField } from './DewormingsField'
 import { WalkInPetForm } from './WalkInPetForm'
+import { AttendingVetField, type TenantVet } from './AttendingVetField'
 import { ExpandablePetBanner } from './ExpandablePetBanner'
 import { OwnerResolutionModal } from './OwnerResolutionModal'
 import { type PetSearchResult } from './PetSearchCombobox'
@@ -30,8 +31,16 @@ const DEFAULT_PET: WalkInPetValues = {
   sex: 'unknown',
 }
 
-export function WalkInConsultationPage() {
+interface WalkInConsultationPageProps {
+  vets: TenantVet[]
+  currentVetId: string
+}
+
+export function WalkInConsultationPage({ vets, currentVetId }: WalkInConsultationPageProps) {
   const router = useRouter()
+  const currentIsAttendee = vets.some(v => v.id === currentVetId)
+  const defaultAttendedBy = currentIsAttendee ? currentVetId : ''
+  const showVetSelector = vets.length > 0 && (vets.length > 1 || !currentIsAttendee)
   const [petValues, setPetValues] = useState<WalkInPetValues>(DEFAULT_PET)
   const [petErrors, setPetErrors] = useState<Partial<Record<keyof WalkInPetValues, string>>>({})
   const [selectedPet, setSelectedPet] = useState<PetSearchResult | null>(null)
@@ -42,10 +51,11 @@ export function WalkInConsultationPage() {
 
   const petReady = selectedPet !== null || (petValues.name.trim().length > 0 && petValues.species_id.length > 0)
 
-  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<WalkInRecordValues>({
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<WalkInRecordValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(walkInRecordSchema) as any,
-    defaultValues: { 
+    defaultValues: {
+      attended_by: defaultAttendedBy,
       prescriptions: [],
       vaccinations: [],
       dewormings: [],
@@ -61,6 +71,10 @@ export function WalkInConsultationPage() {
   }
 
   async function onRecordValid(recordValues: WalkInRecordValues) {
+    if (showVetSelector && !recordValues.attended_by) {
+      toast.error('Selecciona el veterinario que atiende')
+      return
+    }
     if (selectedPet) {
       setIsSubmitting(true)
       try {
@@ -165,6 +179,16 @@ export function WalkInConsultationPage() {
                   </div>
                 }
               >
+                {showVetSelector && (
+                  <div className="mb-6">
+                    <AttendingVetField
+                      vets={vets}
+                      value={watch('attended_by') ?? ''}
+                      onChange={(v) => setValue('attended_by', v)}
+                      currentVetId={currentVetId}
+                    />
+                  </div>
+                )}
                 <div className="space-y-1.5">
                   <Label htmlFor="reason" className="text-[13px] font-bold">Motivo de consulta <span className="text-destructive">*</span></Label>
                   <Input

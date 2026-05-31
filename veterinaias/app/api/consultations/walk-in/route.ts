@@ -5,6 +5,28 @@ import {
   walkInConsultationExistingPetSchema,
 } from '@/lib/validations/medical-record'
 
+// El veterinario que atiende puede diferir del usuario logueado. Default: el
+// usuario actual. Si se elige otro, debe pertenecer al mismo tenant.
+async function resolveAttendedBy(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  tenantId: string,
+  userId: string,
+  candidate: string | undefined,
+): Promise<{ attendedBy?: string; error?: string }> {
+  const attendedBy = candidate ?? userId
+  const { data } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', attendedBy)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+  if (!data || data.role === 'assistant') {
+    return { error: 'El veterinario que atiende no es válido' }
+  }
+  return { attendedBy }
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createServerClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -44,16 +66,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
     }
 
-    const { 
-      prescriptions, 
-      vaccinations, 
-      dewormings, 
-      weight_kg, 
-      temperature_celsius, 
-      heart_rate_bpm, 
-      respiratory_rate_bpm, 
-      ...rest 
+    const {
+      prescriptions,
+      vaccinations,
+      dewormings,
+      weight_kg,
+      temperature_celsius,
+      heart_rate_bpm,
+      respiratory_rate_bpm,
+      attended_by,
+      ...rest
     } = recordData
+
+    const { attendedBy, error: vetError } = await resolveAttendedBy(supabase, profile.tenant_id, user.id, attended_by)
+    if (vetError) return NextResponse.json({ error: vetError }, { status: 422 })
 
     const { data: record, error: recordError } = await supabase
       .from('medical_records')
@@ -66,6 +92,7 @@ export async function POST(req: NextRequest) {
         respiratory_rate_bpm: respiratory_rate_bpm ?? null,
         tenant_id: profile.tenant_id,
         created_by: user.id,
+        attended_by: attendedBy,
       })
       .select('id')
       .single()
@@ -79,10 +106,10 @@ export async function POST(req: NextRequest) {
       tasks.push(Promise.resolve((supabase.from('prescriptions') as any).insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
     }
     if (vaccinations && vaccinations.length > 0) {
-      tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: user.id })))))
+      tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: attendedBy })))))
     }
     if (dewormings && dewormings.length > 0) {
-      tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: user.id })))))
+      tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: existingPetId, tenant_id: profile.tenant_id, applied_by: attendedBy })))))
     }
 
     if (tasks.length > 0) {
@@ -179,16 +206,25 @@ export async function POST(req: NextRequest) {
   }
 
   // Step 4: Create medical record
-  const { 
-    prescriptions, 
-    vaccinations, 
-    dewormings, 
-    weight_kg, 
-    temperature_celsius, 
-    heart_rate_bpm, 
-    respiratory_rate_bpm, 
-    ...rest 
+  const {
+    prescriptions,
+    vaccinations,
+    dewormings,
+    weight_kg,
+    temperature_celsius,
+    heart_rate_bpm,
+    respiratory_rate_bpm,
+    attended_by,
+    ...rest
   } = recordData
+
+  const { attendedBy, error: vetError } = await resolveAttendedBy(supabase, profile.tenant_id, user.id, attended_by)
+  if (vetError) {
+    await (supabase.from('pet_registrations') as any).delete().eq('pet_id', petId)
+    if (ownerWasCreated) await (supabase.from('owners') as any).delete().eq('id', ownerId)
+    await supabase.from('pets').delete().eq('id', petId)
+    return NextResponse.json({ error: vetError }, { status: 422 })
+  }
 
   const { data: record, error: recordError } = await supabase
     .from('medical_records')
@@ -201,6 +237,7 @@ export async function POST(req: NextRequest) {
       respiratory_rate_bpm: respiratory_rate_bpm ?? null,
       tenant_id: profile.tenant_id,
       created_by: user.id,
+      attended_by: attendedBy,
     })
     .select('id')
     .single()
@@ -219,10 +256,10 @@ export async function POST(req: NextRequest) {
     tasks.push(Promise.resolve((supabase.from('prescriptions') as any).insert(prescriptions.map(p => ({ ...p, medical_record_id: record.id })))))
   }
   if (vaccinations && vaccinations.length > 0) {
-    tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: user.id })))))
+    tasks.push(Promise.resolve((supabase.from('pet_vaccinations') as any).insert(vaccinations.map(v => ({ ...v, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: attendedBy })))))
   }
   if (dewormings && dewormings.length > 0) {
-    tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: user.id })))))
+    tasks.push(Promise.resolve((supabase.from('pet_dewormings') as any).insert(dewormings.map(d => ({ ...d, medical_record_id: record.id, pet_id: petId, tenant_id: profile.tenant_id, applied_by: attendedBy })))))
   }
 
   if (tasks.length > 0) {

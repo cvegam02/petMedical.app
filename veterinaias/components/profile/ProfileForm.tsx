@@ -11,9 +11,10 @@ interface ProfileFormProps {
   phone: string | null
   professionalLicense: string | null
   professionalAddress: string | null
+  licenseRequired?: boolean
 }
 
-export function ProfileForm({ fullName, phone, professionalLicense, professionalAddress }: ProfileFormProps) {
+export function ProfileForm({ fullName, phone, professionalLicense, professionalAddress, licenseRequired = false }: ProfileFormProps) {
   const [form, setForm] = useState({
     full_name: fullName,
     phone: phone ?? '',
@@ -24,6 +25,10 @@ export function ProfileForm({ fullName, phone, professionalLicense, professional
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (licenseRequired && !form.professional_license.trim()) {
+      toast.error('La cédula profesional es obligatoria')
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/profile', {
@@ -63,9 +68,16 @@ export function ProfileForm({ fullName, phone, professionalLicense, professional
           <p className="text-xs text-muted-foreground mb-3">Aparecen en las recetas que imprimas.</p>
           <div className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="professional_license">Cédula profesional</Label>
+              <Label htmlFor="professional_license">
+                Cédula profesional {licenseRequired && <span className="text-destructive">*</span>}
+              </Label>
               <Input id="professional_license" value={form.professional_license}
                 onChange={e => setForm(f => ({ ...f, professional_license: e.target.value }))} placeholder="Ej. 12345678" />
+              {licenseRequired && (
+                <p className="text-[11px] text-muted-foreground">
+                  Obligatoria para los veterinarios: es la que se imprime en las recetas.
+                </p>
+              )}
             </div>
             <div className="space-y-1">
               <Label htmlFor="professional_address">Dirección del consultorio</Label>

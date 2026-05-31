@@ -48,7 +48,7 @@ export async function GET(
       .select(`
         id, reason, diagnosis, treatment, notes, created_at,
         weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-        created_by_profile:created_by(full_name),
+        created_by_profile:attended_by(full_name),
         prescriptions(id, medication_name, dosage, frequency, duration, notes),
         attachments(id, file_name, storage_path),
         addendums(id, content, created_at, created_by_profile:created_by(full_name))

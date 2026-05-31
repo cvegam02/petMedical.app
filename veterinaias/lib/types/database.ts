@@ -419,9 +419,9 @@ export type Database = {
         Relationships: []
       }
       grooming_sessions: {
-        Row: { id: string; tenant_id: string; pet_id: string; appointment_id: string | null; session_date: string; notes: string | null; created_by: string; created_at: string }
-        Insert: { tenant_id: string; pet_id: string; appointment_id?: string | null; session_date: string; notes?: string | null; created_by: string }
-        Update: Record<string, never>
+        Row: { id: string; tenant_id: string; pet_id: string; appointment_id: string | null; session_date: string; notes: string | null; created_by: string; created_at: string; started_at: string | null; ended_at: string | null }
+        Insert: { tenant_id: string; pet_id: string; appointment_id?: string | null; session_date: string; notes?: string | null; created_by: string; started_at?: string | null; ended_at?: string | null }
+        Update: { notes?: string | null; started_at?: string | null; ended_at?: string | null }
         Relationships: []
       }
       grooming_session_services: {

@@ -30,6 +30,7 @@ export const prescriptionSchema = z.object({
 
 export const medicalRecordSchema = z.object({
   pet_id: z.string().uuid('Mascota es requerida'),
+  attended_by: z.string().uuid('Veterinario inválido').optional(),
   reason: z.string().min(1, 'Motivo de consulta es requerido'),
   diagnosis: z.string().optional(),
   treatment: z.string().optional(),
@@ -78,6 +79,7 @@ export const walkInPetSchema = z.object({
 })
 
 export const walkInRecordSchema = z.object({
+  attended_by: z.string().uuid('Veterinario inválido').optional(),
   reason: z.string().min(1, 'Motivo de consulta es requerido'),
   diagnosis: z.string().optional(),
   treatment: z.string().optional(),

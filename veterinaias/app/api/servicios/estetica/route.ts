@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const { data, error, count } = await (supabase as any)
     .from('grooming_sessions')
     .select(`
-      id, session_date, notes, created_at,
+      id, session_date, notes, created_at, started_at, ended_at,
       pet:pet_id(id, name, species:species_id(name)),
       services:grooming_session_services(id, service_name)
     `, { count: 'exact' })
@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
       appointment_id: sessionData.appointment_id ?? null,
       session_date: sessionData.session_date,
       notes: sessionData.notes ?? null,
+      started_at: sessionData.started_at ?? null,
       created_by: user.id,
     })
     .select()

@@ -35,7 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .select(`
       id, diagnosis, treatment, weight_kg, created_at, tenant_id,
       pet:pet_id(id, name, sex, date_of_birth, breed, species:species_id(name)),
-      vet:created_by(full_name, professional_license, professional_address),
+      vet:attended_by(full_name, professional_license, professional_address),
       prescriptions(medication_name, active_ingredient, dosage, route_of_administration, frequency, duration, notes)
     `)
     .eq('id', id)

@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Plus, Stethoscope, ClipboardList, Syringe, Pill, Save } from 'lucide-react'
 import { medicalRecordSchema, type MedicalRecordFormValues } from '@/lib/validations/medical-record'
 import { PatientDataSection, type PatientDataValues } from './PatientDataSection'
+import { AttendingVetField, type TenantVet } from './AttendingVetField'
 import { PrescriptionsFields } from './PrescriptionsFields'
 import { VaccinationsField } from './VaccinationsField'
 import { DewormingsField } from './DewormingsField'
@@ -25,23 +26,31 @@ interface MedicalRecordFormProps {
   petId: string
   appointmentId?: string
   incompletePatient?: IncompletePatient | null
+  vets?: TenantVet[]
+  currentVetId?: string
 }
 
-export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: MedicalRecordFormProps) {
+export function MedicalRecordForm({ petId, appointmentId, incompletePatient, vets = [], currentVetId = '' }: MedicalRecordFormProps) {
   const router = useRouter()
   const patientDataRef = useRef<PatientDataValues | null>(null)
   const [showPrescriptions, setShowPrescriptions] = useState(false)
+
+  const currentIsAttendee = vets.some(v => v.id === currentVetId)
+  const defaultAttendedBy = currentIsAttendee ? currentVetId : ''
+  const showVetSelector = vets.length > 0 && (vets.length > 1 || !currentIsAttendee)
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<MedicalRecordFormValues>({
     resolver: zodResolver(medicalRecordSchema) as any,
     defaultValues: {
       pet_id: petId,
+      attended_by: defaultAttendedBy,
       prescriptions: [],
       vaccinations: [],
       dewormings: [],
@@ -77,6 +86,10 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
   }
 
   const onSubmit = async (values: MedicalRecordFormValues) => {
+    if (showVetSelector && !values.attended_by) {
+      toast.error('Selecciona el veterinario que atiende')
+      return
+    }
     try {
       const tasks: Promise<unknown>[] = [
         fetch('/api/medical-records', {
@@ -144,6 +157,16 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient }: M
             </div>
           }
         >
+          {showVetSelector && (
+            <div className="mb-6">
+              <AttendingVetField
+                vets={vets}
+                value={watch('attended_by') ?? ''}
+                onChange={(v) => setValue('attended_by', v)}
+                currentVetId={currentVetId}
+              />
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="reason" className="text-[13px] font-bold">Motivo de consulta <span className="text-destructive">*</span></Label>
             <Input

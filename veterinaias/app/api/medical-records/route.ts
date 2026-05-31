@@ -22,7 +22,20 @@ export async function POST(req: NextRequest) {
   const result = medicalRecordSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
-  const { prescriptions, vaccinations, dewormings, weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm, ...rest } = result.data
+  const { prescriptions, vaccinations, dewormings, weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm, attended_by, ...rest } = result.data
+
+  // El veterinario que atiende puede diferir del usuario logueado. Default: el
+  // usuario actual. Debe pertenecer al tenant y no ser un asistente.
+  const attendedBy = attended_by ?? user.id
+  const { data: vet } = await supabase
+    .from('user_profiles')
+    .select('role')
+    .eq('id', attendedBy)
+    .eq('tenant_id', profile.tenant_id)
+    .maybeSingle() as any
+  if (!vet || vet.role === 'assistant') {
+    return NextResponse.json({ error: 'El veterinario que atiende no es válido' }, { status: 422 })
+  }
 
   const { data: record, error: recordError } = await supabase
     .from('medical_records')
@@ -34,6 +47,7 @@ export async function POST(req: NextRequest) {
       respiratory_rate_bpm: respiratory_rate_bpm ?? null,
       tenant_id: profile.tenant_id,
       created_by: user.id,
+      attended_by: attendedBy,
     })
     .select()
     .single()
@@ -59,7 +73,7 @@ export async function POST(req: NextRequest) {
         ...vaccinationRest,
         pet_id: rest.pet_id,
         tenant_id: profile.tenant_id,
-        applied_by: user.id,
+        applied_by: attendedBy,
         medical_record_id: record.id,
         ...(vaccine_catalog_id ? { vaccine_catalog_id } : {}),
       })
@@ -93,7 +107,7 @@ export async function POST(req: NextRequest) {
         ...d,
         pet_id: rest.pet_id,
         tenant_id: profile.tenant_id,
-        applied_by: user.id,
+        applied_by: attendedBy,
         medical_record_id: record.id,
       }))
     if (dewormingRows.length > 0) {
