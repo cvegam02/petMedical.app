@@ -175,32 +175,53 @@ function Metric({ icon: Icon, label, value }: { icon: typeof PawPrint; label: st
   )
 }
 
+function calcAge(dob?: string) {
+  if (!dob) return null
+  const ms = Date.now() - new Date(dob).getTime()
+  const years = Math.floor(ms / (1000 * 60 * 60 * 24 * 365.25))
+  if (years < 1) {
+    const months = Math.floor(ms / (1000 * 60 * 60 * 24 * 30.44))
+    return `${months} ${months === 1 ? 'mes' : 'meses'}`
+  }
+  return `${years} año${years !== 1 ? 's' : ''}`
+}
+
 function PetPatientCard({ pet, lastVisit }: { pet: any; lastVisit?: string }) {
   const speciesName = pet.species?.name?.toLowerCase() || ''
   const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
+  const age = calcAge(pet.date_of_birth)
+  const sex = pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : null
+  const consultas = pet.medical_records?.length ?? 0
+  const meta = [pet.species?.name, pet.breed, age, sex].filter(Boolean).join(' · ')
   const lastVisitDate = lastVisit
-    ? new Date(lastVisit).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+    ? new Date(lastVisit).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
     : 'Sin visitas'
 
   return (
     <Link
       href={`/dashboard/pets/${pet.id}`}
-      className="group flex items-center gap-4 bg-card p-4 rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all"
+      className="group flex flex-col bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all overflow-hidden"
     >
-      <div className="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 border border-border/50">
-        <Icon size={20} strokeWidth={1.5} />
+      <div className="flex items-center gap-4 p-4">
+        <div className="w-11 h-11 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 border border-border/50">
+          <Icon size={22} strokeWidth={1.5} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-none">{pet.name}</p>
+          <p className="text-xs text-muted-foreground mt-1.5 truncate">{meta || 'Sin datos del paciente'}</p>
+        </div>
+        <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-none">{pet.name}</p>
-        <p className="text-xs text-muted-foreground mt-1 truncate">
-          {pet.breed || 'Raza no definida'} · {pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : '—'}
-        </p>
+      <div className="flex items-center justify-between px-4 py-2.5 border-t border-border/60 bg-muted/20">
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Stethoscope size={12} className="text-muted-foreground/40 shrink-0" />
+          {consultas} {consultas === 1 ? 'consulta' : 'consultas'}
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <CalendarDays size={12} className="text-muted-foreground/40 shrink-0" />
+          {lastVisitDate}
+        </span>
       </div>
-      <div className="text-right shrink-0">
-        <p className="label-overline text-muted-foreground/40">Última visita</p>
-        <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{lastVisitDate}</p>
-      </div>
-      <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
     </Link>
   )
 }
