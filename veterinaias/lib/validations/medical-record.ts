@@ -43,14 +43,6 @@ export const medicalRecordSchema = z.object({
     v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
   ),
-  heart_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
-    z.number().int().positive().optional()
-  ),
-  respiratory_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
-    z.number().int().positive().optional()
-  ),
   prescriptions: z.array(prescriptionSchema).default([]),
   vaccinations: z.array(vaccinationEntrySchema).default([]),
   dewormings: z.array(dewormingEntrySchema).default([]),
@@ -91,14 +83,6 @@ export const walkInRecordSchema = z.object({
   temperature_celsius: z.preprocess(
     v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
     z.number().positive().optional()
-  ),
-  heart_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
-    z.number().int().positive().optional()
-  ),
-  respiratory_rate_bpm: z.preprocess(
-    v => (v === '' || v === null || v === undefined || (typeof v === 'number' && isNaN(v))) ? undefined : Number(v),
-    z.number().int().positive().optional()
   ),
   prescriptions: z.array(prescriptionSchema).default([]),
   vaccinations: z.array(vaccinationEntrySchema).default([]),

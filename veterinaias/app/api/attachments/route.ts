@@ -6,7 +6,7 @@ const attachmentSchema = z.object({
   storage_path: z.string().min(1).max(500),
   file_name: z.string().min(1).max(255),
   file_type: z.string().min(1).max(100),
-  medical_record_id: z.string().uuid(),
+  visit_id: z.string().uuid(),
 })
 
 export async function POST(req: NextRequest) {
