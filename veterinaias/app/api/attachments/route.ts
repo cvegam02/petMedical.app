@@ -18,6 +18,18 @@ export async function POST(req: NextRequest) {
   const result = attachmentSchema.safeParse(body)
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 400 })
 
+  const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
+  // Verificar que la visita pertenece al tenant del usuario (defensa en profundidad sobre RLS)
+  const { data: visit } = await (supabase as any)
+    .from('service_visits')
+    .select('id')
+    .eq('id', result.data.visit_id)
+    .eq('tenant_id', (profile as any).tenant_id)
+    .single()
+  if (!visit) return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })
+
   const { data, error } = await supabase
     .from('attachments')
     .insert({ ...result.data, created_by: user.id })

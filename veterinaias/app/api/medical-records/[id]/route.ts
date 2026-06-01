@@ -13,6 +13,9 @@ export async function GET(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   const { data: visit, error } = await (supabase as any)
     .from('service_visits')
     .select(`
@@ -28,6 +31,7 @@ export async function GET(
     `)
     .eq('id', id)
     .eq('service_type', 'consultation')
+    .eq('tenant_id', (profile as any).tenant_id)
     .single()
 
   if (error?.code === 'PGRST116') return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })

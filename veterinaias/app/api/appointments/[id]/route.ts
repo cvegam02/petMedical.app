@@ -4,8 +4,8 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 import { updateAppointmentSchema } from '@/lib/validations/appointment'
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  scheduled: ['confirmed', 'cancelled'],
-  confirmed: ['cancelled', 'no_show'],
+  scheduled: ['confirmed', 'cancelled', 'completed'],
+  confirmed: ['cancelled', 'no_show', 'completed'],
 }
 
 function validateId(id: string) {

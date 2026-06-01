@@ -52,6 +52,9 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) { redirect('/login'); return null }
 
+  const { data: currentProfile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  const currentTenantId = (currentProfile as any)?.tenant_id ?? ''
+
   const [petResult, regResult, teamResult] = await Promise.all([
     (supabase.from('pets') as any)
       .select(`
@@ -74,7 +77,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
       .select('status, date_of_death, owner:owner_id(id, full_name, email, phone)')
       .eq('pet_id', petId)
       .maybeSingle(),
-    supabase.from('user_profiles').select('id, full_name').not('tenant_id', 'is', null),
+    supabase.from('user_profiles').select('id, full_name').eq('tenant_id', currentTenantId),
   ])
 
   if (petResult.error?.code === 'PGRST116' || !petResult.data) notFound()

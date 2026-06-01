@@ -16,6 +16,9 @@ export async function POST(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const { data: profile } = await supabase.from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  if (!(profile as any)?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
 
@@ -27,6 +30,7 @@ export async function POST(
     .select('id')
     .eq('id', id)
     .eq('service_type', 'consultation')
+    .eq('tenant_id', (profile as any).tenant_id)
     .single()
 
   if (visitError || !visit) return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })

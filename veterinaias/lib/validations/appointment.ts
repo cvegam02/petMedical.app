@@ -19,7 +19,7 @@ export const updateAppointmentSchema = appointmentSchema
   .omit({ pet_id: true, owner_id: true })
   .partial()
   .extend({
-    status: z.enum(['scheduled', 'confirmed', 'cancelled', 'no_show']).optional(),
+    status: z.enum(['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show']).optional(),
   })
 
 // Para el formulario del cliente (scheduled_at es el string del datetime-local input)

@@ -119,6 +119,10 @@ export async function POST(req: NextRequest) {
     ownerId = reg?.owner_id ?? null
   }
 
+  if (!ownerId) {
+    return NextResponse.json({ error: 'No se pudo determinar el dueño de la mascota' }, { status: 422 })
+  }
+
   // Step 2: insert service_visit
   const { data: visit, error: visitError } = await (supabase as any)
     .from('service_visits')
