@@ -58,19 +58,17 @@ interface PetData {
     email: string | null
     phone: string
   } | null
-  medical_records: Array<{
+  service_visits: Array<{
     id: string
-    reason: string
-    diagnosis: string | null
-    treatment: string | null
-    notes: string | null
-    weight_kg: number | null
-    temperature_celsius: number | null
-    heart_rate_bpm: number | null
-    respiratory_rate_bpm: number | null
     created_at: string
-    created_by_profile: {
-      full_name: string
+    consultation: {
+      reason: string
+      diagnosis: string | null
+      treatment: string | null
+      notes: string | null
+      weight_kg: number | null
+      temperature_celsius: number | null
+      attended_by_profile: { full_name: string } | null
     } | null
     prescriptions: Array<{
       id: string
@@ -124,7 +122,19 @@ export function PetExpedienteModal({ petId, petName, trigger }: PetExpedienteMod
   }, [open, petId])
 
   const age = pet?.date_of_birth ? calcAge(pet.date_of_birth) : null
-  const lastRecord = pet?.medical_records?.[0] ?? null
+  const lastVisit = pet?.service_visits?.[0] ?? null
+  const lastRecord = lastVisit
+    ? {
+        ...lastVisit,
+        reason: lastVisit.consultation?.reason ?? '',
+        diagnosis: lastVisit.consultation?.diagnosis ?? null,
+        treatment: lastVisit.consultation?.treatment ?? null,
+        notes: lastVisit.consultation?.notes ?? null,
+        weight_kg: lastVisit.consultation?.weight_kg ?? null,
+        temperature_celsius: lastVisit.consultation?.temperature_celsius ?? null,
+        created_by_profile: lastVisit.consultation?.attended_by_profile ?? null,
+      }
+    : null
 
   const triggerElement = React.isValidElement(trigger)
     ? React.cloneElement(trigger as React.ReactElement<any>, {
@@ -328,24 +338,6 @@ export function PetExpedienteModal({ petId, petName, trigger }: PetExpedienteMod
                         </div>
                       )}
                     </div>
-
-                    {/* Signs details */}
-                    {(lastRecord.heart_rate_bpm || lastRecord.respiratory_rate_bpm) && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/10 p-3 rounded-lg border border-border/10 text-xs">
-                        {lastRecord.heart_rate_bpm && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground/70 uppercase">F. Cardíaca</span>
-                            <span className="block font-bold text-foreground mt-0.5">{lastRecord.heart_rate_bpm} lpm</span>
-                          </div>
-                        )}
-                        {lastRecord.respiratory_rate_bpm && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground/70 uppercase">F. Respiratoria</span>
-                            <span className="block font-bold text-foreground mt-0.5">{lastRecord.respiratory_rate_bpm} rpm</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* Recetas */}
                     {lastRecord.prescriptions && lastRecord.prescriptions.length > 0 && (

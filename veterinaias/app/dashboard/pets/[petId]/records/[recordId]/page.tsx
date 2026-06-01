@@ -15,13 +15,15 @@ export default async function RecordDetailPage({
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: record, error } = await (supabase.from('medical_records') as any)
+  const { data: visitData, error } = await (supabase.from('service_visits') as any)
     .select(`
-      id, reason, diagnosis, treatment, notes,
-      weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-      created_at,
+      id, created_at,
       pet:pet_id(id, name),
-      created_by_profile:attended_by(full_name),
+      consultation:consultation_records(
+        reason, diagnosis, treatment, notes,
+        weight_kg, temperature_celsius,
+        attended_by_profile:attended_by(full_name)
+      ),
       prescriptions(id, medication_name, dosage, frequency, duration, notes),
       attachments(id, file_name, file_type, storage_path, created_at),
       addendums(id, content, created_at, created_by_profile:created_by(full_name))
@@ -29,7 +31,19 @@ export default async function RecordDetailPage({
     .eq('id', recordId)
     .single()
 
-  if (error || !record) notFound()
+  if (error || !visitData) notFound()
+
+  const consultationData = (visitData.consultation as any) ?? {}
+  const record = {
+    ...visitData,
+    reason: consultationData.reason ?? '',
+    diagnosis: consultationData.diagnosis ?? null,
+    treatment: consultationData.treatment ?? null,
+    notes: consultationData.notes ?? null,
+    weight_kg: consultationData.weight_kg ?? null,
+    temperature_celsius: consultationData.temperature_celsius ?? null,
+    created_by_profile: consultationData.attended_by_profile ?? null,
+  }
 
   const { data: regData } = await (supabase as any)
     .from('pet_registrations')
@@ -103,14 +117,12 @@ export default async function RecordDetailPage({
           </div>
         )}
 
-        {(record.weight_kg || record.temperature_celsius || record.heart_rate_bpm || record.respiratory_rate_bpm) && (
+        {(record.weight_kg || record.temperature_celsius) && (
           <div className="mb-4">
             <p className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-widest mb-2">Signos vitales</p>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {record.weight_kg && <span className="text-muted-foreground">Peso: <strong className="text-foreground">{record.weight_kg} kg</strong></span>}
               {record.temperature_celsius && <span className="text-muted-foreground">Temperatura: <strong className="text-foreground">{record.temperature_celsius} °C</strong></span>}
-              {record.heart_rate_bpm && <span className="text-muted-foreground">F. Cardíaca: <strong className="text-foreground">{record.heart_rate_bpm} lpm</strong></span>}
-              {record.respiratory_rate_bpm && <span className="text-muted-foreground">F. Respiratoria: <strong className="text-foreground">{record.respiratory_rate_bpm} rpm</strong></span>}
             </div>
           </div>
         )}

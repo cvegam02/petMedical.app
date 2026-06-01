@@ -1,7 +1,6 @@
 'use client'
 import {
   Calendar,
-  User,
   Heart,
   Stethoscope,
   Activity,
@@ -33,8 +32,6 @@ interface MedicalRecord {
   notes: string | null
   weight_kg: number | null
   temperature_celsius: number | null
-  heart_rate_bpm: number | null
-  respiratory_rate_bpm: number | null
   created_at: string
   created_by_profile: {
     full_name: string
@@ -88,12 +85,12 @@ export function MedicalRecordDetailModal({
 
         <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto">
           {/* Signos Vitales */}
-          {(record.weight_kg || record.temperature_celsius || record.heart_rate_bpm || record.respiratory_rate_bpm) && (
+          {(record.weight_kg || record.temperature_celsius) && (
             <div className="bg-muted/15 p-4 rounded-xl border border-border/40 space-y-3">
               <h4 className="text-[10px] font-mono font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-1.5">
                 <Activity size={11} className="text-primary/70" /> Signos vitales
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-semibold text-foreground">
+              <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-foreground">
                 {record.weight_kg && (
                   <div className="space-y-0.5">
                     <p className="text-[10px] font-normal text-muted-foreground/50">Peso</p>
@@ -104,18 +101,6 @@ export function MedicalRecordDetailModal({
                   <div className="space-y-0.5">
                     <p className="text-[10px] font-normal text-muted-foreground/50">Temperatura</p>
                     <p className="text-foreground">{record.temperature_celsius} °C</p>
-                  </div>
-                )}
-                {record.heart_rate_bpm && (
-                  <div className="space-y-0.5">
-                    <p className="text-[10px] font-normal text-muted-foreground/50">F. Cardíaca</p>
-                    <p className="text-foreground">{record.heart_rate_bpm} bpm</p>
-                  </div>
-                )}
-                {record.respiratory_rate_bpm && (
-                  <div className="space-y-0.5">
-                    <p className="text-[10px] font-normal text-muted-foreground/50">F. Respiratoria</p>
-                    <p className="text-foreground">{record.respiratory_rate_bpm} rpm</p>
                   </div>
                 )}
               </div>

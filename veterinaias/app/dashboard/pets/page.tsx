@@ -161,8 +161,8 @@ export default function PetsPage() {
               {pets.length} {pets.length === 1 ? 'paciente activo' : 'pacientes activos'}
             </p>
             <div className="flex items-center gap-1">
-               <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-               <span className="text-[10px] font-bold text-primary/60 uppercase tracking-tighter">Registros actualizados</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+              <span className="text-[10px] font-bold text-primary/60 uppercase tracking-tighter">Registros actualizados</span>
             </div>
           </div>
         </div>
@@ -189,30 +189,24 @@ function PetRow({ pet }: { pet: Pet }) {
       <div className="flex items-center gap-4 w-1/3 min-w-0">
         <div className="relative shrink-0">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-muted/50 to-muted border border-border/60 flex items-center justify-center group-hover:border-primary/30 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500 shadow-sm">
-            <Icon 
-              size={24} 
-              strokeWidth={1.5} 
-              className="text-muted-foreground/50 group-hover:text-primary transition-colors group-hover:scale-110 duration-500" 
+            <Icon
+              size={24}
+              strokeWidth={1.5}
+              className="text-muted-foreground/50 group-hover:text-primary transition-colors group-hover:scale-110 duration-500"
             />
           </div>
           {/* Badge de sexo */}
-          <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center ${
-            pet.sex === 'male' ? 'bg-blue-500' : pet.sex === 'female' ? 'bg-pink-500' : 'bg-gray-400'
-          }`}>
-             <span className="text-[10px] font-bold text-white">
-                {pet.sex === 'male' ? '♂' : pet.sex === 'female' ? '♀' : '?'}
-             </span>
+          <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center ${pet.sex === 'male' ? 'bg-blue-500' : pet.sex === 'female' ? 'bg-pink-500' : 'bg-gray-400'
+            }`}>
+            <span className="text-[10px] font-bold text-white">
+              {pet.sex === 'male' ? '♂' : pet.sex === 'female' ? '♀' : '?'}
+            </span>
           </div>
         </div>
         <div className="min-w-0">
           <p className="font-bold text-foreground text-[16px] leading-tight tracking-tight truncate group-hover:text-primary transition-colors">
             {pet.name}
           </p>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground/70 font-mono uppercase tracking-wider">
-              {pet.id.split('-')[0]}
-            </span>
-          </div>
         </div>
       </div>
 

@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Clock, User, Info, FileText, Phone, Mail, PawPrint } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
 import { StatusActions } from '@/components/appointments/StatusActions'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -23,8 +22,7 @@ export default async function AppointmentDetailPage({
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone, email),
       assigned_to_profile:assigned_to(id, full_name),
-      created_by_profile:created_by(id, full_name),
-      medical_record:medical_record_id(id)
+      created_by_profile:created_by(id, full_name)
     `)
     .eq('id', appointmentId)
     .single()
@@ -35,7 +33,6 @@ export default async function AppointmentDetailPage({
   const owner = appointment.owner as any
   const assignedTo = appointment.assigned_to_profile as any
   const createdBy = appointment.created_by_profile as any
-  const medicalRecord = appointment.medical_record as any
   const isGrooming = appointment.appointment_type === 'grooming'
   const groomingServices = isGrooming && appointment.reason
     ? appointment.reason.split(', ').filter(Boolean)
@@ -150,28 +147,6 @@ export default async function AppointmentDetailPage({
               </div>
             </div>
 
-            {/* Linked medical record */}
-            {medicalRecord && (
-              <div className="pt-8 border-t border-border/40">
-                <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                      <FileText size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground leading-none">{isGrooming ? 'Sesión de estética registrada' : 'Consulta registrada'}</p>
-                      <p className="text-xs text-muted-foreground mt-1">Existe un registro clínico vinculado a esta cita.</p>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/dashboard/pets/${pet?.id}/records/${medicalRecord.id}`}
-                    className={buttonVariants({ variant: 'outline', size: 'sm', className: 'bg-card' })}
-                  >
-                    Ver registro clínico
-                  </Link>
-                </div>
-              </div>
-            )}
 
             {/* Actions Area */}
             <div className="pt-8 border-t border-border/40">

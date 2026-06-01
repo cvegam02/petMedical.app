@@ -58,16 +58,17 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         id, name, sex, date_of_birth, color, microchip, notes, created_at, sterilized, habitat, feeding, cohabitation, cohabitation_details,
         species:species_id(name),
         breed,
-        medical_records(
-          id, reason, diagnosis, weight_kg, created_at,
-          created_by_profile:attended_by(full_name),
+        service_visits(
+          id, created_at, status,
+          consultation:consultation_records(reason, diagnosis, weight_kg, attended_by),
           prescriptions(id),
           attachments(id),
           addendums(id)
         )
       `)
       .eq('id', petId)
-      .order('created_at', { referencedTable: 'medical_records', ascending: false })
+      .eq('service_visits.service_type', 'consultation')
+      .order('created_at', { referencedTable: 'service_visits', ascending: false })
       .single(),
     (supabase as any).from('pet_registrations')
       .select('status, date_of_death, owner:owner_id(id, full_name, email, phone)')
@@ -86,7 +87,14 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const dateOfDeath = (regResult?.data?.date_of_death ?? null) as string | null
   const species = pet.species as any
   const breed = pet.breed as string | null
-  const records = (pet.medical_records as any[]) ?? []
+  const rawVisits = (pet.service_visits as any[]) ?? []
+  const records = rawVisits.map((v: any) => ({
+    ...v,
+    ...(v.consultation ?? {}),
+    created_by_profile: v.consultation?.attended_by
+      ? { full_name: v.consultation.attended_by }
+      : null,
+  }))
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
 
   const speciesName = species?.name?.toLowerCase() || ''

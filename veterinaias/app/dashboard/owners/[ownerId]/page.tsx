@@ -26,18 +26,19 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
         id, name, sex, date_of_birth, color, microchip,
         species:species_id(id, name),
         breed,
-        medical_records(created_at)
+        service_visits(created_at)
       )
     `)
     .eq('owner_id', ownerId)
+    .eq('pet.service_visits.service_type', 'consultation')
 
   const pets = (registrations ?? []).map((reg: any) => reg.pet).filter(Boolean)
   const initials = getInitials(owner.full_name)
 
-  const allRecords = pets.flatMap((p: any) => p.medical_records ?? [])
-  const totalConsultas = allRecords.length
-  const lastVisitTs = allRecords.length
-    ? Math.max(...allRecords.map((r: any) => new Date(r.created_at).getTime()))
+  const allVisits = pets.flatMap((p: any) => p.service_visits ?? [])
+  const totalConsultas = allVisits.length
+  const lastVisitTs = allVisits.length
+    ? Math.max(...allVisits.map((v: any) => new Date(v.created_at).getTime()))
     : null
   const lastVisitStr = lastVisitTs
     ? new Date(lastVisitTs).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -142,7 +143,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {pets.map((pet: any, index: number) => {
-            const lastVisit = pet.medical_records?.sort((a: any, b: any) =>
+            const lastVisit = pet.service_visits?.sort((a: any, b: any) =>
               new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
             )[0]?.created_at
 
@@ -190,7 +191,7 @@ function PetPatientCard({ pet, lastVisit }: { pet: any; lastVisit?: string }) {
   const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
   const age = calcAge(pet.date_of_birth)
   const sex = pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : null
-  const consultas = pet.medical_records?.length ?? 0
+  const consultas = pet.service_visits?.length ?? 0
   const meta = [pet.species?.name, pet.breed, age, sex].filter(Boolean).join(' · ')
   const lastVisitDate = lastVisit
     ? new Date(lastVisit).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
