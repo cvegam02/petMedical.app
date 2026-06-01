@@ -140,7 +140,7 @@ export interface PetVaccination {
   pet_id: string
   tenant_id: string
   applied_by: string | null
-  medical_record_id: string | null
+  visit_id: string | null
   vaccine_catalog_id: string | null
   vaccine_name: string
   lot_number: string | null
@@ -155,7 +155,7 @@ export interface PetDeworming {
   pet_id: string
   tenant_id: string
   applied_by: string
-  medical_record_id: string | null
+  visit_id: string | null
   product_name: string
   application_date: string
   next_due_date: string | null
@@ -192,12 +192,8 @@ export interface CrossTenantPetResult {
   last_clinic: string | null
 }
 
-export interface MedicalRecord {
-  id: string
-  pet_id: string
-  appointment_id: string | null
-  tenant_id: string
-  created_by: string
+export interface ConsultationRecord {
+  visit_id: string
   attended_by: string | null
   reason: string
   diagnosis: string | null
@@ -205,14 +201,12 @@ export interface MedicalRecord {
   notes: string | null
   weight_kg: number | null
   temperature_celsius: number | null
-  heart_rate_bpm: number | null
-  respiratory_rate_bpm: number | null
-  created_at: string
+  follow_up_for_visit_id: string | null
 }
 
 export interface Prescription {
   id: string
-  medical_record_id: string
+  visit_id: string
   medication_catalog_id: string | null
   medication_name: string
   active_ingredient: string | null
@@ -227,7 +221,7 @@ export interface Prescription {
 
 export interface Attachment {
   id: string
-  medical_record_id: string
+  visit_id: string
   file_name: string
   file_type: string
   storage_path: string
@@ -237,7 +231,7 @@ export interface Attachment {
 
 export interface Addendum {
   id: string
-  medical_record_id: string
+  visit_id: string
   content: string
   created_by: string
   created_at: string
@@ -278,8 +272,6 @@ export interface Appointment {
   duration_minutes: number
   reason: string | null
   notes: string | null
-  medical_record_id: string | null
-  origin_record_id: string | null
   google_event_id: string | null
   created_by: string | null
   created_at: string
@@ -368,21 +360,21 @@ export type Database = {
         }
         Relationships: []
       }
-      medical_records: {
-        Row: { id: string; pet_id: string; appointment_id: string | null; tenant_id: string; created_by: string; attended_by: string | null; reason: string; diagnosis: string | null; treatment: string | null; notes: string | null; weight_kg: number | null; temperature_celsius: number | null; heart_rate_bpm: number | null; respiratory_rate_bpm: number | null; created_at: string }
-        Insert: { pet_id: string; appointment_id?: string | null; tenant_id: string; created_by: string; attended_by?: string | null; reason: string; diagnosis?: string | null; treatment?: string | null; notes?: string | null; weight_kg?: number | null; temperature_celsius?: number | null; heart_rate_bpm?: number | null; respiratory_rate_bpm?: number | null }
-        Update: { [key: string]: never }
+      consultation_records: {
+        Row: { visit_id: string; attended_by: string | null; reason: string; diagnosis: string | null; treatment: string | null; notes: string | null; weight_kg: number | null; temperature_celsius: number | null; follow_up_for_visit_id: string | null }
+        Insert: { visit_id: string; attended_by?: string | null; reason: string; diagnosis?: string | null; treatment?: string | null; notes?: string | null; weight_kg?: number | null; temperature_celsius?: number | null; follow_up_for_visit_id?: string | null }
+        Update: Record<string, never>
         Relationships: []
       }
       prescriptions: {
         Row: {
-          id: string; medical_record_id: string; medication_catalog_id: string | null;
+          id: string; visit_id: string; medication_catalog_id: string | null;
           medication_name: string; active_ingredient: string | null; dosage: string;
           suggested_dose: string | null; route_of_administration: string | null;
           frequency: string; duration: string; notes: string | null; created_at: string
         }
         Insert: {
-          medical_record_id: string; medication_catalog_id?: string | null;
+          visit_id: string; medication_catalog_id?: string | null;
           medication_name: string; active_ingredient?: string | null; dosage: string;
           suggested_dose?: string | null; route_of_administration?: string | null;
           frequency: string; duration: string; notes?: string | null
@@ -391,21 +383,21 @@ export type Database = {
         Relationships: []
       }
       attachments: {
-        Row: { id: string; medical_record_id: string; file_name: string; file_type: string; storage_path: string; created_by: string; created_at: string }
-        Insert: { medical_record_id: string; file_name: string; file_type: string; storage_path: string; created_by: string }
+        Row: { id: string; visit_id: string; file_name: string; file_type: string; storage_path: string; created_by: string; created_at: string }
+        Insert: { visit_id: string; file_name: string; file_type: string; storage_path: string; created_by: string }
         Update: { [key: string]: never }
         Relationships: []
       }
       addendums: {
-        Row: { id: string; medical_record_id: string; content: string; created_by: string; created_at: string }
-        Insert: { medical_record_id: string; content: string; created_by: string }
+        Row: { id: string; visit_id: string; content: string; created_by: string; created_at: string }
+        Insert: { visit_id: string; content: string; created_by: string }
         Update: { [key: string]: never }
         Relationships: []
       }
       appointments: {
-        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; medical_record_id: string | null; origin_record_id: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: AppointmentType }
-        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: AppointmentType }
-        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; medical_record_id?: string | null; origin_record_id?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: AppointmentType }
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: AppointmentType }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: AppointmentType }
+        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: AppointmentType }
         Relationships: []
       }
       share_tokens: {
@@ -427,14 +419,14 @@ export type Database = {
         Relationships: []
       }
       pet_vaccinations: {
-        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string | null; medical_record_id: string | null; vaccine_catalog_id: string | null; vaccine_name: string; lot_number: string | null; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
-        Insert: { pet_id: string; tenant_id: string; applied_by?: string | null; medical_record_id?: string | null; vaccine_catalog_id?: string | null; vaccine_name: string; lot_number?: string | null; application_date: string; next_due_date?: string | null; notes?: string | null }
+        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string | null; visit_id: string | null; vaccine_catalog_id: string | null; vaccine_name: string; lot_number: string | null; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
+        Insert: { pet_id: string; tenant_id: string; applied_by?: string | null; visit_id?: string | null; vaccine_catalog_id?: string | null; vaccine_name: string; lot_number?: string | null; application_date: string; next_due_date?: string | null; notes?: string | null }
         Update: Record<string, never>
         Relationships: []
       }
       pet_dewormings: {
-        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string; medical_record_id: string | null; product_name: string; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
-        Insert: { pet_id: string; tenant_id: string; applied_by: string; medical_record_id?: string | null; product_name: string; application_date: string; next_due_date?: string | null; notes?: string | null }
+        Row: { id: string; pet_id: string; tenant_id: string; applied_by: string; visit_id: string | null; product_name: string; application_date: string; next_due_date: string | null; notes: string | null; created_at: string }
+        Insert: { pet_id: string; tenant_id: string; applied_by: string; visit_id?: string | null; product_name: string; application_date: string; next_due_date?: string | null; notes?: string | null }
         Update: Record<string, never>
         Relationships: []
       }
