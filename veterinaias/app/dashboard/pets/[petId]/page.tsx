@@ -63,7 +63,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         breed,
         service_visits(
           id, created_at, status,
-          consultation:consultation_records(reason, diagnosis, weight_kg, attended_by),
+          consultation:consultation_records!visit_id(reason, diagnosis, weight_kg, attended_by),
           prescriptions(id),
           attachments(id),
           addendums(id)

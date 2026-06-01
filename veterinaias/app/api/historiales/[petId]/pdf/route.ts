@@ -48,7 +48,7 @@ export async function GET(
       .from('service_visits')
       .select(`
         id, created_at,
-        consultation:consultation_records(
+        consultation:consultation_records!visit_id(
           reason, diagnosis, treatment, notes,
           weight_kg, temperature_celsius,
           attended_by_profile:attended_by(full_name)

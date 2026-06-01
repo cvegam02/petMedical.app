@@ -35,7 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .from('service_visits')
     .select(`
       id, created_at, tenant_id,
-      consultation:consultation_records(
+      consultation:consultation_records!visit_id(
         diagnosis, treatment, weight_kg,
         vet:attended_by(full_name, professional_license, professional_address)
       ),

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Search, Loader2, TriangleAlert } from 'lucide-react'
+import { Search, Loader2, TriangleAlert, Stethoscope, Scissors } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,7 +30,10 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
   const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>(initialAppointmentType ?? 'consultation')
+  const [showSelector, setShowSelector] = useState(!initialAppointmentType)
   const [groomingCatalog, setGroomingCatalog] = useState<{ id: string; name: string; duration_minutes: number | null }[]>([])
+
+  // Load grooming catalog when type is grooming and modal is open
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conflictWarning, setConflictWarning] = useState<{ message: string; appointments: { id: string; pet_name: string; owner_name: string }[] } | null>(null)
@@ -136,6 +139,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   function reset() {
     setMode('registered')
     setAppointmentType(initialAppointmentType ?? 'consultation')
+    setShowSelector(!initialAppointmentType)
     setSelectedServiceIds([])
     setSelectedDate(undefined)
     setSelectedTime('')
@@ -238,29 +242,40 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     <Dialog open={isOpen} onOpenChange={(o) => { if (!o) handleClose() }}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Nueva cita</DialogTitle>
+          <DialogTitle>{showSelector ? 'Selecciona un servicio' : 'Nueva cita'}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="px-6 pt-5 pb-2 space-y-6">
-            {/* Service type */}
-            <div className="space-y-1">
-              <Label>Tipo de servicio</Label>
-              <Select
-                value={appointmentType}
-                onValueChange={v => setAppointmentType(v as 'consultation' | 'grooming')}
-                items={{ consultation: 'Médico', grooming: 'Estético' }}
+        {showSelector ? (
+          <div className="px-6 py-8">
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => { setAppointmentType('consultation'); setShowSelector(false) }}
+                className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all group text-center"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona el tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="consultation">Médico</SelectItem>
-                  <SelectItem value="grooming">Estético</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Stethoscope size={28} className="text-primary" />
+                </div>
+                <span className="font-bold text-base">Médico</span>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Consulta, vacunas y revisiones</p>
+              </button>
 
+              <button
+                type="button"
+                onClick={() => { setAppointmentType('grooming'); setShowSelector(false) }}
+                className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all group text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Scissors size={28} className="text-blue-600" />
+                </div>
+                <span className="font-bold text-base">Estético</span>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Baño, corte y peluquería</p>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+          <div className="px-6 pt-5 pb-2 space-y-6">
             {/* Mode toggle */}
             <div className="flex gap-1 p-1 bg-muted rounded-lg">
               <button
@@ -323,6 +338,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                               type="button"
                               className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors"
                               onMouseDown={() => {
+                                skipOwnerSearchRef.current = true
                                 setSelectedOwner(o)
                                 setOwnerQuery(o.full_name)
                                 setShowSuggestions(false)
@@ -551,6 +567,17 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 mt-2">
+            {!initialAppointmentType && (
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setShowSelector(true)} 
+                disabled={isSubmitting}
+                className="mr-auto text-muted-foreground"
+              >
+                ← Volver
+              </Button>
+            )}
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancelar
             </Button>
@@ -559,6 +586,7 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   )

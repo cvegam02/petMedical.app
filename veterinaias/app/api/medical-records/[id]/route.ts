@@ -20,7 +20,7 @@ export async function GET(
     .from('service_visits')
     .select(`
       id, pet_id, owner_id, appointment_id, status, started_at, created_at,
-      consultation:consultation_records(
+      consultation:consultation_records!visit_id(
         attended_by, reason, diagnosis, treatment, notes,
         weight_kg, temperature_celsius
       ),

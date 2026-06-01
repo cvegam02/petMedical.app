@@ -23,7 +23,7 @@ export async function GET(
         breed,
         service_visits(
           id, status, started_at, created_at,
-          consultation:consultation_records(
+          consultation:consultation_records!visit_id(
             reason, diagnosis, treatment, notes,
             weight_kg, temperature_celsius,
             attended_by_profile:attended_by(full_name)

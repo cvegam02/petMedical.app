@@ -19,7 +19,7 @@ export default async function RecordDetailPage({
     .select(`
       id, created_at,
       pet:pet_id(id, name),
-      consultation:consultation_records(
+      consultation:consultation_records!visit_id(
         reason, diagnosis, treatment, notes,
         weight_kg, temperature_celsius,
         attended_by_profile:attended_by(full_name)
