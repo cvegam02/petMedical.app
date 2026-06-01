@@ -199,7 +199,7 @@ export function WalkInConsultationPage({ vets, currentVetId }: WalkInConsultatio
                   />
                   {errors.reason && <p className="text-destructive text-[11px] font-medium mt-1">{errors.reason.message}</p>}
                 </div>
-                <div className="grid grid-cols-4 gap-4 mt-6">
+                <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="space-y-1.5">
                     <Label htmlFor="weight_kg" className="text-[12px] font-bold">Peso (kg)</Label>
                     <Input id="weight_kg" type="number" step="0.01" placeholder="0.0"
@@ -213,20 +213,6 @@ export function WalkInConsultationPage({ vets, currentVetId }: WalkInConsultatio
                       className="bg-muted/30 focus:bg-white transition-all font-mono"
                       {...register('temperature_celsius', { valueAsNumber: true })} />
                     {errors.temperature_celsius && <p className="text-destructive text-[11px] font-medium mt-1">{errors.temperature_celsius.message}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="heart_rate_bpm" className="text-[12px] font-bold">FC (lpm)</Label>
-                    <Input id="heart_rate_bpm" type="number" placeholder="80"
-                      className="bg-muted/30 focus:bg-white transition-all font-mono"
-                      {...register('heart_rate_bpm', { valueAsNumber: true })} />
-                    {errors.heart_rate_bpm && <p className="text-destructive text-[11px] font-medium mt-1">{errors.heart_rate_bpm.message}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="respiratory_rate_bpm" className="text-[12px] font-bold">FR (rpm)</Label>
-                    <Input id="respiratory_rate_bpm" type="number" placeholder="20"
-                      className="bg-muted/30 focus:bg-white transition-all font-mono"
-                      {...register('respiratory_rate_bpm', { valueAsNumber: true })} />
-                    {errors.respiratory_rate_bpm && <p className="text-destructive text-[11px] font-medium mt-1">{errors.respiratory_rate_bpm.message}</p>}
                   </div>
                 </div>
               </FormSection>

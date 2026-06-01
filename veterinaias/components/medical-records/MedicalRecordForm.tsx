@@ -177,7 +177,7 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient, vet
             />
             {errors.reason && <p className="text-destructive text-[11px] font-medium mt-1">{errors.reason.message}</p>}
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="space-y-1.5">
               <Label htmlFor="weight_kg" className="text-[12px] font-bold">Peso (kg)</Label>
               <Input id="weight_kg" type="number" step="0.01" placeholder="0.0"
@@ -189,18 +189,6 @@ export function MedicalRecordForm({ petId, appointmentId, incompletePatient, vet
               <Input id="temperature_celsius" type="number" step="0.1" placeholder="38.5"
                 className="bg-muted/30 focus:bg-white transition-all font-mono"
                 {...register('temperature_celsius', { valueAsNumber: true })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="heart_rate_bpm" className="text-[12px] font-bold">FC (lpm)</Label>
-              <Input id="heart_rate_bpm" type="number" placeholder="80"
-                className="bg-muted/30 focus:bg-white transition-all font-mono"
-                {...register('heart_rate_bpm', { valueAsNumber: true })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="respiratory_rate_bpm" className="text-[12px] font-bold">FR (rpm)</Label>
-              <Input id="respiratory_rate_bpm" type="number" placeholder="20"
-                className="bg-muted/30 focus:bg-white transition-all font-mono"
-                {...register('respiratory_rate_bpm', { valueAsNumber: true })} />
             </div>
           </div>
         </FormSection>

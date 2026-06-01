@@ -25,7 +25,7 @@ export function AttachmentUploader({ recordId, userId, onUploaded }: AttachmentU
           storage_path: path,
           file_name: file.name,
           file_type: file.type,
-          medical_record_id: recordId,
+          visit_id: recordId,
         }),
       })
       const json = await res.json()
