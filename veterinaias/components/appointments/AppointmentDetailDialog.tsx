@@ -1,8 +1,9 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, Phone, Scissors } from 'lucide-react'
+import { Calendar, Clock, Phone, Scissors, Stethoscope, Cat, Dog, PawPrint } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import { serviceTypeConfig } from '@/lib/constants/service-type'
 import { SERVICE_PANELS } from './panels'
 import type { DashboardAppointment } from '@/components/dashboard/DashboardAppointmentCard'
 
@@ -16,6 +17,13 @@ interface AppointmentDetailDialogProps {
   loadingStatus?: string | null
 }
 
+function speciesIcon(name: string | undefined) {
+  const s = (name ?? '').toLowerCase()
+  if (s.includes('fel') || s.includes('gat')) return Cat
+  if (s.includes('can') || s.includes('perr')) return Dog
+  return PawPrint
+}
+
 export function AppointmentDetailDialog({
   open,
   onOpenChange,
@@ -26,54 +34,60 @@ export function AppointmentDetailDialog({
   if (!appointment) return null
 
   const statusCfg = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
-  const isGrooming = (appointment.service_type ?? 'consultation') === 'grooming'
-
   const serviceType = appointment.service_type ?? 'consultation'
+  const isGrooming = serviceType === 'grooming'
+  const svc = serviceTypeConfig(serviceType)
+  const ServiceIcon = isGrooming ? Scissors : Stethoscope
+  const SpeciesIcon = speciesIcon(appointment.pet?.species?.name)
   const Panel = SERVICE_PANELS[serviceType] ?? SERVICE_PANELS.consultation!
+
+  const dateObj = new Date(appointment.scheduled_at)
+  const dateStr = dateObj.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
+  const timeStr = dateObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
+        {/* Accent bar by service type */}
+        <div className={`h-1.5 w-full ${svc.bar}`} />
+
         {/* Header */}
-        <div className="px-6 pt-6 pb-5">
-          <DialogHeader className="mb-0">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-md border ${statusCfg.className}`}>
-                {statusCfg.label}
-              </span>
-              {isGrooming && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-violet-200 bg-violet-50 text-violet-700">
-                  <Scissors size={10} />Estética
-                </span>
-              )}
+        <div className="px-6 pt-5 pb-5">
+          <div className="flex items-start gap-3.5">
+            <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${svc.chip}`}>
+              <SpeciesIcon size={24} strokeWidth={1.75} />
             </div>
-            <DialogTitle className="text-2xl font-bold font-heading text-foreground leading-tight">
-              {appointment.pet?.name ?? '—'}
-            </DialogTitle>
-          </DialogHeader>
-          {appointment.pet?.species && (
-            <p className="text-sm text-muted-foreground mt-0.5">{appointment.pet.species.name}</p>
-          )}
+            <div className="flex-1 min-w-0">
+              <DialogHeader className="mb-0">
+                <DialogTitle className="text-xl font-bold font-heading text-foreground leading-tight truncate">
+                  {appointment.pet?.name ?? '—'}
+                </DialogTitle>
+              </DialogHeader>
+              {appointment.pet?.species && (
+                <p className="text-sm text-muted-foreground mt-0.5 truncate">{appointment.pet.species.name}</p>
+              )}
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${svc.chip}`}>
+                  <ServiceIcon size={10} strokeWidth={2.25} />{svc.label}
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${statusCfg.className}`}>
+                  {statusCfg.label}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Appointment info */}
         <div className="px-6 py-4 border-t border-border/60 space-y-2.5">
           <div className="flex items-center gap-2.5 text-sm">
-            <Calendar size={13} className="text-muted-foreground shrink-0" />
-            <span className="capitalize text-foreground">
-              {new Date(appointment.scheduled_at).toLocaleDateString('es-MX', {
-                weekday: 'long', day: 'numeric', month: 'long',
-              })}
-            </span>
+            <Calendar size={14} className="text-muted-foreground/60 shrink-0" />
+            <span className="capitalize text-foreground">{dateStr}</span>
           </div>
 
           <div className="flex items-center gap-2.5 text-sm">
-            <Clock size={13} className="text-muted-foreground shrink-0" />
-            <span className="text-foreground font-medium tabular-nums">
-              {new Date(appointment.scheduled_at).toLocaleTimeString('es-MX', {
-                hour: '2-digit', minute: '2-digit',
-              })}
-            </span>
+            <Clock size={14} className="text-muted-foreground/60 shrink-0" />
+            <span className="text-foreground font-medium tabular-nums">{timeStr}</span>
             {!isGrooming && (
               <span className="text-muted-foreground">· {appointment.duration_minutes} min</span>
             )}
@@ -81,33 +95,39 @@ export function AppointmentDetailDialog({
 
           {appointment.owner && (
             <div className="flex items-center gap-2.5 text-sm">
-              <Phone size={13} className="text-muted-foreground shrink-0" />
-              <span className="font-medium text-foreground">{appointment.owner.full_name}</span>
+              <Phone size={14} className="text-muted-foreground/60 shrink-0" />
+              <span className="font-medium text-foreground truncate">{appointment.owner.full_name}</span>
               {appointment.owner.phone && (
-                <a href={`tel:${appointment.owner.phone}`} className="text-xs text-primary hover:underline tabular-nums">
+                <a href={`tel:${appointment.owner.phone}`} className="text-xs text-primary hover:underline tabular-nums ml-auto shrink-0">
                   {appointment.owner.phone}
                 </a>
               )}
             </div>
           )}
 
+          {/* Reason (consultation) */}
           {appointment.reason && !isGrooming && (
-            <p className="text-sm text-muted-foreground italic pl-[21px]">{appointment.reason}</p>
+            <div className="pl-[26px]">
+              <p className="text-sm text-muted-foreground leading-relaxed italic">“{appointment.reason}”</p>
+            </div>
           )}
 
-          {/* Grooming services chips */}
+          {/* Services (grooming) */}
           {isGrooming && appointment.reason && (
-            <div className="flex flex-wrap gap-1 pl-[21px]">
-              {appointment.reason.split(', ').filter(Boolean).map(svc => (
-                <span key={svc} className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200">
-                  {svc}
-                </span>
-              ))}
+            <div className="pl-[26px]">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/50 mb-1.5">Servicios</p>
+              <div className="flex flex-wrap gap-1">
+                {appointment.reason.split(', ').filter(Boolean).map(s => (
+                  <span key={s} className={`text-xs font-medium px-2 py-0.5 rounded-full border ${svc.chip}`}>
+                    {s}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Service panel */}
+        {/* Service panel (actions) */}
         <Panel
           appointment={appointment}
           onClose={() => onOpenChange(false)}
