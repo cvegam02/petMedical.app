@@ -63,7 +63,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
         breed,
         service_visits(
           id, created_at, status,
-          consultation:consultation_records!visit_id(reason, diagnosis, weight_kg, attended_by),
+          consultation:consultation_records!visit_id(reason, diagnosis, weight_kg, attended_by_profile:attended_by(full_name)),
           prescriptions(id),
           attachments(id),
           addendums(id)
@@ -94,9 +94,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   const records = rawVisits.map((v: any) => ({
     ...v,
     ...(v.consultation ?? {}),
-    created_by_profile: v.consultation?.attended_by
-      ? { full_name: v.consultation.attended_by }
-      : null,
+    created_by_profile: v.consultation?.attended_by_profile ?? null,
   }))
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
 
