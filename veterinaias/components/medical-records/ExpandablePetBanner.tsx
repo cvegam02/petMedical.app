@@ -171,9 +171,15 @@ export function ExpandablePetBanner({
               {/* Last 2 visits */}
               <div className="space-y-2.5 pt-2 border-t border-border/40">
                 <p className="text-[10px] font-mono font-bold text-muted-foreground/60 uppercase tracking-wider">Últimas 2 visitas</p>
-                {petDetails.medical_records && petDetails.medical_records.length > 0 ? (
+                {(() => {
+                  const visits = ((petDetails.service_visits ?? []) as any[]).map((v: any) => ({
+                    ...v,
+                    ...(v.consultation ?? {}),
+                    created_by_profile: v.consultation?.attended_by_profile ?? null,
+                  }))
+                  return visits.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {petDetails.medical_records.slice(0, 2).map((visit: any, idx: number) => {
+                    {visits.slice(0, 2).map((visit: any, idx: number) => {
                       const visitDate = new Date(visit.created_at).toLocaleDateString('es-MX', {
                         year: 'numeric', month: 'short', day: 'numeric'
                       })
@@ -209,7 +215,8 @@ export function ExpandablePetBanner({
                   <p className="text-xs text-muted-foreground italic py-1 pl-1">
                     No hay visitas anteriores registradas para esta mascota.
                   </p>
-                )}
+                )
+                })()}
               </div>
             </div>
           )}
