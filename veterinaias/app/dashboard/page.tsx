@@ -39,7 +39,7 @@ export default async function DashboardPage() {
   let appointmentsQuery = supabase
     .from('appointments')
     .select(`
-      id, status, scheduled_at, duration_minutes, reason,
+      id, status, scheduled_at, duration_minutes, reason, service_type,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone),
       assigned_to_profile:assigned_to(id, full_name)

@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import { serviceTypeConfig } from '@/lib/constants/service-type'
 import type { ServiceType } from '@/lib/types/database'
 
 export interface AppointmentResource {
@@ -21,28 +22,11 @@ export interface AppointmentResource {
   owner: { id: string; full_name: string; phone: string | null } | null
 }
 
-const SERVICE_CONFIG: Record<string, { label: string; icon: typeof Stethoscope; accent: string; chip: string; bar: string }> = {
-  consultation: {
-    label: 'Médico',
-    icon: Stethoscope,
-    accent: 'text-primary',
-    chip: 'bg-primary/10 text-primary border-primary/20',
-    bar: 'bg-primary',
-  },
-  grooming: {
-    label: 'Estético',
-    icon: Scissors,
-    accent: 'text-violet-600',
-    chip: 'bg-violet-50 text-violet-700 border-violet-200',
-    bar: 'bg-violet-500',
-  },
-}
-
 export function AppointmentPopover({ appointment, children }: { appointment: AppointmentResource; children: React.ReactNode }) {
   const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
-  const svc = SERVICE_CONFIG[appointment.service_type ?? 'consultation'] ?? SERVICE_CONFIG.consultation
-  const ServiceIcon = svc.icon
+  const svc = serviceTypeConfig(appointment.service_type)
   const isGrooming = (appointment.service_type ?? 'consultation') === 'grooming'
+  const ServiceIcon = isGrooming ? Scissors : Stethoscope
 
   const dateObj = new Date(appointment.scheduled_at)
   const time = dateObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
