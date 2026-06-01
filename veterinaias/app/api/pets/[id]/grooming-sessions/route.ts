@@ -21,17 +21,29 @@ export async function GET(
     return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
   const { data, error } = await (supabase as any)
-    .from('grooming_sessions')
+    .from('service_visits')
     .select(`
-      id, session_date, notes, created_at,
-      services:grooming_session_services(id, service_name),
+      id, started_at, ended_at, status, created_at,
+      record:grooming_records(notes),
+      services:grooming_record_services(id, service_name),
       tenant:tenant_id(name)
     `)
     .eq('pet_id', petId)
     .eq('tenant_id', (profile as any).tenant_id)
-    .order('session_date', { ascending: false })
+    .eq('service_type', 'grooming')
+    .order('created_at', { ascending: false })
 
   if (error)
     return NextResponse.json({ error: 'Error al obtener historial' }, { status: 500 })
-  return NextResponse.json({ data })
+
+  const mapped = (data ?? []).map((row: any) => {
+    const record = Array.isArray(row.record) ? row.record[0] : row.record
+    return {
+      ...row,
+      session_date: row.started_at ?? row.created_at,
+      notes: record?.notes ?? null,
+    }
+  })
+
+  return NextResponse.json({ data: mapped })
 }

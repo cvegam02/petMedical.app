@@ -22,6 +22,8 @@ export async function PATCH(
   if (!(profile as any)?.tenant_id)
     return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
+  const tenantId = (profile as any).tenant_id
+
   let body: unknown
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'JSON inválido' }, { status: 400 })
@@ -31,14 +33,68 @@ export async function PATCH(
   if (!result.success)
     return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
 
-  const { data, error } = await (supabase as any)
-    .from('grooming_sessions')
-    .update(result.data)
+  // Invariant: check if session is already concluded
+  const { data: existing, error: fetchError } = await (supabase as any)
+    .from('service_visits')
+    .select('ended_at')
     .eq('id', id)
-    .eq('tenant_id', (profile as any).tenant_id)
-    .select()
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+
+  if (fetchError) return NextResponse.json({ error: 'Error al verificar sesión' }, { status: 500 })
+  if (!existing) return NextResponse.json({ error: 'Sesión no encontrada' }, { status: 404 })
+  if (existing.ended_at) return NextResponse.json({ error: 'La sesión ya fue concluida' }, { status: 409 })
+
+  const { notes, ...visitFields } = result.data
+
+  // Update service_visits with status + timestamps
+  const visitUpdate: Record<string, unknown> = {}
+  if (visitFields.started_at !== undefined) visitUpdate.started_at = visitFields.started_at
+  if (visitFields.ended_at !== undefined) {
+    visitUpdate.ended_at = visitFields.ended_at
+    visitUpdate.status = 'completed'
+  }
+
+  if (Object.keys(visitUpdate).length > 0) {
+    const { error: visitError } = await (supabase as any)
+      .from('service_visits')
+      .update(visitUpdate)
+      .eq('id', id)
+      .eq('tenant_id', tenantId)
+
+    if (visitError) return NextResponse.json({ error: 'Error al actualizar sesión' }, { status: 500 })
+  }
+
+  // Update notes in grooming_records
+  if (notes !== undefined) {
+    const { error: recordError } = await (supabase as any)
+      .from('grooming_records')
+      .update({ notes })
+      .eq('visit_id', id)
+
+    if (recordError) return NextResponse.json({ error: 'Error al actualizar notas' }, { status: 500 })
+  }
+
+  // Return updated visit
+  const { data, error } = await (supabase as any)
+    .from('service_visits')
+    .select(`
+      id, started_at, ended_at, status, created_at, appointment_id,
+      record:grooming_records(notes),
+      services:grooming_record_services(id, service_name)
+    `)
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single()
 
-  if (error) return NextResponse.json({ error: 'Error al actualizar sesión' }, { status: 500 })
-  return NextResponse.json({ data })
+  if (error) return NextResponse.json({ error: 'Error al obtener sesión actualizada' }, { status: 500 })
+
+  const record = Array.isArray(data.record) ? data.record[0] : data.record
+  return NextResponse.json({
+    data: {
+      ...data,
+      session_date: data.started_at ?? data.created_at,
+      notes: record?.notes ?? null,
+    },
+  })
 }

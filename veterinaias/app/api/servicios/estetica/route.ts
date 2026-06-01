@@ -12,22 +12,36 @@ export async function GET(req: NextRequest) {
   if (!(profile as any)?.tenant_id)
     return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
+  const tenantId = (profile as any).tenant_id
   const { searchParams } = new URL(req.url)
   const appointmentId = searchParams.get('appointmentId')
 
   // Single-session lookup by appointment_id (used by the appointment dialog)
   if (appointmentId) {
     const { data, error } = await (supabase as any)
-      .from('grooming_sessions')
+      .from('service_visits')
       .select(`
-        id, session_date, notes, created_at, started_at, ended_at,
-        services:grooming_session_services(id, service_name)
+        id, started_at, ended_at, status, created_at, appointment_id,
+        pet:pet_id(id, name, species:species_id(name)),
+        record:grooming_records(notes),
+        services:grooming_record_services(id, service_name)
       `)
-      .eq('tenant_id', (profile as any).tenant_id)
+      .eq('tenant_id', tenantId)
+      .eq('service_type', 'grooming')
       .eq('appointment_id', appointmentId)
       .maybeSingle()
     if (error) return NextResponse.json({ error: 'Error al obtener sesión' }, { status: 500 })
-    return NextResponse.json({ data })
+
+    if (!data) return NextResponse.json({ data: null })
+
+    const record = Array.isArray(data.record) ? data.record[0] : data.record
+    return NextResponse.json({
+      data: {
+        ...data,
+        session_date: data.started_at ?? data.created_at,
+        notes: record?.notes ?? null,
+      },
+    })
   }
 
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
@@ -35,18 +49,30 @@ export async function GET(req: NextRequest) {
   const offset = (page - 1) * limit
 
   const { data, error, count } = await (supabase as any)
-    .from('grooming_sessions')
+    .from('service_visits')
     .select(`
-      id, session_date, notes, created_at, started_at, ended_at,
+      id, started_at, ended_at, status, created_at, appointment_id,
       pet:pet_id(id, name, species:species_id(name)),
-      services:grooming_session_services(id, service_name)
+      record:grooming_records(notes),
+      services:grooming_record_services(id, service_name)
     `, { count: 'exact' })
-    .eq('tenant_id', (profile as any).tenant_id)
-    .order('session_date', { ascending: false })
+    .eq('tenant_id', tenantId)
+    .eq('service_type', 'grooming')
+    .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
   if (error) return NextResponse.json({ error: 'Error al obtener sesiones' }, { status: 500 })
-  return NextResponse.json({ data, meta: { total: count ?? 0, page, limit } })
+
+  const mapped = (data ?? []).map((row: any) => {
+    const record = Array.isArray(row.record) ? row.record[0] : row.record
+    return {
+      ...row,
+      session_date: row.started_at ?? row.created_at,
+      notes: record?.notes ?? null,
+    }
+  })
+
+  return NextResponse.json({ data: mapped, meta: { total: count ?? 0, page, limit } })
 }
 
 export async function POST(req: NextRequest) {
@@ -71,41 +97,74 @@ export async function POST(req: NextRequest) {
   const { services, ...sessionData } = result.data
   const tenantId = (profile as any).tenant_id
 
-  // Insert session
-  const { data: session, error: sessionError } = await (supabase as any)
-    .from('grooming_sessions')
+  // Step 1: resolve owner_id
+  // Try appointment first, then pet_registrations
+  let ownerId: string | null = null
+  if (sessionData.appointment_id) {
+    const { data: appt } = await (supabase as any)
+      .from('appointments')
+      .select('owner_id')
+      .eq('id', sessionData.appointment_id)
+      .eq('tenant_id', tenantId)
+      .maybeSingle()
+    ownerId = appt?.owner_id ?? null
+  }
+  if (!ownerId) {
+    const { data: reg } = await (supabase as any)
+      .from('pet_registrations')
+      .select('owner_id')
+      .eq('pet_id', sessionData.pet_id)
+      .eq('tenant_id', tenantId)
+      .maybeSingle()
+    ownerId = reg?.owner_id ?? null
+  }
+
+  // Step 2: insert service_visit
+  const { data: visit, error: visitError } = await (supabase as any)
+    .from('service_visits')
     .insert({
       tenant_id: tenantId,
       pet_id: sessionData.pet_id,
+      owner_id: ownerId,
       appointment_id: sessionData.appointment_id ?? null,
-      session_date: sessionData.session_date,
-      notes: sessionData.notes ?? null,
+      service_type: 'grooming',
+      status: sessionData.started_at ? 'in_progress' : 'completed',
       started_at: sessionData.started_at ?? null,
       created_by: user.id,
     })
     .select()
     .single()
 
-  if (sessionError)
+  if (visitError)
     return NextResponse.json({ error: 'Error al crear sesión' }, { status: 500 })
 
-  // Insert services
-  const serviceRows = services.map(s => ({
-    session_id: session.id,
-    tenant_id: tenantId,
-    service_catalog_id: s.service_catalog_id ?? null,
-    service_name: s.service_name,
-  }))
+  // Step 3: insert grooming_record
+  const { error: recordError } = await (supabase as any)
+    .from('grooming_records')
+    .insert({ visit_id: visit.id, notes: sessionData.notes ?? null })
 
-  const { error: servicesError } = await (supabase as any)
-    .from('grooming_session_services')
-    .insert(serviceRows)
-
-  if (servicesError) {
-    // Clean up orphaned session to maintain immutability contract
-    await (supabase as any).from('grooming_sessions').delete().eq('id', session.id)
-    return NextResponse.json({ error: 'Error al guardar servicios' }, { status: 500 })
+  if (recordError) {
+    await (supabase as any).from('service_visits').delete().eq('id', visit.id)
+    return NextResponse.json({ error: 'Error al guardar registro' }, { status: 500 })
   }
 
-  return NextResponse.json({ data: session }, { status: 201 })
+  // Step 4: insert grooming_record_services
+  if (services.length > 0) {
+    const serviceRows = services.map((s: { service_name: string; service_catalog_id?: string }) => ({
+      record_id: visit.id,
+      service_catalog_id: s.service_catalog_id ?? null,
+      service_name: s.service_name,
+    }))
+
+    const { error: servicesError } = await (supabase as any)
+      .from('grooming_record_services')
+      .insert(serviceRows)
+
+    if (servicesError) {
+      await (supabase as any).from('service_visits').delete().eq('id', visit.id)
+      return NextResponse.json({ error: 'Error al guardar servicios' }, { status: 500 })
+    }
+  }
+
+  return NextResponse.json({ data: visit }, { status: 201 })
 }
