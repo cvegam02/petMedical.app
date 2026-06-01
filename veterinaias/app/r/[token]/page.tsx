@@ -23,21 +23,39 @@ export default async function SharedRecordPage({ params }: { params: Promise<{ t
     )
   }
 
-  const { data: record } = await (admin.from('medical_records') as any)
+  const { data: visit } = await (admin as any)
+    .from('service_visits')
     .select(`
-      id, reason, diagnosis, treatment, notes, created_at,
-      weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
+      id, created_at,
+      consultation:consultation_records(
+        reason, diagnosis, treatment, notes,
+        weight_kg, temperature_celsius,
+        attended_by_profile:attended_by(full_name)
+      ),
       pet:pet_id(name, species:species_id(name), breed),
-      created_by_profile:attended_by(full_name),
       prescriptions(id, medication_name, dosage, frequency, duration, notes)
     `)
     .eq('id', shared.record_id)
+    .eq('service_type', 'consultation')
     .single()
 
-  if (!record) notFound()
+  if (!visit) notFound()
 
-  const pet = record.pet as any
-  const vet = record.created_by_profile as any
+  const consultation = (visit.consultation ?? {}) as any
+  const record = {
+    id: visit.id,
+    created_at: visit.created_at,
+    reason: consultation.reason ?? null,
+    diagnosis: consultation.diagnosis ?? null,
+    treatment: consultation.treatment ?? null,
+    notes: consultation.notes ?? null,
+    weight_kg: consultation.weight_kg ?? null,
+    temperature_celsius: consultation.temperature_celsius ?? null,
+    prescriptions: visit.prescriptions ?? [],
+  }
+
+  const pet = visit.pet as any
+  const vet = consultation.attended_by_profile as any
   const tenantName = (shared.tenants as any)?.name ?? 'Clínica Veterinaria'
   const date = new Date(record.created_at).toLocaleDateString('es-MX', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -88,14 +106,12 @@ export default async function SharedRecordPage({ params }: { params: Promise<{ t
             </div>
           )}
 
-          {[record.weight_kg, record.temperature_celsius, record.heart_rate_bpm, record.respiratory_rate_bpm].some(v => v != null) && (
+          {[record.weight_kg, record.temperature_celsius].some(v => v != null) && (
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Signos vitales</p>
               <div className="flex flex-wrap gap-2">
                 {record.weight_kg != null && <span className="text-xs px-2 py-0.5 rounded-full bg-muted border border-border">Peso: {record.weight_kg} kg</span>}
                 {record.temperature_celsius != null && <span className="text-xs px-2 py-0.5 rounded-full bg-muted border border-border">Temp: {record.temperature_celsius}°C</span>}
-                {record.heart_rate_bpm != null && <span className="text-xs px-2 py-0.5 rounded-full bg-muted border border-border">FC: {record.heart_rate_bpm} bpm</span>}
-                {record.respiratory_rate_bpm != null && <span className="text-xs px-2 py-0.5 rounded-full bg-muted border border-border">FR: {record.respiratory_rate_bpm} rpm</span>}
               </div>
             </div>
           )}

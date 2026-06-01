@@ -15,24 +15,27 @@ export async function GET(
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
   const [petResult, regResult] = await Promise.all([
-    supabase
+    (supabase as any)
       .from('pets')
       .select(`
         id, name, sex, date_of_birth, color, microchip, notes, sterilized, habitat, feeding, cohabitation, cohabitation_details, created_at, updated_at,
         species:species_id(id, name),
         breed,
-        medical_records(
-          id, reason, diagnosis, treatment, notes,
-          weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-          created_at, tenant_id,
-          created_by_profile:attended_by(full_name),
+        service_visits(
+          id, status, started_at, created_at,
+          consultation:consultation_records(
+            reason, diagnosis, treatment, notes,
+            weight_kg, temperature_celsius,
+            attended_by_profile:attended_by(full_name)
+          ),
           prescriptions(id, medication_name, dosage, frequency, duration, notes),
           attachments(id, file_name, file_type, storage_path, created_at),
           addendums(id, content, created_at, created_by_profile:created_by(full_name))
         )
       `)
       .eq('id', id)
-      .order('created_at', { referencedTable: 'medical_records', ascending: false })
+      .eq('service_visits.service_type', 'consultation')
+      .order('created_at', { referencedTable: 'service_visits', ascending: false })
       .single(),
     (supabase as any)
       .from('pet_registrations')

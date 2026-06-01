@@ -31,11 +31,13 @@ export async function POST(req: NextRequest) {
   const { record_id, phone, pet_name } = body
   if (!record_id || !phone) return NextResponse.json({ error: 'record_id y phone son requeridos' }, { status: 400 })
 
-  const { data: record } = await (supabase.from('medical_records') as any)
+  const { data: visit } = await (supabase as any)
+    .from('service_visits')
     .select('id')
     .eq('id', record_id)
+    .eq('service_type', 'consultation')
     .single()
-  if (!record) return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 })
+  if (!visit) return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 })
 
   const expiryDays: number = profile.tenants?.settings?.share_link_expiry_days ?? 7
   const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString()

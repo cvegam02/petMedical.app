@@ -13,22 +13,47 @@ export async function GET(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  const { data, error } = await supabase
-    .from('medical_records')
+  const { data: visit, error } = await (supabase as any)
+    .from('service_visits')
     .select(`
-      id, reason, diagnosis, treatment, notes,
-      weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-      created_at, tenant_id,
+      id, pet_id, owner_id, appointment_id, status, started_at, created_at,
+      consultation:consultation_records(
+        attended_by, reason, diagnosis, treatment, notes,
+        weight_kg, temperature_celsius
+      ),
       pet:pet_id(id, name, species:species_id(name), owner:owner_id(full_name, phone)),
-      created_by_profile:attended_by(full_name),
       prescriptions(id, medication_name, dosage, frequency, duration, notes),
       attachments(id, file_name, file_type, storage_path, created_at),
       addendums(id, content, created_at, created_by_profile:created_by(full_name))
     `)
     .eq('id', id)
+    .eq('service_type', 'consultation')
     .single()
 
   if (error?.code === 'PGRST116') return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const consultation = visit.consultation ?? {}
+  const data = {
+    id: visit.id,
+    pet_id: visit.pet_id,
+    owner_id: visit.owner_id,
+    appointment_id: visit.appointment_id,
+    status: visit.status,
+    started_at: visit.started_at,
+    created_at: visit.created_at,
+    reason: consultation.reason ?? null,
+    diagnosis: consultation.diagnosis ?? null,
+    treatment: consultation.treatment ?? null,
+    notes: consultation.notes ?? null,
+    weight_kg: consultation.weight_kg ?? null,
+    temperature_celsius: consultation.temperature_celsius ?? null,
+    attended_by: consultation.attended_by ?? null,
+    pet: visit.pet,
+    prescriptions: visit.prescriptions ?? [],
+    attachments: visit.attachments ?? [],
+    addendums: visit.addendums ?? [],
+  }
+
   return NextResponse.json({ data })
 }

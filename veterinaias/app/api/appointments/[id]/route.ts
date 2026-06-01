@@ -36,8 +36,7 @@ export async function GET(
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone, email),
       assigned_to_profile:assigned_to(id, full_name),
-      created_by_profile:created_by(id, full_name),
-      medical_record:medical_record_id(id)
+      created_by_profile:created_by(id, full_name)
     `)
     .eq('id', id)
     .eq('tenant_id', profile.tenant_id)

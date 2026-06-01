@@ -132,14 +132,12 @@ export function MedicalHistoryDocument({ pet, owner, records, tenantName, tenant
               <Text style={styles.fieldValue}>{rec.notes}</Text>
             </>}
 
-            {[rec.weight_kg, rec.temperature_celsius, rec.heart_rate_bpm, rec.respiratory_rate_bpm].some(v => v != null) && (
+            {[rec.weight_kg, rec.temperature_celsius].some(v => v != null) && (
               <>
                 <Text style={styles.fieldLabel}>Signos vitales</Text>
                 <View style={styles.vitalsRow}>
                   {rec.weight_kg != null && <Text style={styles.vitalChip}>Peso: {rec.weight_kg} kg</Text>}
                   {rec.temperature_celsius != null && <Text style={styles.vitalChip}>Temp: {rec.temperature_celsius}°C</Text>}
-                  {rec.heart_rate_bpm != null && <Text style={styles.vitalChip}>FC: {rec.heart_rate_bpm} bpm</Text>}
-                  {rec.respiratory_rate_bpm != null && <Text style={styles.vitalChip}>FR: {rec.respiratory_rate_bpm} rpm</Text>}
                 </View>
               </>
             )}

@@ -31,18 +31,36 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     .single() as any
   if (!profile?.tenant_id) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
-  const { data: record } = await (supabase.from('medical_records') as any)
+  const { data: visit } = await (supabase as any)
+    .from('service_visits')
     .select(`
-      id, diagnosis, treatment, weight_kg, created_at, tenant_id,
+      id, created_at, tenant_id,
+      consultation:consultation_records(
+        diagnosis, treatment, weight_kg,
+        vet:attended_by(full_name, professional_license, professional_address)
+      ),
       pet:pet_id(id, name, sex, date_of_birth, breed, species:species_id(name)),
-      vet:attended_by(full_name, professional_license, professional_address),
       prescriptions(medication_name, active_ingredient, dosage, route_of_administration, frequency, duration, notes)
     `)
     .eq('id', id)
+    .eq('service_type', 'consultation')
     .eq('tenant_id', profile.tenant_id)
     .single()
 
-  if (!record) return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })
+  if (!visit) return NextResponse.json({ error: 'Expediente no encontrado' }, { status: 404 })
+
+  const consultation = visit.consultation ?? {}
+  const record = {
+    id: visit.id,
+    created_at: visit.created_at,
+    tenant_id: visit.tenant_id,
+    diagnosis: consultation.diagnosis ?? null,
+    treatment: consultation.treatment ?? null,
+    weight_kg: consultation.weight_kg ?? null,
+    vet: consultation.vet ?? null,
+    pet: visit.pet,
+    prescriptions: visit.prescriptions ?? [],
+  }
 
   const prescriptions = (record.prescriptions ?? []) as any[]
   if (prescriptions.length === 0) {

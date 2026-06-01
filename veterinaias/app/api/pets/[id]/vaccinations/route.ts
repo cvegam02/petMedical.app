@@ -11,7 +11,7 @@ const createVaccinationSchema = z.object({
   application_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato YYYY-MM-DD'),
   next_due_date: z.preprocess(v => v === '' ? undefined : v, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
   notes: z.string().optional(),
-  medical_record_id: z.string().uuid().optional(),
+  visit_id: z.string().uuid().optional(),
   // Registro de carnet: vacuna histórica aplicada fuera del sistema.
   // No se atribuye a un usuario ni se descuenta inventario.
   is_historical: z.boolean().optional(),

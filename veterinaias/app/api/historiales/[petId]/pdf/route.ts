@@ -44,16 +44,21 @@ export async function GET(
       .eq('id', petId)
       .eq('pet_registrations.tenant_id', profile.tenant_id)
       .single(),
-    (supabase.from('medical_records') as any)
+    (supabase as any)
+      .from('service_visits')
       .select(`
-        id, reason, diagnosis, treatment, notes, created_at,
-        weight_kg, temperature_celsius, heart_rate_bpm, respiratory_rate_bpm,
-        created_by_profile:attended_by(full_name),
+        id, created_at,
+        consultation:consultation_records(
+          reason, diagnosis, treatment, notes,
+          weight_kg, temperature_celsius,
+          attended_by_profile:attended_by(full_name)
+        ),
         prescriptions(id, medication_name, dosage, frequency, duration, notes),
         attachments(id, file_name, storage_path),
         addendums(id, content, created_at, created_by_profile:created_by(full_name))
       `)
       .eq('pet_id', petId)
+      .eq('service_type', 'consultation')
       .order('created_at', { ascending: false }),
   ])
 
@@ -61,7 +66,25 @@ export async function GET(
 
   const pet = petRes.data as any
   const owner = pet.owner?.[0]?.owner ?? null
-  const records = (recordsRes.data ?? []) as any[]
+
+  // Flatten visit + consultation_records into the shape MedicalHistoryDocument expects
+  const records = ((recordsRes.data ?? []) as any[]).map((visit: any) => {
+    const c = visit.consultation ?? {}
+    return {
+      id: visit.id,
+      created_at: visit.created_at,
+      reason: c.reason ?? null,
+      diagnosis: c.diagnosis ?? null,
+      treatment: c.treatment ?? null,
+      notes: c.notes ?? null,
+      weight_kg: c.weight_kg ?? null,
+      temperature_celsius: c.temperature_celsius ?? null,
+      created_by_profile: c.attended_by_profile ?? null,
+      prescriptions: visit.prescriptions ?? [],
+      attachments: visit.attachments ?? [],
+      addendums: visit.addendums ?? [],
+    }
+  })
   const tenant = profile.tenants as any
   const generatedAt = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
