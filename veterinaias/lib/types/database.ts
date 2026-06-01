@@ -3,6 +3,8 @@ export type UserRole = 'admin' | 'staff' | 'doctor' | 'assistant'
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'grace_period'
 export type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
 export type AppointmentType = 'consultation' | 'grooming'
+export type ServiceType = 'consultation' | 'grooming' | 'surgery' | 'hospitalization' | 'boarding'
+export type VisitStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
 export type PetSex = 'male' | 'female' | 'unknown'
 
 export interface BusinessHoursConfig {
@@ -241,6 +243,30 @@ export interface Addendum {
   created_at: string
 }
 
+export interface ServiceVisit {
+  id: string
+  tenant_id: string
+  pet_id: string
+  owner_id: string
+  appointment_id: string | null
+  service_type: ServiceType
+  status: VisitStatus
+  started_at: string | null
+  ended_at: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ServiceVisitDelivery {
+  id: string
+  visit_id: string
+  tenant_id: string
+  channel: 'whatsapp' | 'email' | 'pdf' | 'print'
+  delivered_at: string
+  delivered_by: string
+}
+
 export interface Appointment {
   id: string
   tenant_id: string
@@ -427,6 +453,18 @@ export type Database = {
       grooming_session_services: {
         Row: { id: string; session_id: string; tenant_id: string; service_catalog_id: string | null; service_name: string; created_at: string }
         Insert: { session_id: string; tenant_id: string; service_catalog_id?: string | null; service_name: string }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      service_visits: {
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; appointment_id: string | null; service_type: ServiceType; status: VisitStatus; started_at: string | null; ended_at: string | null; created_by: string; created_at: string; updated_at: string }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; appointment_id?: string | null; service_type: ServiceType; status?: VisitStatus; started_at?: string | null; ended_at?: string | null; created_by: string }
+        Update: { status?: VisitStatus; started_at?: string | null; ended_at?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      service_visit_deliveries: {
+        Row: { id: string; visit_id: string; tenant_id: string; channel: 'whatsapp' | 'email' | 'pdf' | 'print'; delivered_at: string; delivered_by: string }
+        Insert: { visit_id: string; tenant_id: string; channel: 'whatsapp' | 'email' | 'pdf' | 'print'; delivered_by: string }
         Update: Record<string, never>
         Relationships: []
       }
