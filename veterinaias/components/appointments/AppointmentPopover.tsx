@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Clock } from 'lucide-react'
+import { Clock, Phone, Stethoscope, Scissors, ArrowRight } from 'lucide-react'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import type { ServiceType } from '@/lib/types/database'
 
 export interface AppointmentResource {
   id: string
@@ -15,22 +16,37 @@ export interface AppointmentResource {
   scheduled_at: string
   duration_minutes: number
   reason: string | null
+  service_type?: ServiceType
   pet: { id: string; name: string; species: { name: string } | null } | null
   owner: { id: string; full_name: string; phone: string | null } | null
 }
 
-interface AppointmentPopoverProps {
-  appointment: AppointmentResource
-  children: React.ReactNode
+const SERVICE_CONFIG: Record<string, { label: string; icon: typeof Stethoscope; accent: string; chip: string; bar: string }> = {
+  consultation: {
+    label: 'Médico',
+    icon: Stethoscope,
+    accent: 'text-primary',
+    chip: 'bg-primary/10 text-primary border-primary/20',
+    bar: 'bg-primary',
+  },
+  grooming: {
+    label: 'Estético',
+    icon: Scissors,
+    accent: 'text-violet-600',
+    chip: 'bg-violet-50 text-violet-700 border-violet-200',
+    bar: 'bg-violet-500',
+  },
 }
 
-export function AppointmentPopover({ appointment, children }: AppointmentPopoverProps) {
+export function AppointmentPopover({ appointment, children }: { appointment: AppointmentResource; children: React.ReactNode }) {
   const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
+  const svc = SERVICE_CONFIG[appointment.service_type ?? 'consultation'] ?? SERVICE_CONFIG.consultation
+  const ServiceIcon = svc.icon
+  const isGrooming = (appointment.service_type ?? 'consultation') === 'grooming'
+
   const dateObj = new Date(appointment.scheduled_at)
   const time = dateObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
-  const date = dateObj.toLocaleDateString('es-MX', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  })
+  const date = dateObj.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' })
 
   return (
     <Popover>
@@ -40,42 +56,68 @@ export function AppointmentPopover({ appointment, children }: AppointmentPopover
       >
         {children}
       </PopoverTrigger>
-      <PopoverContent side="top" className="w-64 p-3">
-        <div className="space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="font-medium text-sm text-foreground leading-none">
+      <PopoverContent side="top" align="center" className="w-72 p-0 overflow-hidden rounded-xl border-border shadow-lg">
+        {/* Accent bar by service type */}
+        <div className={`h-1 w-full ${svc.bar}`} />
+
+        <div className="p-4 space-y-3">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-bold text-[15px] text-foreground leading-tight truncate">
                 {appointment.pet?.name ?? '—'}
               </p>
               {appointment.pet?.species && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {appointment.pet.species.name}
-                </p>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">{appointment.pet.species.name}</p>
               )}
             </div>
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${status.className}`}>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${status.className}`}>
               {status.label}
             </span>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            {appointment.owner?.full_name ?? '—'}
-          </p>
-
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock size={11} />
-            <span className="capitalize">{date} · {time} · {appointment.duration_minutes}min</span>
+          {/* Service type chip */}
+          <div className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${svc.chip}`}>
+            <ServiceIcon size={12} strokeWidth={2} />
+            {svc.label}
           </div>
 
+          {/* Info rows */}
+          <div className="space-y-1.5 pt-1 border-t border-border/60">
+            <div className="flex items-center gap-2 text-xs text-foreground/80">
+              <Clock size={12} className="text-muted-foreground/60 shrink-0" />
+              <span className="capitalize">{date} · {time}</span>
+              {!isGrooming && (
+                <span className="text-muted-foreground">· {appointment.duration_minutes} min</span>
+              )}
+            </div>
+            {appointment.owner && (
+              <div className="flex items-center gap-2 text-xs text-foreground/80">
+                <Phone size={12} className="text-muted-foreground/60 shrink-0" />
+                <span className="truncate">{appointment.owner.full_name}</span>
+                {appointment.owner.phone && (
+                  <a href={`tel:${appointment.owner.phone}`} className="text-primary hover:underline tabular-nums ml-auto shrink-0">
+                    {appointment.owner.phone}
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Reason / services */}
           {appointment.reason && (
-            <p className="text-xs text-muted-foreground italic">{appointment.reason}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+              {isGrooming ? appointment.reason : `“${appointment.reason}”`}
+            </p>
           )}
 
+          {/* CTA */}
           <Link
             href={`/dashboard/appointments/${appointment.id}`}
-            className="block w-full text-center text-xs font-medium text-primary hover:underline pt-1 border-t border-border mt-1"
+            className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-colors rounded-lg py-2 mt-1"
           >
-            Ver detalle →
+            Ver detalle
+            <ArrowRight size={13} />
           </Link>
         </div>
       </PopoverContent>

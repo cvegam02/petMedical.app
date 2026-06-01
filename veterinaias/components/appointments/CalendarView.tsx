@@ -7,6 +7,7 @@ import {
   format, parse, startOfWeek, endOfWeek, getDay,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Scissors } from 'lucide-react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import { AppointmentPopover, type AppointmentResource } from './AppointmentPopover'
@@ -36,15 +37,29 @@ interface CalendarEvent {
 }
 
 function EventComponent({ event }: EventProps<CalendarEvent>) {
+  const isGrooming = (event.resource.service_type ?? 'consultation') === 'grooming'
   return (
     <AppointmentPopover appointment={event.resource}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[event.resource.status] ?? 'bg-muted-foreground/40'}`} />
+      {isGrooming && <Scissors size={9} strokeWidth={2.25} className="shrink-0 opacity-70" />}
       <span className="text-[11px] truncate leading-tight">
         {event.resource.pet?.name ?? '—'}
         {event.resource.pet?.species ? ` · ${event.resource.pet.species.name}` : ''}
       </span>
     </AppointmentPopover>
   )
+}
+
+// Color the event tile by service type (consultation = primary, grooming = violet)
+// and dim terminal/cancelled states.
+function eventPropGetter(event: CalendarEvent) {
+  const isGrooming = (event.resource.service_type ?? 'consultation') === 'grooming'
+  const isDimmed = event.resource.status === 'cancelled' || event.resource.status === 'no_show'
+  const classes = [
+    isGrooming ? 'rbc-event--grooming' : 'rbc-event--consultation',
+    isDimmed ? 'rbc-event--dimmed' : '',
+  ].filter(Boolean).join(' ')
+  return { className: classes }
 }
 
 function parseHHMM(timeStr: string): Date {
@@ -146,6 +161,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           max={parseHHMM(businessHours.end)}
           culture="es"
           components={components}
+          eventPropGetter={eventPropGetter}
           selectable={false}
           style={{ height: 600 }}
           messages={{
