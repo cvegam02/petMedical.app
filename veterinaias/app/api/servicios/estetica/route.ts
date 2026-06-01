@@ -13,6 +13,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
+  const appointmentId = searchParams.get('appointmentId')
+
+  // Single-session lookup by appointment_id (used by the appointment dialog)
+  if (appointmentId) {
+    const { data, error } = await (supabase as any)
+      .from('grooming_sessions')
+      .select(`
+        id, session_date, notes, created_at, started_at, ended_at,
+        services:grooming_session_services(id, service_name)
+      `)
+      .eq('tenant_id', (profile as any).tenant_id)
+      .eq('appointment_id', appointmentId)
+      .maybeSingle()
+    if (error) return NextResponse.json({ error: 'Error al obtener sesión' }, { status: 500 })
+    return NextResponse.json({ data })
+  }
+
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
   const limit = 20
   const offset = (page - 1) * limit
