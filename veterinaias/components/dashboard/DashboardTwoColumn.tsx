@@ -3,10 +3,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope } from 'lucide-react'
+import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope, Scissors } from 'lucide-react'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
 import { AppointmentDetailDialog } from '@/components/appointments/AppointmentDetailDialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import { serviceTypeConfig } from '@/lib/constants/service-type'
 import type { DashboardAppointment } from './DashboardAppointmentCard'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
@@ -182,6 +183,9 @@ export function DashboardTwoColumn({
               <div className="space-y-1.5">
                 {todayAppointments.map(apt => {
                   const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
+                  const svc = serviceTypeConfig(apt.service_type)
+                  const isGrooming = (apt.service_type ?? 'consultation') === 'grooming'
+                  const SvcIcon = isGrooming ? Scissors : Stethoscope
                   const time = new Date(apt.scheduled_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                   const done = !ACTIVE.includes(apt.status)
                   const isNext = apt.id === nextAppointment?.id
@@ -200,22 +204,28 @@ export function DashboardTwoColumn({
                           : 'border-border bg-card hover:border-primary/30'
                       }`}
                     >
-                      <div className={`w-1 shrink-0 ${cfg.stripe} ${done ? 'opacity-40' : ''}`} />
+                      <div className={`w-1 shrink-0 ${svc.bar} ${done ? 'opacity-40' : ''}`} />
                       <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
                         <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
-                        {apt.duration_minutes && (
+                        {!isGrooming && apt.duration_minutes && (
                           <span className="text-[10px] text-muted-foreground mt-0.5">{apt.duration_minutes}m</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0 px-3 py-3">
-                        <p className={`text-sm font-semibold leading-none ${done ? 'text-muted-foreground' : 'text-foreground'}`}>
-                          {apt.pet?.name ?? '—'}
-                          {apt.pet?.species && (
-                            <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
-                          )}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className={`text-sm font-semibold leading-none ${done ? 'text-muted-foreground' : 'text-foreground'}`}>
+                            {apt.pet?.name ?? '—'}
+                            {apt.pet?.species && (
+                              <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
+                            )}
+                          </p>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${svc.chip}`}>
+                            <SvcIcon size={9} strokeWidth={2.25} />
+                            {svc.label}
+                          </span>
+                        </div>
                         {apt.owner && (
-                          <p className="text-xs text-muted-foreground mt-0.5">{apt.owner.full_name}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{apt.owner.full_name}</p>
                         )}
                       </div>
                       <div className="flex items-center px-3 py-3 shrink-0">
@@ -248,6 +258,9 @@ export function DashboardTwoColumn({
               <div className="space-y-1.5">
                 {futureAppointments.map(apt => {
                   const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
+                  const svc = serviceTypeConfig(apt.service_type)
+                  const isGrooming = (apt.service_type ?? 'consultation') === 'grooming'
+                  const SvcIcon = isGrooming ? Scissors : Stethoscope
                   const date = new Date(apt.scheduled_at).toLocaleDateString('es-MX', {
                     weekday: 'short', day: 'numeric', month: 'short',
                   })
@@ -259,21 +272,27 @@ export function DashboardTwoColumn({
                       onClick={() => setSelected(apt)}
                       className="w-full text-left flex items-stretch rounded-xl border border-border bg-card overflow-hidden transition-all hover:shadow-sm hover:border-primary/30"
                     >
-                      <div className={`w-1 shrink-0 ${cfg.stripe}`} />
+                      <div className={`w-1 shrink-0 ${svc.bar}`} />
                       <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
                         <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
-                        {apt.duration_minutes && (
+                        {!isGrooming && apt.duration_minutes && (
                           <span className="text-[10px] text-muted-foreground mt-0.5">{apt.duration_minutes}m</span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0 px-3 py-3">
-                        <p className="text-sm font-semibold text-foreground leading-none">
-                          {apt.pet?.name ?? '—'}
-                          {apt.pet?.species && (
-                            <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-semibold text-foreground leading-none">
+                            {apt.pet?.name ?? '—'}
+                            {apt.pet?.species && (
+                              <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
+                            )}
+                          </p>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${svc.chip}`}>
+                            <SvcIcon size={9} strokeWidth={2.25} />
+                            {svc.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 capitalize">
                           {apt.owner?.full_name && <span>{apt.owner.full_name} · </span>}
                           {date}
                         </p>
