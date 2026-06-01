@@ -436,15 +436,15 @@ export type Database = {
         Update: { name?: string; duration_minutes?: number | null; active?: boolean; notes?: string | null; updated_at?: string }
         Relationships: []
       }
-      grooming_sessions: {
-        Row: { id: string; tenant_id: string; pet_id: string; appointment_id: string | null; session_date: string; notes: string | null; created_by: string; created_at: string; started_at: string | null; ended_at: string | null }
-        Insert: { tenant_id: string; pet_id: string; appointment_id?: string | null; session_date: string; notes?: string | null; created_by: string; started_at?: string | null; ended_at?: string | null }
-        Update: { notes?: string | null; started_at?: string | null; ended_at?: string | null }
+      grooming_records: {
+        Row: { visit_id: string; notes: string | null }
+        Insert: { visit_id: string; notes?: string | null }
+        Update: { notes?: string | null }
         Relationships: []
       }
-      grooming_session_services: {
-        Row: { id: string; session_id: string; tenant_id: string; service_catalog_id: string | null; service_name: string; created_at: string }
-        Insert: { session_id: string; tenant_id: string; service_catalog_id?: string | null; service_name: string }
+      grooming_record_services: {
+        Row: { id: string; record_id: string; service_catalog_id: string | null; service_name: string }
+        Insert: { record_id: string; service_catalog_id?: string | null; service_name: string }
         Update: Record<string, never>
         Relationships: []
       }
@@ -467,5 +467,5 @@ export type Database = {
 }
 
 export type GroomingServiceCatalog = Database['public']['Tables']['grooming_service_catalog']['Row']
-export type GroomingSession = Database['public']['Tables']['grooming_sessions']['Row']
-export type GroomingSessionService = Database['public']['Tables']['grooming_session_services']['Row']
+export type GroomingRecord = Database['public']['Tables']['grooming_records']['Row']
+export type GroomingRecordService = Database['public']['Tables']['grooming_record_services']['Row']
