@@ -18,7 +18,7 @@ export default async function AppointmentDetailPage({
 
   const { data: appointment, error } = await (supabase.from('appointments') as any)
     .select(`
-      id, status, scheduled_at, duration_minutes, reason, notes, created_at, appointment_type,
+      id, status, scheduled_at, duration_minutes, reason, notes, created_at, service_type,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone, email),
       assigned_to_profile:assigned_to(id, full_name),
@@ -33,7 +33,7 @@ export default async function AppointmentDetailPage({
   const owner = appointment.owner as any
   const assignedTo = appointment.assigned_to_profile as any
   const createdBy = appointment.created_by_profile as any
-  const isGrooming = appointment.appointment_type === 'grooming'
+  const isGrooming = appointment.service_type === 'grooming'
   const groomingServices = isGrooming && appointment.reason
     ? appointment.reason.split(', ').filter(Boolean)
     : []
@@ -155,7 +155,7 @@ export default async function AppointmentDetailPage({
                 appointmentId={appointmentId}
                 petId={pet?.id ?? ''}
                 status={appointment.status}
-                appointmentType={appointment.appointment_type}
+                serviceType={appointment.service_type}
               />
             </div>
           </section>

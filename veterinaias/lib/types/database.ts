@@ -276,7 +276,7 @@ export interface Appointment {
   created_by: string | null
   created_at: string
   updated_at: string
-  appointment_type: AppointmentType
+  service_type: ServiceType
 }
 
 export interface ShareToken {
@@ -395,9 +395,9 @@ export type Database = {
         Relationships: []
       }
       appointments: {
-        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; appointment_type: AppointmentType }
-        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; appointment_type?: AppointmentType }
-        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; appointment_type?: AppointmentType }
+        Row: { id: string; tenant_id: string; pet_id: string; owner_id: string; assigned_to: string | null; status: AppointmentStatus; scheduled_at: string; duration_minutes: number; reason: string | null; notes: string | null; google_event_id: string | null; created_by: string | null; created_at: string; updated_at: string; service_type: ServiceType }
+        Insert: { tenant_id: string; pet_id: string; owner_id: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; service_type?: ServiceType }
+        Update: { tenant_id?: string; pet_id?: string; owner_id?: string; assigned_to?: string | null; status?: AppointmentStatus; scheduled_at?: string; duration_minutes?: number; reason?: string | null; notes?: string | null; google_event_id?: string | null; created_by?: string | null; updated_at?: string; service_type?: ServiceType }
         Relationships: []
       }
       share_tokens: {

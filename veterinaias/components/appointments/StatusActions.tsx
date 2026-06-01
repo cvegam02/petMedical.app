@@ -10,10 +10,10 @@ interface StatusActionsProps {
   appointmentId: string
   petId: string
   status: string
-  appointmentType?: 'consultation' | 'grooming'
+  serviceType?: 'consultation' | 'grooming'
 }
 
-export function StatusActions({ appointmentId, petId, status, appointmentType = 'consultation' }: StatusActionsProps) {
+export function StatusActions({ appointmentId, petId, status, serviceType = 'consultation' }: StatusActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
@@ -65,7 +65,7 @@ export function StatusActions({ appointmentId, petId, status, appointmentType = 
           href={`/dashboard/pets/${petId}/records/new?appointmentId=${appointmentId}`}
           className={buttonVariants({ size: 'sm' })}
         >
-          {appointmentType === 'grooming' ? 'Registrar sesión' : 'Registrar consulta'}
+          {serviceType === 'grooming' ? 'Registrar sesión' : 'Registrar consulta'}
         </Link>
         <Button
           size="sm"

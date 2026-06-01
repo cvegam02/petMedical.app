@@ -55,7 +55,7 @@ export function AppointmentDetailDialog({
   const [concludeNotes, setConcludeNotes] = useState('')
   const [concluding, setConcluding] = useState(false)
 
-  const isGrooming = (appointment?.appointment_type ?? 'consultation') === 'grooming'
+  const isGrooming = (appointment?.service_type ?? 'consultation') === 'grooming'
   const isActive = ACTIVE_STATUSES.includes(appointment?.status ?? '')
   const appointmentId = appointment?.id
 

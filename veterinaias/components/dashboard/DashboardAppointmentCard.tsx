@@ -1,6 +1,7 @@
 'use client'
 import { Clock } from 'lucide-react'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import type { ServiceType } from '@/lib/types/database'
 
 export interface DashboardAppointment {
   id: string
@@ -8,7 +9,7 @@ export interface DashboardAppointment {
   scheduled_at: string
   duration_minutes: number
   reason: string | null
-  appointment_type?: 'consultation' | 'grooming'
+  service_type?: ServiceType
   pet: { id: string; name: string; species: { name: string } | null } | null
   owner: { id: string; full_name: string; phone: string | null } | null
   assigned_to_profile: { full_name: string } | null

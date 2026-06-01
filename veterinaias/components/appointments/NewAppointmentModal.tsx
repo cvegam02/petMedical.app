@@ -204,8 +204,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
       const url = mode === 'registered' ? '/api/appointments' : '/api/appointments/first-visit'
       const payload = mode === 'registered'
-        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
-        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, appointment_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
 
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const json = await res.json()
