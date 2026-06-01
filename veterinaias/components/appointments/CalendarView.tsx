@@ -78,10 +78,12 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   const [currentView, setCurrentView] = useState<View>(Views.WEEK)
   const [currentDate, setCurrentDate] = useState(new Date())
   const abortRef = useRef<AbortController | null>(null)
+  const lastRangeRef = useRef<{ from: Date; to: Date } | null>(null)
 
   const components = useMemo(() => ({ event: EventComponent }), [])
 
   const fetchRange = useCallback(async (from: Date, to: Date) => {
+    lastRangeRef.current = { from, to }
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
@@ -121,6 +123,16 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
       endOfWeek(now, { weekStartsOn: 1 })
     )
     return () => { abortRef.current?.abort() }
+  }, [fetchRange])
+
+  // Re-fetch when a new appointment is created elsewhere on the page
+  useEffect(() => {
+    function onCreated() {
+      const r = lastRangeRef.current
+      if (r) fetchRange(r.from, r.to)
+    }
+    window.addEventListener('appointment:created', onCreated)
+    return () => window.removeEventListener('appointment:created', onCreated)
   }, [fetchRange])
 
   const handleRangeChange = useCallback(

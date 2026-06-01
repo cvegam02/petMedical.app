@@ -225,6 +225,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
       toast.success('Cita creada')
       handleClose()
       router.refresh()
+      // Notify client-side views (e.g. the calendar) that fetch their own data
+      window.dispatchEvent(new CustomEvent('appointment:created'))
     } catch {
       toast.error('Error de red. Intenta de nuevo.')
     } finally {

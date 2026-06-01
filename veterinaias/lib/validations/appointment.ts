@@ -20,6 +20,9 @@ export const updateAppointmentSchema = appointmentSchema
   .partial()
   .extend({
     status: z.enum(['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show']).optional(),
+    // Override: NO default on update — a partial PATCH (e.g. just {status}) must NOT
+    // silently reset service_type to 'consultation'.
+    service_type: z.enum(['consultation', 'grooming']).optional(),
   })
 
 // Para el formulario del cliente (scheduled_at es el string del datetime-local input)
