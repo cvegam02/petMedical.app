@@ -178,13 +178,14 @@
 .rbc-wrapper .rbc-btn-group button.rbc-active, .rbc-wrapper .rbc-btn-group button.rbc-active:focus, .rbc-wrapper .rbc-btn-group button.rbc-active:focus-visible { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); outline: none; box-shadow: none; }
 .rbc-wrapper .rbc-header { font-size: 0.75rem; font-weight: 800; color: var(--muted-foreground); padding: 0.5rem 0; border-color: var(--border); }
 .rbc-wrapper .rbc-today { background: color-mix(in oklch, var(--primary) 5%, transparent); }
-.rbc-wrapper .rbc-event { background: color-mix(in oklch, var(--primary) 18%, var(--card)); border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent); border-left: 3px solid var(--primary); border-radius: 0.25rem; color: var(--foreground); padding: 1px 2px; }
-.rbc-wrapper .rbc-event.rbc-selected { background: color-mix(in oklch, var(--primary) 32%, var(--card)); outline: 2px solid var(--primary); }
-/* Service-type color coding */
-.rbc-wrapper .rbc-event--consultation { background: color-mix(in oklch, var(--primary) 16%, var(--card)); border-color: color-mix(in oklch, var(--primary) 30%, transparent); border-left-color: var(--primary); }
-.rbc-wrapper .rbc-event--grooming { background: color-mix(in oklch, oklch(0.55 0.2 295) 14%, var(--card)); border-color: color-mix(in oklch, oklch(0.55 0.2 295) 30%, transparent); border-left-color: oklch(0.55 0.2 295); }
-.rbc-wrapper .rbc-event--grooming.rbc-selected { background: color-mix(in oklch, oklch(0.55 0.2 295) 28%, var(--card)); outline-color: oklch(0.55 0.2 295); }
-.rbc-wrapper .rbc-event--dimmed { opacity: 0.5; }
+.rbc-wrapper .rbc-event { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--muted-foreground); border-radius: 0.25rem; color: var(--foreground); padding: 1px 2px; }
+.rbc-wrapper .rbc-event.rbc-selected { outline: 2px solid var(--primary); }
+/* Status color coding (color = status, never service type) */
+.rbc-wrapper .rbc-event--scheduled { background: color-mix(in oklch, oklch(0.55 0.04 256) 12%, var(--card)); border-color: color-mix(in oklch, oklch(0.55 0.04 256) 28%, transparent); border-left-color: oklch(0.6 0.04 256); }
+.rbc-wrapper .rbc-event--confirmed { background: color-mix(in oklch, var(--primary) 14%, var(--card)); border-color: color-mix(in oklch, var(--primary) 30%, transparent); border-left-color: var(--primary); }
+.rbc-wrapper .rbc-event--completed { background: color-mix(in oklch, oklch(0.6 0.17 150) 14%, var(--card)); border-color: color-mix(in oklch, oklch(0.6 0.17 150) 30%, transparent); border-left-color: oklch(0.6 0.17 150); }
+.rbc-wrapper .rbc-event--cancelled { background: color-mix(in oklch, var(--destructive) 10%, var(--card)); border-color: color-mix(in oklch, var(--destructive) 26%, transparent); border-left-color: var(--destructive); opacity: 0.7; }
+.rbc-wrapper .rbc-event--no_show { background: color-mix(in oklch, oklch(0.7 0.18 50) 14%, var(--card)); border-color: color-mix(in oklch, oklch(0.7 0.18 50) 30%, transparent); border-left-color: oklch(0.7 0.18 50); }
 .rbc-wrapper .rbc-current-time-indicator { background: var(--primary); }
 .rbc-wrapper .rbc-off-range-bg { background: var(--muted); }
 .rbc-wrapper .rbc-time-content { border-color: var(--border); }

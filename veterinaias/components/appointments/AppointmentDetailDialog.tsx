@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, Phone, Scissors, Stethoscope, Cat, Dog, PawPrint } from 'lucide-react'
+import { Calendar, Clock, Phone, Cat, Dog, PawPrint } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 import { serviceTypeConfig } from '@/lib/constants/service-type'
@@ -37,7 +37,7 @@ export function AppointmentDetailDialog({
   const serviceType = appointment.service_type ?? 'consultation'
   const isGrooming = serviceType === 'grooming'
   const svc = serviceTypeConfig(serviceType)
-  const ServiceIcon = isGrooming ? Scissors : Stethoscope
+  const ServiceIcon = svc.Icon
   const SpeciesIcon = speciesIcon(appointment.pet?.species?.name)
   const Panel = SERVICE_PANELS[serviceType] ?? SERVICE_PANELS.consultation!
 
@@ -48,13 +48,13 @@ export function AppointmentDetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-0 overflow-hidden gap-0">
-        {/* Accent bar by service type */}
-        <div className={`h-1.5 w-full ${svc.bar}`} />
+        {/* Accent bar by status */}
+        <div className={`h-1.5 w-full ${statusCfg.stripe}`} />
 
         {/* Header */}
         <div className="px-6 pt-5 pb-5">
           <div className="flex items-start gap-3.5">
-            <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${svc.chip}`}>
+            <div className="w-12 h-12 rounded-xl border border-border bg-muted/40 text-muted-foreground flex items-center justify-center shrink-0">
               <SpeciesIcon size={24} strokeWidth={1.75} />
             </div>
             <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export function AppointmentDetailDialog({
                 <p className="text-sm text-muted-foreground mt-0.5 truncate">{appointment.pet.species.name}</p>
               )}
               <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border ${svc.chip}`}>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-border bg-muted/40 text-foreground/70">
                   <ServiceIcon size={10} strokeWidth={2.25} />{svc.label}
                 </span>
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${statusCfg.className}`}>
@@ -118,7 +118,7 @@ export function AppointmentDetailDialog({
               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/50 mb-1.5">Servicios</p>
               <div className="flex flex-wrap gap-1">
                 {appointment.reason.split(', ').filter(Boolean).map(s => (
-                  <span key={s} className={`text-xs font-medium px-2 py-0.5 rounded-full border ${svc.chip}`}>
+                  <span key={s} className="text-xs font-medium px-2 py-0.5 rounded-full border border-border bg-muted/40 text-foreground/70">
                     {s}
                   </span>
                 ))}

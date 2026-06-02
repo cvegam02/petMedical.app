@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { PawPrint, Search, X, Cat, Dog, ChevronRight, User, Hash, Info, Filter, Tag, Mars, Venus, HelpCircle } from 'lucide-react'
+import { PawPrint, Cat, Dog, ChevronRight, User, Filter, Tag } from 'lucide-react'
+import { SearchInput } from '@/components/ui/search-input'
 
 interface Pet {
   id: string
@@ -61,26 +62,12 @@ export default function PetsPage() {
       </div>
 
       {/* Tools Bar: Search */}
-      <div className="relative mb-8 group">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-primary/50 transition-colors pointer-events-none">
-          <Search size={18} strokeWidth={2.5} />
-        </div>
-        <input
-          type="text"
-          value={query}
-          onChange={e => onSearch(e.target.value)}
-          placeholder="Buscar mascota por nombre..."
-          className="w-full pl-12 pr-12 py-3.5 text-[15px] font-medium bg-card border border-border rounded-2xl shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/[0.04] focus:border-primary/40 transition-all placeholder:text-muted-foreground/40"
-        />
-        {query && (
-          <button
-            onClick={() => onSearch('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-muted/30 flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted/60 transition-all"
-          >
-            <X size={14} strokeWidth={2.5} />
-          </button>
-        )}
-      </div>
+      <SearchInput
+        value={query}
+        onChange={onSearch}
+        placeholder="Buscar mascota por nombre..."
+        containerClassName="mb-8"
+      />
 
       {/* Content Area */}
       {fetchError ? (

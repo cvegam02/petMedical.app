@@ -7,10 +7,10 @@ import {
   format, parse, startOfWeek, endOfWeek, getDay,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Scissors } from 'lucide-react'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 import { AppointmentPopover, type AppointmentResource } from './AppointmentPopover'
+import { serviceTypeConfig } from '@/lib/constants/service-type'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
 const localizer = dateFnsLocalizer({
@@ -21,14 +21,6 @@ const localizer = dateFnsLocalizer({
   locales: { es },
 })
 
-const STATUS_DOT: Record<string, string> = {
-  scheduled: 'bg-muted-foreground/40',
-  confirmed:  'bg-primary',
-  completed:  'bg-primary/70',
-  cancelled:  'bg-destructive',
-  no_show:    'bg-orange-400',
-}
-
 interface CalendarEvent {
   title: string
   start: Date
@@ -36,12 +28,12 @@ interface CalendarEvent {
   resource: AppointmentResource
 }
 
+// Service type is shown by ICON; appointment status drives the color (see eventPropGetter + globals.css).
 function EventComponent({ event }: EventProps<CalendarEvent>) {
-  const isGrooming = (event.resource.service_type ?? 'consultation') === 'grooming'
+  const { Icon } = serviceTypeConfig(event.resource.service_type)
   return (
     <AppointmentPopover appointment={event.resource}>
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[event.resource.status] ?? 'bg-muted-foreground/40'}`} />
-      {isGrooming && <Scissors size={9} strokeWidth={2.25} className="shrink-0 opacity-70" />}
+      <Icon size={10} strokeWidth={2.25} className="shrink-0" />
       <span className="text-[11px] truncate leading-tight">
         {event.resource.pet?.name ?? '—'}
         {event.resource.pet?.species ? ` · ${event.resource.pet.species.name}` : ''}
@@ -50,16 +42,9 @@ function EventComponent({ event }: EventProps<CalendarEvent>) {
   )
 }
 
-// Color the event tile by service type (consultation = primary, grooming = violet)
-// and dim terminal/cancelled states.
+// Color the event tile by STATUS (never service type).
 function eventPropGetter(event: CalendarEvent) {
-  const isGrooming = (event.resource.service_type ?? 'consultation') === 'grooming'
-  const isDimmed = event.resource.status === 'cancelled' || event.resource.status === 'no_show'
-  const classes = [
-    isGrooming ? 'rbc-event--grooming' : 'rbc-event--consultation',
-    isDimmed ? 'rbc-event--dimmed' : '',
-  ].filter(Boolean).join(' ')
-  return { className: classes }
+  return { className: `rbc-event--${event.resource.status}` }
 }
 
 function parseHHMM(timeStr: string): Date {

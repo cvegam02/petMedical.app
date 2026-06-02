@@ -1,5 +1,5 @@
 'use client'
-import { Clock, Stethoscope, Scissors } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 import { serviceTypeConfig } from '@/lib/constants/service-type'
 import type { ServiceType } from '@/lib/types/database'
@@ -28,7 +28,7 @@ export function DashboardAppointmentCard({ appointment, onSelect }: Props) {
   const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
   const svc = serviceTypeConfig(appointment.service_type)
   const isGrooming = (appointment.service_type ?? 'consultation') === 'grooming'
-  const ServiceIcon = isGrooming ? Scissors : Stethoscope
+  const ServiceIcon = svc.Icon
 
   return (
     <button
@@ -36,8 +36,8 @@ export function DashboardAppointmentCard({ appointment, onSelect }: Props) {
       onClick={() => onSelect(appointment)}
       className="w-full group flex items-stretch gap-0 bg-card rounded-xl border border-border hover:border-primary/40 hover:shadow-sm transition-all text-left overflow-hidden"
     >
-      {/* Service-type accent bar */}
-      <span className={`w-1 shrink-0 ${svc.bar}`} aria-hidden />
+      {/* Accent bar by status */}
+      <span className={`w-1 shrink-0 ${status.stripe}`} aria-hidden />
 
       <div className="flex items-center gap-4 px-5 py-4 flex-1 min-w-0">
         <div className="flex flex-col items-center w-16 shrink-0 border-r border-border pr-4">
@@ -60,7 +60,7 @@ export function DashboardAppointmentCard({ appointment, onSelect }: Props) {
                 </span>
               )}
             </p>
-            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${svc.chip}`}>
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-border bg-muted/40 text-foreground/70">
               <ServiceIcon size={10} strokeWidth={2.25} />
               {svc.label}
             </span>

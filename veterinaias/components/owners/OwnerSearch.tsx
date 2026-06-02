@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Search, X } from 'lucide-react'
+import { SearchInput } from '@/components/ui/search-input'
 import type { Owner } from '@/lib/types/owner'
 
 interface OwnerSearchProps {
@@ -28,31 +28,12 @@ export function OwnerSearch({ onResults, onLoadingChange }: OwnerSearchProps) {
     return () => clearTimeout(timer)
   }, [query, search])
 
-  function clear() {
-    setQuery('')
-  }
-
   return (
-    <div className="relative max-w-lg">
-      <Search
-        size={14}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none"
-      />
-      <input
-        type="text"
-        placeholder="Buscar por nombre, teléfono o email..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        className="w-full pl-9 pr-9 py-2.5 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary/40 transition-all"
-      />
-      {query && (
-        <button
-          onClick={clear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
-        >
-          <X size={13} />
-        </button>
-      )}
-    </div>
+    <SearchInput
+      value={query}
+      onChange={setQuery}
+      placeholder="Buscar por nombre, teléfono o email..."
+      containerClassName="mb-8"
+    />
   )
 }

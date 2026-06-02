@@ -1,30 +1,14 @@
+import { Stethoscope, Scissors, type LucideIcon } from 'lucide-react'
 import type { ServiceType } from '@/lib/types/database'
 
 /**
- * Visual config per service type — single source of truth for color coding
- * across the calendar, popover, and dashboard cards.
+ * Service type is differentiated ACROSS THE APP by ICON ONLY (no color).
+ * Color is reserved for appointment STATUS — see APPOINTMENT_STATUS_CONFIG.
+ * This is the single source of truth for the per-service icon + label.
  */
-export const SERVICE_TYPE_CONFIG: Record<string, {
-  label: string
-  /** chip background/text/border classes */
-  chip: string
-  /** left accent bar background class */
-  bar: string
-  /** accent text color class */
-  accent: string
-}> = {
-  consultation: {
-    label: 'Médico',
-    chip: 'bg-primary/10 text-primary border-primary/20',
-    bar: 'bg-primary',
-    accent: 'text-primary',
-  },
-  grooming: {
-    label: 'Estético',
-    chip: 'bg-violet-50 text-violet-700 border-violet-200',
-    bar: 'bg-violet-500',
-    accent: 'text-violet-600',
-  },
+export const SERVICE_TYPE_CONFIG: Record<string, { label: string; Icon: LucideIcon }> = {
+  consultation: { label: 'Médico', Icon: Stethoscope },
+  grooming: { label: 'Estético', Icon: Scissors },
 }
 
 export function serviceTypeConfig(type: ServiceType | undefined | null) {

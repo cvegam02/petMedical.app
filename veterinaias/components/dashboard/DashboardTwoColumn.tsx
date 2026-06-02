@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope, Scissors } from 'lucide-react'
+import { Calendar, Plus, Users, PawPrint, ChevronRight, Stethoscope } from 'lucide-react'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
 import { AppointmentDetailDialog } from '@/components/appointments/AppointmentDetailDialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
@@ -185,7 +185,7 @@ export function DashboardTwoColumn({
                   const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
                   const svc = serviceTypeConfig(apt.service_type)
                   const isGrooming = (apt.service_type ?? 'consultation') === 'grooming'
-                  const SvcIcon = isGrooming ? Scissors : Stethoscope
+                  const SvcIcon = svc.Icon
                   const time = new Date(apt.scheduled_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
                   const done = !ACTIVE.includes(apt.status)
                   const isNext = apt.id === nextAppointment?.id
@@ -204,7 +204,7 @@ export function DashboardTwoColumn({
                           : 'border-border bg-card hover:border-primary/30'
                       }`}
                     >
-                      <div className={`w-1 shrink-0 ${svc.bar} ${done ? 'opacity-40' : ''}`} />
+                      <div className={`w-1 shrink-0 ${cfg.stripe} ${done ? 'opacity-40' : ''}`} />
                       <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
                         <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
                         {!isGrooming && apt.duration_minutes && (
@@ -219,7 +219,7 @@ export function DashboardTwoColumn({
                               <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
                             )}
                           </p>
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${svc.chip}`}>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-border bg-muted/40 text-foreground/70">
                             <SvcIcon size={9} strokeWidth={2.25} />
                             {svc.label}
                           </span>
@@ -260,7 +260,7 @@ export function DashboardTwoColumn({
                   const cfg = APPOINTMENT_STATUS_CONFIG[apt.status] ?? { ...STATUS_FALLBACK, label: apt.status }
                   const svc = serviceTypeConfig(apt.service_type)
                   const isGrooming = (apt.service_type ?? 'consultation') === 'grooming'
-                  const SvcIcon = isGrooming ? Scissors : Stethoscope
+                  const SvcIcon = svc.Icon
                   const date = new Date(apt.scheduled_at).toLocaleDateString('es-MX', {
                     weekday: 'short', day: 'numeric', month: 'short',
                   })
@@ -272,7 +272,7 @@ export function DashboardTwoColumn({
                       onClick={() => setSelected(apt)}
                       className="w-full text-left flex items-stretch rounded-xl border border-border bg-card overflow-hidden transition-all hover:shadow-sm hover:border-primary/30"
                     >
-                      <div className={`w-1 shrink-0 ${svc.bar}`} />
+                      <div className={`w-1 shrink-0 ${cfg.stripe}`} />
                       <div className="flex flex-col justify-center px-3 py-3 shrink-0 w-[4.5rem] border-r border-border/30">
                         <span className="text-sm font-mono font-semibold tabular-nums text-foreground leading-none">{time}</span>
                         {!isGrooming && apt.duration_minutes && (
@@ -287,7 +287,7 @@ export function DashboardTwoColumn({
                               <span className="font-normal text-muted-foreground ml-1.5">{apt.pet.species.name}</span>
                             )}
                           </p>
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${svc.chip}`}>
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-border bg-muted/40 text-foreground/70">
                             <SvcIcon size={9} strokeWidth={2.25} />
                             {svc.label}
                           </span>

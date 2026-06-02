@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Clock, Phone, Stethoscope, Scissors, ArrowRight } from 'lucide-react'
+import { Clock, Phone, ArrowRight } from 'lucide-react'
 import {
   Popover,
   PopoverContent,
@@ -25,8 +25,8 @@ export interface AppointmentResource {
 export function AppointmentPopover({ appointment, children }: { appointment: AppointmentResource; children: React.ReactNode }) {
   const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
   const svc = serviceTypeConfig(appointment.service_type)
+  const ServiceIcon = svc.Icon
   const isGrooming = (appointment.service_type ?? 'consultation') === 'grooming'
-  const ServiceIcon = isGrooming ? Scissors : Stethoscope
 
   const dateObj = new Date(appointment.scheduled_at)
   const time = dateObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
@@ -41,8 +41,8 @@ export function AppointmentPopover({ appointment, children }: { appointment: App
         {children}
       </PopoverTrigger>
       <PopoverContent side="top" align="center" className="w-72 p-0 overflow-hidden rounded-xl border-border shadow-lg">
-        {/* Accent bar by service type */}
-        <div className={`h-1 w-full ${svc.bar}`} />
+        {/* Accent bar by status */}
+        <div className={`h-1 w-full ${status.stripe}`} />
 
         <div className="p-4 space-y-3">
           {/* Header */}
@@ -60,8 +60,8 @@ export function AppointmentPopover({ appointment, children }: { appointment: App
             </span>
           </div>
 
-          {/* Service type chip */}
-          <div className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border ${svc.chip}`}>
+          {/* Service type — icon differentiates type (neutral, no color) */}
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border bg-muted/40 text-foreground/70">
             <ServiceIcon size={12} strokeWidth={2} />
             {svc.label}
           </div>
