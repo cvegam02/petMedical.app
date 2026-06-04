@@ -95,17 +95,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   // 2. Update service_visit.started_at if surgery start time was provided
   if (d.started_at) {
-    await (supabase as any)
+    const { error: startError } = await (supabase as any)
       .from('service_visits')
       .update({ started_at: d.started_at })
       .eq('id', id)
+    if (startError) return NextResponse.json({ error: 'Error al guardar hora de inicio' }, { status: 500 })
   }
 
   // 3. Insert prescriptions
   if (d.prescriptions && d.prescriptions.length > 0) {
     const { error: presError } = await (supabase as any)
       .from('prescriptions')
-      .insert(d.prescriptions.map((p: any) => ({ ...p, visit_id: id })))
+      .insert(d.prescriptions.map((p) => ({ ...p, visit_id: id })))
     if (presError) return NextResponse.json({ error: 'Error al guardar las recetas' }, { status: 500 })
   }
 
