@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, PawPrint, Calendar, Settings2, Scissors } from 'lucide-react'
+import { Home, Users, PawPrint, Calendar, Settings2, Scissors, BedDouble, Syringe } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
@@ -12,6 +12,8 @@ const NAV_ITEMS = [
 
 const SERVICES_NAV_ITEMS = [
   { href: '/dashboard/servicios/estetica', icon: Scissors, label: 'Estética' },
+  { href: '/dashboard/servicios/hotel', icon: BedDouble, label: 'Hotel' },
+  { href: '/dashboard/servicios/cirugia', icon: Syringe, label: 'Cirugía' },
 ]
 
 const ADMIN_NAV_ITEMS = [
@@ -41,7 +43,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
               isActive
                 ? 'bg-card text-primary font-semibold shadow-sm border border-primary/10'
-                : 'text-foreground/55 hover:text-foreground hover:bg-white/60'
+                : 'text-foreground/55 hover:text-foreground hover:bg-muted'
             }`}
           >
             <Icon
