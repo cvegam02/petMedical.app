@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ChevronRight, BedDouble } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronRight, BedDouble, Cat, Dog, PawPrint, CalendarDays } from 'lucide-react'
 import { isCheckoutOverdue, stayDayLabel, remainingDaysLabel } from '@/lib/utils/boarding'
 
 interface StayRow {
@@ -21,8 +21,14 @@ function formatDate(d: string | null): string {
   })
 }
 
+function getPetIcon(speciesName: string | null | undefined) {
+  const s = speciesName?.toLowerCase() ?? ''
+  if (s.includes('fel') || s.includes('gat')) return Cat
+  if (s.includes('can') || s.includes('perr')) return Dog
+  return PawPrint
+}
+
 export function ActiveBoardingStays() {
-  const router = useRouter()
   const [stays, setStays] = useState<StayRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -69,49 +75,57 @@ export function ActiveBoardingStays() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {stays.map(s => {
             const overdue = isCheckoutOverdue(s.expected_check_out, s.started_at, s.ended_at)
             const remaining = remainingDaysLabel(s.expected_check_out, s.ended_at)
             const subtitle = [s.pet?.species?.name, s.owner?.full_name].filter(Boolean).join(' · ')
+            const PetIcon = getPetIcon(s.pet?.species?.name)
             return (
-              <div
+              <Link
                 key={s.id}
-                onClick={() => router.push(`/dashboard/servicios/hotel/${s.id}`)}
-                className="rounded-xl border border-border bg-card hover:bg-muted/20 transition-colors cursor-pointer p-4"
+                href={`/dashboard/servicios/hotel/${s.id}`}
+                className="group flex flex-col bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all overflow-hidden"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full border text-amber-700 bg-amber-50 border-amber-200">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        {stayDayLabel(s.started_at, s.expected_check_out)}
-                      </span>
-                      {!overdue && remaining && (
-                        <span className="text-xs px-2 py-0.5 rounded-full border text-muted-foreground border-border/60">
-                          {remaining}
-                        </span>
-                      )}
-                      {overdue && (
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full border text-orange-600 bg-orange-50 border-orange-200">
-                          Salida vencida
-                        </span>
-                      )}
-                    </div>
-                    <p className="font-semibold text-foreground">{s.pet?.name ?? '—'}</p>
-                    {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-                    <div className="flex items-baseline gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
-                      <span>{formatDate(s.started_at)} → {formatDate(s.expected_check_out)}</span>
-                      {s.today_note && (
-                        <span className="italic">
-                          &ldquo;{s.today_note.length > 60 ? s.today_note.slice(0, 57) + '…' : s.today_note}&rdquo;
-                        </span>
-                      )}
-                    </div>
+                <div className="flex items-center gap-4 p-4">
+                  <div className="w-11 h-11 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 border border-border/50">
+                    <PetIcon size={22} strokeWidth={1.5} />
                   </div>
-                  <ChevronRight size={14} className="text-muted-foreground/30 mt-1 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-none">
+                      {s.pet?.name ?? '—'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1.5 truncate">
+                      {subtitle || 'Sin datos del paciente'}
+                    </p>
+                  </div>
+                  <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
                 </div>
-              </div>
+                <div className={`flex items-center justify-between px-4 py-2.5 border-t bg-muted/20 ${overdue ? 'border-orange-100 bg-orange-50/60' : 'border-border/60'}`}>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                    {stayDayLabel(s.started_at, s.expected_check_out)}
+                    {!overdue && remaining && (
+                      <span className="text-muted-foreground/50">· {remaining}</span>
+                    )}
+                    {overdue && (
+                      <span className="text-orange-600 font-medium">· Salida vencida</span>
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {s.today_note ? (
+                      <span className="italic truncate max-w-[140px]">
+                        &ldquo;{s.today_note.length > 40 ? s.today_note.slice(0, 37) + '…' : s.today_note}&rdquo;
+                      </span>
+                    ) : (
+                      <>
+                        <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
+                        {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
+                      </>
+                    )}
+                  </span>
+                </div>
+              </Link>
             )
           })}
         </div>
