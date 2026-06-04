@@ -249,7 +249,7 @@ export function HospitalizationDetailModal({ visitId, open, onOpenChange, onChan
                         className="text-sm" placeholder="38.5" />
                     </div>
                     <div className="flex items-center gap-2 pt-4">
-                      <Checkbox id="fed" checked={logFed} onCheckedChange={v => setLogFed(v === true)} />
+                      <Checkbox id="fed" checked={logFed} onChange={e => setLogFed((e.target as HTMLInputElement).checked)} />
                       <label htmlFor="fed" className="text-sm cursor-pointer">Alimentado</label>
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export function HospitalizationDetailModal({ visitId, open, onOpenChange, onChan
                 </div>
                 <div className="flex items-center gap-2">
                   <Checkbox id="follow-up" checked={scheduleFollowUp}
-                    onCheckedChange={v => setScheduleFollowUp(v === true)} />
+                    onChange={e => setScheduleFollowUp((e.target as HTMLInputElement).checked)} />
                   <label htmlFor="follow-up" className="text-sm cursor-pointer">
                     Agendar cita de seguimiento (consulta)
                   </label>

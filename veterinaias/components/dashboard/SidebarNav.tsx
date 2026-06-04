@@ -33,7 +33,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
     <div className="space-y-0.5">
       {label && (
         <div className="pt-5 pb-1.5 px-3">
-          <p className="text-[10px] font-bold text-foreground/35 uppercase tracking-[0.14em]">{label}</p>
+          <p className="text-[10px] font-bold text-secondary-foreground/60 uppercase tracking-[0.14em]">{label}</p>
         </div>
       )}
       {items.map(({ href, icon: Icon, label: itemLabel, exact }) => {

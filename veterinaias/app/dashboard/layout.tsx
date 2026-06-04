@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { UserMenu } from '@/components/dashboard/UserMenu'
 import { Toaster } from 'sonner'
 import { SidebarNav } from '@/components/dashboard/SidebarNav'
-import { PawPrint } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -34,21 +33,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     /* Accent rail — thin primary stripe at the very top of the entire chrome */
-    <div className="min-h-dvh flex flex-col border-t-[3px] border-primary bg-background">
-      <div className="flex flex-1 overflow-hidden">
+    <div className="h-dvh flex flex-col border-t-[3px] border-primary bg-background overflow-hidden">
+      <div className="flex flex-1 min-h-0">
 
         {/* Sidebar */}
-        <aside className="w-56 h-[calc(100dvh-3px)] sticky top-0 flex flex-col bg-secondary border-r border-border shrink-0">
+        <aside className="w-56 h-full flex flex-col bg-secondary border-r border-border shrink-0">
 
           {/* Brand */}
           <div className="px-4 h-14 flex items-center shrink-0">
-            <Link href="/dashboard" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
-                <PawPrint size={20} className="text-primary" strokeWidth={2} />
-              </div>
-              <p className="text-base font-medium text-foreground tracking-tight leading-none">
-                Mundo<span className="font-bold">Pet</span>
-              </p>
+            <Link href="/dashboard">
+              <Image
+                src="/mundeopet.png"
+                alt="MundoPet"
+                width={148}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </Link>
           </div>
 
@@ -62,7 +63,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </aside>
 
         {/* Content column */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0">
 
           {/* Topbar */}
           <header className="h-14 shrink-0 sticky top-0 z-20 bg-card border-b border-border shadow-sm flex items-center px-6 relative">
@@ -74,7 +75,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                   <Image src={tenantLogoUrl} alt={tenantName} width={55} height={55} className="object-contain" unoptimized />
                 </div>
               ) : null}
-              <p className="text-sm font-semibold text-foreground tracking-tight">{tenantName}</p>
+              <p className="text-sm font-semibold text-secondary-foreground tracking-tight">{tenantName}</p>
             </div>
 
             {/* Right — user menu */}
@@ -88,7 +89,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 min-h-0 overflow-y-auto">
             <div className="max-w-5xl mx-auto px-10 py-10">
               {children}
             </div>

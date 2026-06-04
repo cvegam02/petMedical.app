@@ -243,7 +243,7 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
             <Checkbox
               id="requires-hosp"
               checked={requiresHosp}
-              onCheckedChange={v => setRequiresHosp(v === true)}
+              onChange={e => setRequiresHosp((e.target as HTMLInputElement).checked)}
             />
             <label htmlFor="requires-hosp" className="text-sm font-medium cursor-pointer select-none">
               Requiere hospitalización post-quirúrgica
