@@ -34,6 +34,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
   const [isSearchingOwner, setIsSearchingOwner] = useState(false)
   const [isLoadingPets, setIsLoadingPets] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const skipSearchRef = useRef(false)
 
   // Date/time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -64,6 +65,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
   // Owner search debounce
   useEffect(() => {
     if (ownerQuery.length < 1) return
+    if (skipSearchRef.current) { skipSearchRef.current = false; return }
     if (debounceRef.current) clearTimeout(debounceRef.current)
     setIsSearchingOwner(true)
     debounceRef.current = setTimeout(async () => {
@@ -129,6 +131,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
     setPreOpNotes('')
     setAnesthesiaType('')
     setAnesthesiaNotes('')
+    skipSearchRef.current = false
   }
 
   function handleClose() {
@@ -223,6 +226,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
                       type="button"
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted/60 transition-colors"
                       onMouseDown={() => {
+                        skipSearchRef.current = true
                         setSelectedOwner({ id: o.id, full_name: o.full_name })
                         setOwnerQuery(o.full_name)
                         setShowSuggestions(false)
@@ -243,8 +247,9 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
               </Label>
               <Select
                 value={selectedPetId}
-                onValueChange={setSelectedPetId}
+                onValueChange={v => setSelectedPetId(v ?? '')}
                 disabled={!selectedOwner || isLoadingPets}
+                items={Object.fromEntries(pets.map(p => [p.id, p.name]))}
               >
                 <SelectTrigger className="bg-muted/30">
                   <SelectValue placeholder={
