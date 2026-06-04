@@ -9,7 +9,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-lora);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,46 +38,92 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  --radius-4xl: 3rem;
 }
 
 :root {
-  /* MundoPet — Warm Coral */
-  --background: oklch(0.99 0.004 50);       /* Papel cálido - apenas tintado */
-  --foreground: oklch(0.20 0.020 40);       /* Café-carbón cálido - no negro puro */
+  /* ── MundoPet Palette ────────────────────────────────── */
+  /* Greens — Vitality / Bienestar */
+  --mp-green-50:  #F1FCF7;
+  --mp-green-100: #DCF8EB;
+  --mp-green-200: #B7EFD4;
+  --mp-green-300: #83E0B5;
+  --mp-green-400: #53D29A;
+  --mp-green-500: #35C48B;
+  --mp-green-600: #27A673;
+  --mp-green-700: #1D865C;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.020 40);
+  /* Blues — Confianza / Institucional */
+  --mp-blue-50:  #F3F8FC;
+  --mp-blue-100: #DCEAF6;
+  --mp-blue-200: #B7D3EB;
+  --mp-blue-300: #86B5DA;
+  --mp-blue-400: #5C99CA;
+  --mp-blue-500: #337DB9;
+  --mp-blue-600: #1F659E;
+  --mp-blue-700: #0F4C81;
+  --mp-blue-800: #093760;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.020 40);
+  /* Grays — Neutral scale */
+  --mp-gray-50:  #FAFBFC;
+  --mp-gray-100: #F3F5F7;
+  --mp-gray-200: #E7EBEF;
+  --mp-gray-300: #D2D9E0;
+  --mp-gray-400: #A3AFBA;
+  --mp-gray-500: #73808C;
+  --mp-gray-600: #55616C;
+  --mp-gray-700: #3B4650;
+  --mp-gray-800: #27313B;
+  --mp-gray-900: #161D24;
 
-  /* Coral - cálido, amigable, cuidado integral */
-  --primary: oklch(0.57 0.17 40);           /* Brand Coral - MundoPet */
-  --primary-foreground: oklch(0.99 0.004 50);
+  /* Sand — Accent cálido (ilustraciones, empty states) */
+  --mp-sand: #F3C57B;
 
-  --secondary: oklch(0.96 0.012 50);        /* Tinte coral suave */
-  --secondary-foreground: oklch(0.20 0.020 40);
+  /* ── Semantic tokens — chaining al palette ───────────── */
+  --background:            var(--mp-gray-50);
+  --foreground:            var(--mp-gray-900);
 
-  --muted: oklch(0.97 0.008 50);            /* Neutro cálido */
-  --muted-foreground: oklch(0.45 0.030 40);
+  --card:                  #FFFFFF;
+  --card-foreground:       var(--mp-gray-900);
 
-  --accent: oklch(0.32 0.050 40);           /* Terracota para estados de alta tensión */
-  --accent-foreground: oklch(0.99 0.004 50);
+  --popover:               #FFFFFF;
+  --popover-foreground:    var(--mp-gray-900);
 
-  --destructive: oklch(0.55 0.22 25);       /* Rojo señal - más profundo para distinguir del coral */
+  --primary:               var(--mp-green-500);
+  --primary-foreground:    #FFFFFF;
 
-  --border: oklch(0.92 0.012 50);           /* Hairline cálido */
-  --input: oklch(0.89 0.016 50);
-  --ring: oklch(0.57 0.17 40);
+  --secondary:             var(--mp-blue-50);
+  --secondary-foreground:  var(--mp-blue-700);
 
-  --radius: 0.5rem;                         /* Precision 8px radius */
+  --muted:                 var(--mp-gray-100);
+  --muted-foreground:      var(--mp-gray-500);
+
+  --accent:                var(--mp-green-50);
+  --accent-foreground:     var(--mp-green-700);
+
+  --destructive:           #EF4444;
+
+  --border:                var(--mp-gray-200);
+  --input:                 var(--mp-gray-200);
+  --ring:                  var(--mp-green-500);
+
+  --radius: 1rem;
+
+  /* Sidebar — superficie clara, congruente con la app */
+  --sidebar:                    var(--mp-gray-50);
+  --sidebar-foreground:         var(--mp-gray-700);
+  --sidebar-primary:            var(--mp-green-500);
+  --sidebar-primary-foreground: var(--mp-green-700);
+  --sidebar-accent:             var(--mp-green-50);
+  --sidebar-accent-foreground:  var(--mp-green-700);
+  --sidebar-border:             var(--mp-gray-200);
+  --sidebar-ring:               var(--mp-green-500);
 }
 
 @theme inline {
@@ -87,38 +132,37 @@
 }
 
 .dark {
-  /* MundoPet — Lienzo cálido oscuro + coral brillante */
-  --background: oklch(0.17 0.010 40);
-  --foreground: oklch(0.975 0.004 50);
-  --card: oklch(0.21 0.012 40);
-  --card-foreground: oklch(0.975 0.004 50);
-  --popover: oklch(0.21 0.012 40);
-  --popover-foreground: oklch(0.975 0.004 50);
-  --primary: oklch(0.70 0.15 40);          /* Coral brillante */
-  --primary-foreground: oklch(0.17 0.010 40);
-  --secondary: oklch(0.26 0.012 40);
-  --secondary-foreground: oklch(0.975 0.004 50);
-  --muted: oklch(0.26 0.012 40);
-  --muted-foreground: oklch(0.65 0.012 40);
-  --accent: oklch(0.26 0.012 40);
-  --accent-foreground: oklch(0.975 0.004 50);
-  --destructive: oklch(0.65 0.20 22);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.70 0.15 40);
-  --chart-1: oklch(0.72 0.15 40);
-  --chart-2: oklch(0.60 0.12 40);
-  --chart-3: oklch(0.50 0.10 40);
-  --chart-4: oklch(0.40 0.08 40);
-  --chart-5: oklch(0.30 0.06 40);
-  --sidebar: oklch(0.21 0.012 40);
-  --sidebar-foreground: oklch(0.975 0.004 50);
-  --sidebar-primary: oklch(0.70 0.15 40);
-  --sidebar-primary-foreground: oklch(0.17 0.010 40);
-  --sidebar-accent: oklch(0.26 0.012 40);
-  --sidebar-accent-foreground: oklch(0.975 0.004 50);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.70 0.15 40);
+  --background:            #101418;
+  --foreground:            #F7F9FB;
+  --card:                  #182028;
+  --card-foreground:       #F7F9FB;
+  --popover:               #182028;
+  --popover-foreground:    #F7F9FB;
+  --primary:               var(--mp-green-500);
+  --primary-foreground:    #FFFFFF;
+  --secondary:             #1E2A38;
+  --secondary-foreground:  var(--mp-blue-300);
+  --muted:                 #1E2A38;
+  --muted-foreground:      var(--mp-gray-400);
+  --accent:                #1E2A38;
+  --accent-foreground:     #F7F9FB;
+  --destructive:           #EF4444;
+  --border:                rgba(255, 255, 255, 0.08);
+  --input:                 rgba(255, 255, 255, 0.10);
+  --ring:                  var(--mp-green-500);
+  --chart-1: var(--mp-green-400);
+  --chart-2: var(--mp-green-300);
+  --chart-3: var(--mp-green-200);
+  --chart-4: var(--mp-blue-400);
+  --chart-5: var(--mp-blue-300);
+  --sidebar:                    #0D1520;
+  --sidebar-foreground:         #F7F9FB;
+  --sidebar-primary:            var(--mp-green-500);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #1E2A38;
+  --sidebar-accent-foreground:  #F7F9FB;
+  --sidebar-border:             rgba(255, 255, 255, 0.06);
+  --sidebar-ring:               var(--mp-green-500);
 }
 
 @layer base {
@@ -130,9 +174,6 @@
   }
   html {
     @apply font-sans;
-  }
-  h1 {
-    @apply font-heading;
   }
   input::placeholder,
   textarea::placeholder {
