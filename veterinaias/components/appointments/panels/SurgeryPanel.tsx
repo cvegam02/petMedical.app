@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Syringe, CheckCircle2, ClipboardList, Pill } from 'lucide-react'
@@ -185,7 +184,6 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
 }
 
 export function SurgeryPanel({ appointment, onClose, onRefresh }: PanelProps) {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [surgery, setSurgery] = useState<SurgeryStub | null>(null)
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null)
@@ -238,7 +236,7 @@ export function SurgeryPanel({ appointment, onClose, onRefresh }: PanelProps) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => router.push(`/dashboard/servicios/cirugia/${surgery.id}`)}
+              onClick={() => { window.location.href = `/dashboard/servicios/cirugia/${surgery.id}` }}
             >
               Ver detalles
             </Button>
