@@ -10,6 +10,8 @@ interface StayRow {
   ended_at: string | null
   expected_check_out: string | null
   today_note: string | null
+  today_fed: boolean | null
+  today_walked: boolean | null
   pet: { id: string; name: string; species: { name: string } | null } | null
   owner: { id: string; full_name: string } | null
 }
@@ -112,18 +114,32 @@ export function ActiveBoardingStays() {
                       <span className="text-orange-600 font-medium">· Salida vencida</span>
                     )}
                   </span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {s.today_note ? (
-                      <span className="italic truncate max-w-[140px]">
-                        &ldquo;{s.today_note.length > 40 ? s.today_note.slice(0, 37) + '…' : s.today_note}&rdquo;
+                  {s.today_fed !== null ? (
+                    <span className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <span className="text-[10px] text-muted-foreground/50">Comió</span>
+                        {s.today_fed
+                          ? <span className="text-green-600 font-bold">✓</span>
+                          : <span className="text-muted-foreground/30">—</span>}
                       </span>
-                    ) : (
-                      <>
-                        <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
-                        {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
-                      </>
-                    )}
-                  </span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-[10px] text-muted-foreground/50">Paseó</span>
+                        {s.today_walked
+                          ? <span className="text-green-600 font-bold">✓</span>
+                          : <span className="text-muted-foreground/30">—</span>}
+                      </span>
+                      {s.today_note && (
+                        <span className="italic truncate max-w-[100px]">
+                          &ldquo;{s.today_note.length > 30 ? s.today_note.slice(0, 27) + '…' : s.today_note}&rdquo;
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
+                      {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
+                    </span>
+                  )}
                 </div>
               </Link>
             )

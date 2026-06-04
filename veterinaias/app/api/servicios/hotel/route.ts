@@ -30,6 +30,8 @@ function mapStay(row: any) {
     special_care: record?.special_care ?? null,
     notes: record?.notes ?? null,
     today_note: todayLog?.notes ?? null,
+    today_fed: todayLog !== null ? (todayLog.fed ?? false) : null,
+    today_walked: todayLog !== null ? (todayLog.walked ?? false) : null,
   }
 }
 
