@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Syringe, CheckCircle2, ClipboardList, Pill } from 'lucide-react'
@@ -41,10 +42,14 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
     })
 
   async function onSubmit(values: ConcludeSurgeryValues) {
+    function toISO(s: string): string | undefined {
+      const d = new Date(s)
+      return isNaN(d.getTime()) ? undefined : d.toISOString()
+    }
     const payload = {
       ...values,
-      ...(startedAtLocal ? { started_at: new Date(startedAtLocal).toISOString() } : {}),
-      ...(endedAtLocal ? { ended_at: new Date(endedAtLocal).toISOString() } : {}),
+      ...(startedAtLocal ? { started_at: toISO(startedAtLocal) } : {}),
+      ...(endedAtLocal ? { ended_at: toISO(endedAtLocal) } : {}),
     }
     const res = await fetch(`/api/servicios/cirugia/${visitId}`, {
       method: 'PATCH',
@@ -180,6 +185,7 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
 }
 
 export function SurgeryPanel({ appointment, onClose, onRefresh }: PanelProps) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [surgery, setSurgery] = useState<SurgeryStub | null>(null)
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null)
@@ -232,7 +238,7 @@ export function SurgeryPanel({ appointment, onClose, onRefresh }: PanelProps) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => window.location.href = `/dashboard/servicios/cirugia/${surgery.id}`}
+              onClick={() => router.push(`/dashboard/servicios/cirugia/${surgery.id}`)}
             >
               Ver detalles
             </Button>

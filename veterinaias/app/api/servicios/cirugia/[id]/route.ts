@@ -63,20 +63,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!result.success) return NextResponse.json({ error: result.error.issues[0].message }, { status: 422 })
   const d = result.data
 
-  // Verify visit belongs to tenant
+  // Verify visit belongs to tenant and hasn't been concluded yet
   const { data: visit } = await (supabase as any)
     .from('service_visits')
-    .select('id, surgery_records(id)')
+    .select('id, ended_at')
     .eq('id', id)
     .eq('tenant_id', (profile as any).tenant_id)
     .eq('service_type', 'surgery')
     .maybeSingle()
   if (!visit) return NextResponse.json({ error: 'Cirugía no encontrada' }, { status: 404 })
-
-  const recordId = Array.isArray(visit.surgery_records)
-    ? visit.surgery_records[0]?.id
-    : visit.surgery_records?.id
-  if (!recordId) return NextResponse.json({ error: 'Registro quirúrgico no encontrado' }, { status: 404 })
+  if (visit.ended_at) return NextResponse.json({ error: 'La cirugía ya fue concluida' }, { status: 409 })
 
   // 1. Update surgery_records with conclusion data
   const { error: recError } = await (supabase as any)
@@ -90,7 +86,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       recovery_instructions: d.recovery_instructions ?? null,
       follow_up_date: d.follow_up_date ?? null,
     })
-    .eq('id', recordId)
+    .eq('visit_id', id)
   if (recError) return NextResponse.json({ error: 'Error al actualizar el registro' }, { status: 500 })
 
   // 2. Update service_visit.started_at if surgery start time was provided
