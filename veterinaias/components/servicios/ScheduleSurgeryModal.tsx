@@ -92,6 +92,11 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
       .finally(() => setIsLoadingPets(false))
   }, [selectedOwner])
 
+  // Clear time when date changes
+  useEffect(() => {
+    setSelectedTime('')
+  }, [selectedDate])
+
   async function preloadOwners() {
     if (ownerResults.length > 0) { setShowSuggestions(true); return }
     setIsSearchingOwner(true)
