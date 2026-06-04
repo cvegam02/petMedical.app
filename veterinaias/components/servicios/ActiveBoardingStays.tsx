@@ -100,6 +100,11 @@ export function ActiveBoardingStays() {
                     <p className="text-xs text-muted-foreground mt-1.5 truncate">
                       {subtitle || 'Sin datos del paciente'}
                     </p>
+                    {s.today_note && (
+                      <p className="text-xs text-muted-foreground/70 mt-1 truncate italic">
+                        &ldquo;{s.today_note}&rdquo;
+                      </p>
+                    )}
                   </div>
                   {s.today_fed !== null && (
                     <div className="flex items-center gap-2.5 text-xs shrink-0">
@@ -131,16 +136,8 @@ export function ActiveBoardingStays() {
                     )}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    {s.today_note ? (
-                      <span className="italic truncate max-w-[160px]">
-                        &ldquo;{s.today_note.length > 45 ? s.today_note.slice(0, 42) + '…' : s.today_note}&rdquo;
-                      </span>
-                    ) : (
-                      <>
-                        <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
-                        {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
-                      </>
-                    )}
+                    <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
+                    {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
                   </span>
                 </div>
               </Link>
