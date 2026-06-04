@@ -28,7 +28,7 @@ export function NextAppointmentCard({ appointment, onSelect }: Props) {
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">
               Siguiente consulta
             </p>
-            <h2 className="text-xl font-bold font-heading text-foreground">
+            <h2 className="text-xl font-bold text-foreground">
               {appointment.pet?.name ?? '—'}
               {appointment.pet?.species && (
                 <span className="text-muted-foreground font-normal text-base ml-2">

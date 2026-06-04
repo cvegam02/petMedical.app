@@ -247,7 +247,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Expediente Clínico</p>
           </div>
-          <h2 className="text-lg font-bold font-heading text-foreground">Consultas realizadas</h2>
+          <h2 className="text-lg font-bold text-foreground">Consultas realizadas</h2>
         </div>
         <Link
           href={`/dashboard/pets/${petId}/records/new`}

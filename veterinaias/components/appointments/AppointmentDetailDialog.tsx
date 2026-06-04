@@ -59,7 +59,7 @@ export function AppointmentDetailDialog({
             </div>
             <div className="flex-1 min-w-0">
               <DialogHeader className="mb-0">
-                <DialogTitle className="text-xl font-bold font-heading text-foreground leading-tight truncate">
+                <DialogTitle className="text-xl font-bold text-foreground leading-tight truncate">
                   {appointment.pet?.name ?? '—'}
                 </DialogTitle>
               </DialogHeader>

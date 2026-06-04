@@ -118,7 +118,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ ow
             <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
             <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Pacientes</p>
           </div>
-          <h2 className="text-lg font-bold font-heading text-foreground">Mascotas registradas</h2>
+          <h2 className="text-lg font-bold text-foreground">Mascotas registradas</h2>
         </div>
         <Link
           href={`/dashboard/owners/${ownerId}/pets/new`}
