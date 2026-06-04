@@ -95,14 +95,14 @@
   --popover:               #FFFFFF;
   --popover-foreground:    var(--mp-gray-900);
 
-  --primary:               var(--mp-green-500);
+  --primary:               var(--mp-green-700);
   --primary-foreground:    #FFFFFF;
 
   --secondary:             var(--mp-blue-50);
   --secondary-foreground:  var(--mp-blue-700);
 
   --muted:                 var(--mp-gray-100);
-  --muted-foreground:      var(--mp-gray-500);
+  --muted-foreground:      var(--mp-gray-600);
 
   --accent:                var(--mp-green-50);
   --accent-foreground:     var(--mp-green-700);
@@ -115,11 +115,18 @@
 
   --radius: 1rem;
 
+  /* Chart colors */
+  --chart-1: var(--mp-green-500);
+  --chart-2: var(--mp-blue-500);
+  --chart-3: var(--mp-green-300);
+  --chart-4: var(--mp-blue-300);
+  --chart-5: var(--mp-sand);
+
   /* Sidebar — superficie clara, congruente con la app */
   --sidebar:                    var(--mp-gray-50);
   --sidebar-foreground:         var(--mp-gray-700);
   --sidebar-primary:            var(--mp-green-500);
-  --sidebar-primary-foreground: var(--mp-green-700);
+  --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent:             var(--mp-green-50);
   --sidebar-accent-foreground:  var(--mp-green-700);
   --sidebar-border:             var(--mp-gray-200);
