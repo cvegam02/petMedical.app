@@ -469,3 +469,28 @@ export type Database = {
 export type GroomingServiceCatalog = Database['public']['Tables']['grooming_service_catalog']['Row']
 export type GroomingRecord = Database['public']['Tables']['grooming_records']['Row']
 export type GroomingRecordService = Database['public']['Tables']['grooming_record_services']['Row']
+
+export interface HospitalizationRecord {
+  visit_id: string
+  source_visit_id: string | null
+  admitted_by: string | null
+  reason: string
+  diagnosis: string | null
+  weight_kg: number | null
+  treatment_plan: string | null
+  discharge_notes: string | null
+  discharge_diagnosis: string | null
+  post_discharge_instructions: string | null
+}
+
+export interface HospitalizationDailyLog {
+  id: string
+  visit_id: string
+  log_date: string
+  notes: string | null
+  medications: string | null
+  fed: boolean
+  temperature: number | null
+  created_by: string
+  created_at: string
+}
