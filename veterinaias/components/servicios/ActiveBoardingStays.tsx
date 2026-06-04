@@ -101,6 +101,22 @@ export function ActiveBoardingStays() {
                       {subtitle || 'Sin datos del paciente'}
                     </p>
                   </div>
+                  {s.today_fed !== null && (
+                    <div className="flex items-center gap-2.5 text-xs shrink-0">
+                      <span className="flex items-center gap-1">
+                        <span className="text-[10px] text-muted-foreground/50">Comió</span>
+                        {s.today_fed
+                          ? <span className="text-green-600 font-bold">✓</span>
+                          : <span className="text-muted-foreground/30">—</span>}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-[10px] text-muted-foreground/50">Paseó</span>
+                        {s.today_walked
+                          ? <span className="text-green-600 font-bold">✓</span>
+                          : <span className="text-muted-foreground/30">—</span>}
+                      </span>
+                    </div>
+                  )}
                   <ChevronRight size={14} className="text-muted-foreground/20 group-hover:text-primary/50 transition-colors shrink-0" />
                 </div>
                 <div className={`flex items-center justify-between px-4 py-2.5 border-t bg-muted/20 ${overdue ? 'border-orange-100 bg-orange-50/60' : 'border-border/60'}`}>
@@ -114,32 +130,18 @@ export function ActiveBoardingStays() {
                       <span className="text-orange-600 font-medium">· Salida vencida</span>
                     )}
                   </span>
-                  {s.today_fed !== null ? (
-                    <span className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <span className="text-[10px] text-muted-foreground/50">Comió</span>
-                        {s.today_fed
-                          ? <span className="text-green-600 font-bold">✓</span>
-                          : <span className="text-muted-foreground/30">—</span>}
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    {s.today_note ? (
+                      <span className="italic truncate max-w-[160px]">
+                        &ldquo;{s.today_note.length > 45 ? s.today_note.slice(0, 42) + '…' : s.today_note}&rdquo;
                       </span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-[10px] text-muted-foreground/50">Paseó</span>
-                        {s.today_walked
-                          ? <span className="text-green-600 font-bold">✓</span>
-                          : <span className="text-muted-foreground/30">—</span>}
-                      </span>
-                      {s.today_note && (
-                        <span className="italic truncate max-w-[100px]">
-                          &ldquo;{s.today_note.length > 30 ? s.today_note.slice(0, 27) + '…' : s.today_note}&rdquo;
-                        </span>
-                      )}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
-                      {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
-                    </span>
-                  )}
+                    ) : (
+                      <>
+                        <CalendarDays size={11} className="text-muted-foreground/40 shrink-0" />
+                        {formatDate(s.started_at)} → {formatDate(s.expected_check_out)}
+                      </>
+                    )}
+                  </span>
                 </div>
               </Link>
             )
