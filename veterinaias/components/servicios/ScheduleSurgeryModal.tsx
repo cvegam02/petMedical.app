@@ -52,7 +52,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const timeSlots = useMemo(() => {
-    if (!selectedDate) return []
+    if (!(selectedDate instanceof Date)) return []
     return generateTimeSlots({
       days: businessHours?.days ?? [1, 2, 3, 4, 5, 6],
       start: businessHours?.start ?? '09:00',
