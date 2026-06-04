@@ -36,8 +36,8 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const skipSearchRef = useRef(false)
 
-  // Date/time
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
+  // Date/time — stored as YYYY-MM-DD string (DateInput emits strings, not Date objects)
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState('')
 
   // Vet
@@ -53,13 +53,15 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const timeSlots = useMemo(() => {
-    if (!(selectedDate instanceof Date)) return []
+    if (!selectedDate) return []
+    const dateObj = new Date(selectedDate + 'T12:00:00')
+    if (isNaN(dateObj.getTime())) return []
     return generateTimeSlots({
       days: businessHours?.days ?? [1, 2, 3, 4, 5, 6],
       start: businessHours?.start ?? '09:00',
       end: businessHours?.end ?? '18:00',
       slot_interval: businessHours?.slot_interval ?? 30,
-    }, selectedDate)
+    }, dateObj)
   }, [selectedDate, businessHours])
 
   // Owner search debounce
@@ -148,7 +150,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
 
     setIsSubmitting(true)
     try {
-      const scheduledAt = combineDateAndTime(selectedDate, selectedTime).toISOString()
+      const scheduledAt = combineDateAndTime(new Date(selectedDate! + 'T12:00:00'), selectedTime).toISOString()
       const res = await fetch('/api/servicios/cirugia', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
