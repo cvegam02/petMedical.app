@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, Syringe, Save, Pill, ClipboardList } from 'lucide-react'
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { FormSection } from '@/components/ui/form-section'
 import { PrescriptionsFields } from '@/components/medical-records/PrescriptionsFields'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface Prescription {
   id: string
@@ -89,6 +91,9 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
       defaultValues: { procedure: '', prescriptions: [] },
     })
 
+  const router = useRouter()
+  const [requiresHosp, setRequiresHosp] = useState(false)
+
   async function onSubmit(values: ConcludeSurgeryValues) {
     function toISO(s: string): string | undefined {
       const d = new Date(s)
@@ -107,7 +112,11 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
     const json = await res.json()
     if (!res.ok) { toast.error(json.error ?? 'Error al registrar'); return }
     toast.success('Cirugía registrada y concluida')
-    onSuccess()
+    if (requiresHosp) {
+      router.push(`/dashboard/servicios/hospitalizacion?from=${visitId}`)
+    } else {
+      onSuccess()
+    }
   }
 
   return (
@@ -229,6 +238,17 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
               setValue={setValue as any}
             />
           </FormSection>
+
+          <div className="px-6 py-4 flex items-center gap-3 border-t border-border/60">
+            <Checkbox
+              id="requires-hosp"
+              checked={requiresHosp}
+              onCheckedChange={v => setRequiresHosp(v === true)}
+            />
+            <label htmlFor="requires-hosp" className="text-sm font-medium cursor-pointer select-none">
+              Requiere hospitalización post-quirúrgica
+            </label>
+          </div>
 
           <div className="px-8 py-5 bg-muted/20 flex items-center gap-4">
             <Button type="submit" size="lg" disabled={isSubmitting} className="shadow-md shadow-primary/20">

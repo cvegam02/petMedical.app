@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, HeartPulse } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import type { PanelProps } from './index'
@@ -32,9 +32,22 @@ export function ConsultationPanel({ appointment, onClose, onRefresh }: PanelProp
   }
 
   if (!isActive) {
+    if (appointment.status === 'completed') {
+      return (
+        <div className="space-y-2">
+          <p className="text-sm text-center text-muted-foreground py-1">Esta cita ya fue completada.</p>
+          <Link
+            href={`/dashboard/servicios/hospitalizacion?fromAppt=${appointment.id}`}
+            className={`${buttonVariants({ variant: 'outline' })} w-full justify-center gap-2 text-sm`}
+          >
+            <HeartPulse size={14} />
+            Hospitalizar paciente
+          </Link>
+        </div>
+      )
+    }
     return (
       <p className="text-sm text-center text-muted-foreground py-1">
-        {appointment.status === 'completed' && 'Esta cita ya fue completada.'}
         {appointment.status === 'cancelled' && 'Esta cita fue cancelada.'}
         {appointment.status === 'no_show' && 'El paciente no se presentó.'}
       </p>
