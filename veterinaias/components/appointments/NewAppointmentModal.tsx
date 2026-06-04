@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Search, Loader2, TriangleAlert, Stethoscope, Scissors } from 'lucide-react'
+import { Search, Loader2, TriangleAlert, Stethoscope, Scissors, BedDouble } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,7 +19,7 @@ export interface NewAppointmentModalProps {
   team: TeamMember[]
   businessHours?: BusinessHoursConfig
   /** Pre-select a service type when opening from a service CTA */
-  initialAppointmentType?: 'consultation' | 'grooming'
+  initialAppointmentType?: 'consultation' | 'grooming' | 'boarding'
   /** Pre-select a pet and its owner when opening from a pet profile */
   initialPet?: { petId: string; petName: string; ownerId: string; ownerName: string }
 }
@@ -29,7 +29,7 @@ type Mode = 'registered' | 'first_visit'
 export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS, initialAppointmentType, initialPet }: NewAppointmentModalProps) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
-  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming'>(initialAppointmentType ?? 'consultation')
+  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming' | 'boarding'>(initialAppointmentType ?? 'consultation')
   const [showSelector, setShowSelector] = useState(!initialAppointmentType)
   const [groomingCatalog, setGroomingCatalog] = useState<{ id: string; name: string; duration_minutes: number | null }[]>([])
 
@@ -41,6 +41,9 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // Date/time
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState('')
+  // Hotel (boarding): salida planeada (fecha + hora)
+  const [exitDate, setExitDate] = useState<Date | undefined>(undefined)
+  const [exitTime, setExitTime] = useState('')
 
   // Shared fields
   const [reason, setReason] = useState('')
@@ -76,6 +79,17 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     }
     return generateTimeSlots(config, selectedDate)
   }, [selectedDate, businessHours])
+
+  const exitSlots = useMemo(() => {
+    if (!exitDate) return []
+    const config = {
+      days: businessHours?.days ?? [1, 2, 3, 4, 5, 6],
+      start: businessHours?.start ?? '09:00',
+      end: businessHours?.end ?? '18:00',
+      slot_interval: businessHours?.slot_interval ?? 30,
+    }
+    return generateTimeSlots(config, exitDate)
+  }, [exitDate, businessHours])
 
   // Load grooming catalog when type is grooming and modal is open
   useEffect(() => {
@@ -143,6 +157,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setSelectedServiceIds([])
     setSelectedDate(undefined)
     setSelectedTime('')
+    setExitDate(undefined)
+    setExitTime('')
     setReason('')
     setAssignedTo('')
     setOwnerQuery('')
@@ -190,6 +206,9 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
 
   async function submitAppointment(force = false) {
     if (!selectedDate || !selectedTime) { toast.error('Fecha y hora son requeridas'); return }
+    if (appointmentType === 'boarding' && (!exitDate || !exitTime)) {
+      toast.error('Fecha y hora de salida son requeridas'); return
+    }
 
     if (mode === 'registered') {
       if (!selectedOwner) { toast.error('Selecciona un dueño'); return }
@@ -202,14 +221,24 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     try {
       const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
 
-      const groomingReason = appointmentType === 'grooming'
-        ? groomingCatalog.filter(s => selectedServiceIds.includes(s.id)).map(s => s.name).join(', ')
-        : undefined
+      const selectedGroomingServices = appointmentType === 'grooming'
+        ? groomingCatalog
+            .filter(s => selectedServiceIds.includes(s.id))
+            .map(s => ({ service_catalog_id: s.id, service_name: s.name }))
+        : []
+      const groomingReason = selectedGroomingServices.map(s => s.service_name).join(', ')
+      const groomingExtras = appointmentType === 'grooming'
+        ? { ...(groomingReason ? { reason: groomingReason } : {}), ...(selectedGroomingServices.length > 0 ? { grooming_services: selectedGroomingServices } : {}) }
+        : {}
+
+      const boardingExtras = appointmentType === 'boarding' && exitDate && exitTime
+        ? { expected_check_out: combineDateAndTime(exitDate, exitTime).toISOString() }
+        : {}
 
       const url = mode === 'registered' ? '/api/appointments' : '/api/appointments/first-visit'
       const payload = mode === 'registered'
-        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
-        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...(appointmentType === 'grooming' && groomingReason ? { reason: groomingReason } : {}), ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        ? { pet_id: selectedPetId, owner_id: selectedOwner!.id, scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...groomingExtras, ...boardingExtras, ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
+        : { pet_name: petName.trim(), scheduled_at: scheduledAtISO, service_type: appointmentType, ...(appointmentType === 'consultation' && reason ? { reason } : {}), ...groomingExtras, ...boardingExtras, ...(assignedTo ? { assigned_to: assignedTo } : {}), ...(force ? { force: true } : {}) }
 
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const json = await res.json()
@@ -273,6 +302,19 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 <span className="font-bold text-base">Estético</span>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Baño, corte y peluquería</p>
               </button>
+
+              <button
+                type="button"
+                onClick={() => { setAppointmentType('boarding'); setShowSelector(false) }}
+                className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all group text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <BedDouble size={28} className="text-amber-600" />
+                </div>
+                <span className="font-bold text-base">Hotel</span>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Hospedaje por noche</p>
+              </button>
+
             </div>
           </div>
         ) : (
@@ -454,7 +496,45 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 </div>
               </div>
 
-              {appointmentType === 'consultation' ? (
+              {appointmentType === 'boarding' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>Fecha de salida <span className="text-destructive">*</span></Label>
+                    <DateInput
+                      value={exitDate ? `${exitDate.getFullYear()}-${String(exitDate.getMonth() + 1).padStart(2, '0')}-${String(exitDate.getDate()).padStart(2, '0')}` : undefined}
+                      onChange={v => {
+                        const d = v ? new Date(v + 'T12:00:00') : undefined
+                        setExitDate(d)
+                        setExitTime('')
+                      }}
+                      disabled={(date) => {
+                        const today = new Date(); today.setHours(0, 0, 0, 0)
+                        return date < today
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Hora de salida <span className="text-destructive">*</span></Label>
+                    <Select
+                      value={exitTime}
+                      onValueChange={v => setExitTime(v ?? '')}
+                      disabled={!exitDate || exitSlots.length === 0}
+                      items={Object.fromEntries(exitSlots.map(slot => [slot, slot]))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={!exitDate ? 'Primero elige fecha' : 'Selecciona hora'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {exitSlots.map(slot => (
+                          <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {appointmentType === 'consultation' && (
                 <div className="space-y-1">
                   <Label>Motivo (opcional)</Label>
                   <Input
@@ -463,7 +543,8 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                     onChange={e => setReason(e.target.value)}
                   />
                 </div>
-              ) : (
+              )}
+              {appointmentType === 'grooming' && (
                 <div className="space-y-2">
                   <Label>Servicios</Label>
                   {groomingCatalog.length === 0 ? (
