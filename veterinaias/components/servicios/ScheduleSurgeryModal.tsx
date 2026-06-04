@@ -283,7 +283,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
                 </Label>
                 <Select
                   value={selectedTime}
-                  onValueChange={setSelectedTime}
+                  onValueChange={(v) => { if (v !== null) setSelectedTime(v) }}
                   disabled={!selectedDate || timeSlots.length === 0}
                 >
                   <SelectTrigger className="bg-muted/30">
@@ -362,7 +362,7 @@ export function ScheduleSurgeryModal({ isOpen, onClose, team, businessHours = DE
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label className="text-[13px] font-bold">Tipo de anestesia</Label>
-                <Select value={anesthesiaType} onValueChange={setAnesthesiaType}>
+                <Select value={anesthesiaType} onValueChange={(v) => { if (v !== null) setAnesthesiaType(v) }}>
                   <SelectTrigger className="bg-muted/30">
                     <SelectValue placeholder="Selecciona" />
                   </SelectTrigger>

@@ -11,6 +11,7 @@ interface AppointmentDetailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   appointment: DashboardAppointment | null
+  onUpdated?: () => void
   /** @deprecated panels own their transitions — kept for call-site compat */
   onTransition?: (newStatus: string) => void
   /** @deprecated panels own their loading state — kept for call-site compat */
