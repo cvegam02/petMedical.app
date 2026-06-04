@@ -10,12 +10,20 @@ export interface PanelProps {
 
 export { ConsultationPanel } from './ConsultationPanel'
 export { GroomingPanel } from './GroomingPanel'
+export { BoardingPanel } from './BoardingPanel'
+export { SurgeryPanel } from './SurgeryPanel'
+export { HospitalizationPanel } from './HospitalizationPanel'
 
 import { ConsultationPanel } from './ConsultationPanel'
 import { GroomingPanel } from './GroomingPanel'
+import { BoardingPanel } from './BoardingPanel'
+import { SurgeryPanel } from './SurgeryPanel'
+import { HospitalizationPanel } from './HospitalizationPanel'
 
 export const SERVICE_PANELS: Partial<Record<ServiceType, ComponentType<PanelProps>>> = {
   consultation: ConsultationPanel,
   grooming: GroomingPanel,
-  // surgery, hospitalization, boarding → planes 9-11
+  boarding: BoardingPanel,
+  surgery: SurgeryPanel,
+  hospitalization: HospitalizationPanel,
 }

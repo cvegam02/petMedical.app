@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, PawPrint, Calendar, Settings2, Scissors, BedDouble, Syringe } from 'lucide-react'
+import { Home, Users, PawPrint, Calendar, Settings2, Scissors, BedDouble, Syringe, HeartPulse } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
@@ -14,6 +14,7 @@ const SERVICES_NAV_ITEMS = [
   { href: '/dashboard/servicios/estetica', icon: Scissors, label: 'Estética' },
   { href: '/dashboard/servicios/hotel', icon: BedDouble, label: 'Hotel' },
   { href: '/dashboard/servicios/cirugia', icon: Syringe, label: 'Cirugía' },
+  { href: '/dashboard/servicios/hospitalizacion', icon: HeartPulse, label: 'Hospitalización' },
 ]
 
 const ADMIN_NAV_ITEMS = [
