@@ -128,7 +128,7 @@
   --sidebar-primary:            var(--mp-green-700);
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent:             var(--mp-green-50);
-  --sidebar-accent-foreground:  var(--mp-green-700);
+  --sidebar-accent-foreground:  #14613F;
   --sidebar-border:             var(--mp-gray-200);
   --sidebar-ring:               var(--mp-green-700);
 }
