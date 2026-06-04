@@ -5,15 +5,18 @@ import { scheduleSurgerySchema } from '@/lib/validations/surgery'
 const LIST_SELECT = `
   id, started_at, ended_at, status, created_at, appointment_id,
   pet:pet_id(id, name, species:species_id(name)),
-  record:surgery_records(procedure, diagnosis)
+  record:surgery_records(procedure, diagnosis),
+  appointment:appointment_id(scheduled_at)
 `
 
 function mapRow(row: any) {
   const record = Array.isArray(row.record) ? row.record[0] : row.record
+  const appt = Array.isArray(row.appointment) ? row.appointment[0] : row.appointment
   return {
     id: row.id,
     started_at: row.started_at,
     ended_at: row.ended_at,
+    scheduled_at: appt?.scheduled_at ?? null,
     status: row.status,
     created_at: row.created_at,
     appointment_id: row.appointment_id,

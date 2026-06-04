@@ -6,7 +6,9 @@ interface SurgeryRow {
   id: string
   started_at: string | null
   ended_at: string | null
+  scheduled_at: string | null
   procedure: string | null
+  diagnosis: string | null
   pet: { id: string; name: string; species: { name: string } | null } | null
 }
 
@@ -57,12 +59,12 @@ export function SurgeryTable() {
             <tbody className="divide-y divide-border/60">
               {rows.map(r => (
                 <tr key={r.id} onClick={() => router.push(`/dashboard/servicios/cirugia/${r.id}`)} className="hover:bg-muted/20 transition-colors cursor-pointer">
-                  <td className="px-4 py-3 text-foreground whitespace-nowrap">{formatDate(r.ended_at ?? r.started_at)}</td>
+                  <td className="px-4 py-3 text-foreground whitespace-nowrap">{formatDate(r.ended_at ?? r.started_at ?? r.scheduled_at)}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-foreground">{r.pet?.name ?? '—'}</p>
                     {r.pet?.species?.name && <p className="text-xs text-muted-foreground">{r.pet.species.name}</p>}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{r.procedure ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.procedure ?? r.diagnosis ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

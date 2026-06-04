@@ -16,7 +16,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { data, error } = await (supabase as any)
     .from('service_visits')
     .select(`
-      id, started_at, ended_at, status, created_at,
+      id, started_at, ended_at, status, created_at, appointment_id,
+      appointment:appointment_id(scheduled_at),
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone),
       record:surgery_records(*, attended_by_profile:attended_by(full_name)),
@@ -30,11 +31,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!data) return NextResponse.json({ error: 'Cirugía no encontrada' }, { status: 404 })
 
   const record = Array.isArray(data.record) ? data.record[0] : data.record
+  const appt = Array.isArray(data.appointment) ? data.appointment[0] : data.appointment
   return NextResponse.json({
     data: {
       id: data.id,
       started_at: data.started_at,
       ended_at: data.ended_at,
+      scheduled_at: appt?.scheduled_at ?? null,
       status: data.status,
       pet: data.pet ?? null,
       owner: data.owner ?? null,
