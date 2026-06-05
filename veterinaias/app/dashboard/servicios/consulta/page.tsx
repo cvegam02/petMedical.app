@@ -40,7 +40,12 @@ export default async function ConsultaPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <NewAppointmentButton team={team ?? []} businessHours={businessHours} />
+          <NewAppointmentButton
+            team={team ?? []}
+            businessHours={businessHours}
+            initialAppointmentType="consultation"
+            label="Nueva consulta"
+          />
         </div>
       </div>
       <ConsultationsServiceView />

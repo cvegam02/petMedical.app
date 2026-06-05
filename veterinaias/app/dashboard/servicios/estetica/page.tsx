@@ -1,17 +1,27 @@
-'use client'
-import { useState } from 'react'
 import { Scissors } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 import { GroomingSessionsTable } from '@/components/servicios/GroomingSessionsTable'
-import { GroomingSessionModal } from '@/components/servicios/GroomingSessionModal'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 
-export default function EsteticaPage() {
-  const [modalOpen, setModalOpen] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
+export default async function EsteticaPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  function handleSuccess() {
-    setModalOpen(false)
-    setRefreshKey(k => k + 1)
-  }
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('tenant_id, tenants(settings)')
+    .eq('id', user!.id)
+    .single() as any
+
+  const businessHours = (profile?.tenants as any)?.settings?.business_hours ?? DEFAULT_BUSINESS_HOURS
+
+  const { data: team } = await supabase
+    .from('user_profiles')
+    .select('id, full_name')
+    .eq('tenant_id', profile?.tenant_id ?? '')
+    .neq('role', 'assistant')
+    .order('full_name') as { data: { id: string; full_name: string }[] | null }
 
   return (
     <div className="max-w-5xl mx-auto pb-20">
@@ -29,18 +39,17 @@ export default function EsteticaPage() {
             Sesiones de baño, corte y arreglo para los pacientes del consultorio.
           </p>
         </div>
+        <div className="flex items-center gap-3">
+          <NewAppointmentButton
+            team={team ?? []}
+            businessHours={businessHours}
+            initialAppointmentType="grooming"
+            label="Nueva sesión"
+          />
+        </div>
       </div>
 
-      <GroomingSessionsTable
-        key={refreshKey}
-        onNew={() => setModalOpen(true)}
-      />
-
-      <GroomingSessionModal
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        onSuccess={handleSuccess}
-      />
+      <GroomingSessionsTable onNew={() => {}} />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ServiceLifecycleBar } from './ServiceLifecycleBar'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronLeft, Syringe, Save, Pill, ClipboardList } from 'lucide-react'
@@ -266,9 +267,34 @@ function ConclusionForm({ visitId, onSuccess }: { visitId: string; onSuccess: ()
   )
 }
 
-export function SurgeryDetail({ visitId }: { visitId: string }) {
+interface Props {
+  visitId: string
+  appointmentId?: string | null
+  appointmentStatus?: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | null
+  surgeryStartedAt?: string | null
+}
+
+export function SurgeryDetail({ visitId, appointmentId, appointmentStatus, surgeryStartedAt }: Props) {
   const [s, setS] = useState<Surgery | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  async function handleIniciarCirugia() {
+    if (!visitId || visitId === appointmentId) {
+      toast.info('Completa el formulario de conclusión para registrar la cirugía')
+      return
+    }
+    try {
+      const res = await fetch(`/api/servicios/cirugia/${visitId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ started_at: new Date().toISOString() }),
+      })
+      const json = await res.json()
+      if (!res.ok) { toast.error(json.error ?? 'Error'); return }
+      router.refresh()
+    } catch { toast.error('Error de red') }
+  }
 
   async function load() {
     setLoading(true)
@@ -313,6 +339,18 @@ export function SurgeryDetail({ visitId }: { visitId: string }) {
       >
         <ChevronLeft size={14} />Cirugías
       </Link>
+
+      {appointmentId && appointmentStatus && (
+        <div className="mb-6">
+          <ServiceLifecycleBar
+            appointmentId={appointmentId}
+            appointmentStatus={appointmentStatus}
+            serviceType="surgery"
+            serviceStartedAt={surgeryStartedAt ?? s?.started_at}
+            onInitiate={handleIniciarCirugia}
+          />
+        </div>
+      )}
 
       {/* Header card */}
       <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">

@@ -45,8 +45,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Image
                 src="/mundeopet.png"
                 alt="MundoPet"
-                width={148}
-                height={40}
+                width={180}
+                height={75}
                 className="object-contain"
                 priority
               />

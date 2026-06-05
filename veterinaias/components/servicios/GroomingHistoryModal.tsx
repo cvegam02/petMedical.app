@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Scissors, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { GroomingSessionModal } from './GroomingSessionModal'
 
 interface SessionRow {
   id: string
@@ -18,12 +17,13 @@ interface GroomingHistoryModalProps {
   petName: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Called when user clicks "Registrar sesión" — parent is responsible for opening the booking flow */
+  onNew?: () => void
 }
 
-export function GroomingHistoryModal({ petId, petName, open, onOpenChange }: GroomingHistoryModalProps) {
+export function GroomingHistoryModal({ petId, petName, open, onOpenChange, onNew }: GroomingHistoryModalProps) {
   const [sessions, setSessions] = useState<SessionRow[]>([])
   const [loading, setLoading] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
 
   async function loadSessions() {
     setLoading(true)
@@ -46,7 +46,7 @@ export function GroomingHistoryModal({ petId, petName, open, onOpenChange }: Gro
               <DialogTitle className="flex items-center gap-2">
                 <Scissors size={16} />Historial de Estética
               </DialogTitle>
-              <Button size="sm" onClick={() => setAddOpen(true)} className="mr-6">
+              <Button size="sm" onClick={() => onNew?.()} className="mr-6">
                 <Plus size={14} className="mr-1" />Registrar sesión
               </Button>
             </div>
@@ -102,14 +102,6 @@ export function GroomingHistoryModal({ petId, petName, open, onOpenChange }: Gro
           )}
         </DialogContent>
       </Dialog>
-
-      <GroomingSessionModal
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        petId={petId}
-        petName={petName}
-        onSuccess={() => { setAddOpen(false); loadSessions() }}
-      />
     </>
   )
 }

@@ -6,7 +6,7 @@ const weightPreprocess = z.preprocess(
   z.number().positive().optional()
 )
 
-// Phase 1 — used by ScheduleSurgeryModal → POST /api/servicios/cirugia
+// Phase 1 — used by NewAppointmentModal → POST /api/servicios/cirugia
 export const scheduleSurgerySchema = z.object({
   pet_id: z.string().uuid('Mascota requerida'),
   owner_id: z.string().uuid('Dueño requerido'),

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { isCheckoutOverdue, stayDays, stayDayLabel, remainingDaysLabel } from '@/lib/utils/boarding'
+import { ServiceLifecycleBar } from './ServiceLifecycleBar'
 
 interface Stay {
   id: string
@@ -243,7 +244,14 @@ function LogTable({ days, today, logByDate, inProgress, visitId, onSaved }: {
   )
 }
 
-export function BoardingStayDetail({ visitId }: { visitId: string }) {
+interface Props {
+  visitId: string
+  appointmentId?: string | null
+  appointmentStatus?: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | null
+  serviceVisitStartedAt?: string | null
+}
+
+export function BoardingStayDetail({ visitId, appointmentId, appointmentStatus, serviceVisitStartedAt }: Props) {
   const router = useRouter()
   const [stay, setStay] = useState<Stay | null>(null)
   const [logs, setLogs] = useState<DailyLog[]>([])
@@ -292,6 +300,21 @@ export function BoardingStayDetail({ visitId }: { visitId: string }) {
     }
   }
 
+  async function handleCheckIn() {
+    if (!appointmentId) return
+    try {
+      const res = await fetch('/api/servicios/hotel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointment_id: appointmentId }),
+      })
+      const json = await res.json()
+      if (!res.ok) { toast.error(json.error ?? 'Error al hacer check-in'); return }
+      toast.success('Check-in registrado')
+      router.refresh()
+    } catch { toast.error('Error de red') }
+  }
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto pb-10">
@@ -308,8 +331,21 @@ export function BoardingStayDetail({ visitId }: { visitId: string }) {
             Hotel
           </Link>
         </div>
+        {appointmentId && appointmentStatus && (
+          <div className="mb-6">
+            <ServiceLifecycleBar
+              appointmentId={appointmentId}
+              appointmentStatus={appointmentStatus}
+              serviceType="boarding"
+              serviceStartedAt={serviceVisitStartedAt ?? null}
+              onInitiate={handleCheckIn}
+            />
+          </div>
+        )}
         <div className="text-center py-16 rounded-xl border-2 border-dashed border-border/60 bg-muted/10">
-          <p className="text-sm font-medium text-foreground">Estancia no encontrada</p>
+          <p className="text-sm font-medium text-foreground">
+            {appointmentId ? 'Pendiente de check-in' : 'Estancia no encontrada'}
+          </p>
         </div>
       </div>
     )
@@ -347,6 +383,19 @@ export function BoardingStayDetail({ visitId }: { visitId: string }) {
           Hotel
         </Link>
       </div>
+
+      {/* Lifecycle bar */}
+      {appointmentId && appointmentStatus && (
+        <div className="mb-6">
+          <ServiceLifecycleBar
+            appointmentId={appointmentId}
+            appointmentStatus={appointmentStatus}
+            serviceType="boarding"
+            serviceStartedAt={serviceVisitStartedAt ?? stay?.started_at}
+            onInitiate={handleCheckIn}
+          />
+        </div>
+      )}
 
       {/* Hero card */}
       <div className="bg-card rounded-xl border border-border p-6 mb-6 shadow-sm">

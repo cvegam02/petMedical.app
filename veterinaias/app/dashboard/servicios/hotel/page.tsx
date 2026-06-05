@@ -4,7 +4,7 @@ import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 import { ActiveBoardingStays } from '@/components/servicios/ActiveBoardingStays'
 import { BoardingHistoryTable } from '@/components/servicios/BoardingHistoryTable'
 import { HotelUpcomingReservations } from '@/components/servicios/HotelUpcomingReservations'
-import { NewHotelReservationButton } from '@/components/servicios/NewHotelReservationButton'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 
 export default async function HotelPage() {
   const supabase = await createClient()
@@ -41,7 +41,12 @@ export default async function HotelPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <NewHotelReservationButton team={team ?? []} businessHours={businessHours} />
+          <NewAppointmentButton
+            team={team ?? []}
+            businessHours={businessHours}
+            initialAppointmentType="boarding"
+            label="Nueva reserva"
+          />
         </div>
       </div>
       <ActiveBoardingStays />

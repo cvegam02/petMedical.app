@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Search, Loader2, TriangleAlert, Stethoscope, Scissors, BedDouble } from 'lucide-react'
+import { Search, Loader2, TriangleAlert, Stethoscope, Scissors, BedDouble, Syringe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DateInput } from '@/components/ui/date-input'
 import { generateTimeSlots, combineDateAndTime, BusinessHoursConfig, DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
+
+const OVERLAP_CHECK_WINDOW_MINUTES = 90
+
+interface ConflictAppointment {
+  id: string
+  pet?: { name?: string }
+  owner?: { full_name?: string }
+}
 
 interface TeamMember { id: string; full_name: string }
 
@@ -19,7 +27,7 @@ export interface NewAppointmentModalProps {
   team: TeamMember[]
   businessHours?: BusinessHoursConfig
   /** Pre-select a service type when opening from a service CTA */
-  initialAppointmentType?: 'consultation' | 'grooming' | 'boarding'
+  initialAppointmentType?: 'consultation' | 'grooming' | 'boarding' | 'cirugia'
   /** Pre-select a pet and its owner when opening from a pet profile */
   initialPet?: { petId: string; petName: string; ownerId: string; ownerName: string }
 }
@@ -29,7 +37,7 @@ type Mode = 'registered' | 'first_visit'
 export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEFAULT_BUSINESS_HOURS, initialAppointmentType, initialPet }: NewAppointmentModalProps) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('registered')
-  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming' | 'boarding'>(initialAppointmentType ?? 'consultation')
+  const [appointmentType, setAppointmentType] = useState<'consultation' | 'grooming' | 'boarding' | 'cirugia'>(initialAppointmentType ?? 'consultation')
   const [showSelector, setShowSelector] = useState(!initialAppointmentType)
   const [groomingCatalog, setGroomingCatalog] = useState<{ id: string; name: string; duration_minutes: number | null }[]>([])
 
@@ -68,6 +76,12 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
   // First visit mode
   const [petName, setPetName] = useState('')
 
+  // Surgery (cirugia) fields
+  const [surgeryDiagnosis, setSurgeryDiagnosis] = useState('')
+  const [surgeryWeight, setSurgeryWeight] = useState('')
+  const [surgeryAnesthesia, setSurgeryAnesthesia] = useState<'local' | 'general' | 'sedacion' | ''>('')
+  const [surgeryPreOpNotes, setSurgeryPreOpNotes] = useState('')
+
   const timeSlots = useMemo(() => {
     if (!selectedDate) return []
     // Ensure we have all required fields for generateTimeSlots
@@ -100,6 +114,34 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
       .then(json => setGroomingCatalog((json.data ?? []).filter((s: any) => s.active)))
       .catch(() => {})
   }, [isOpen, appointmentType])
+
+  // Proactive conflict check when date + time are both selected
+  useEffect(() => {
+    if (!selectedDate || !selectedTime) { setConflictWarning(null); return }
+    const controller = new AbortController()
+    const dt = combineDateAndTime(selectedDate, selectedTime)
+    const from = dt.toISOString()
+    const to = new Date(dt.getTime() + OVERLAP_CHECK_WINDOW_MINUTES * 60_000).toISOString()
+
+    fetch(`/api/appointments?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(json => {
+        const conflicts: ConflictAppointment[] = (json.data ?? []) as ConflictAppointment[]
+        if (conflicts.length === 0) { setConflictWarning(null); return }
+        setConflictWarning({
+          message: `Hay ${conflicts.length} cita(s) en este horario`,
+          appointments: conflicts.map(a => ({
+            id: a.id,
+            pet_name: a.pet?.name ?? '—',
+            owner_name: a.owner?.full_name ?? '—',
+          })),
+        })
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') setConflictWarning(null)
+      })
+    return () => controller.abort()
+  }, [selectedDate, selectedTime])
 
   // Owner search debounce
   useEffect(() => {
@@ -167,6 +209,10 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setPets([])
     setSelectedPetId('')
     setPetName('')
+    setSurgeryDiagnosis('')
+    setSurgeryWeight('')
+    setSurgeryAnesthesia('')
+    setSurgeryPreOpNotes('')
     setShowSuggestions(false)
     setIsSearchingOwner(false)
     setIsLoadingPets(false)
@@ -220,6 +266,33 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
     setIsSubmitting(true)
     try {
       const scheduledAtISO = combineDateAndTime(selectedDate, selectedTime).toISOString()
+
+      if (appointmentType === 'cirugia') {
+        if (surgeryWeight && parseFloat(surgeryWeight) <= 0) {
+          toast.error('El peso debe ser mayor a 0')
+          return
+        }
+        const res = await fetch('/api/servicios/cirugia', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pet_id: selectedPetId,
+            owner_id: selectedOwner!.id,
+            scheduled_at: scheduledAtISO,
+            attended_by: assignedTo || null,
+            diagnosis: surgeryDiagnosis || null,
+            weight_kg: surgeryWeight ? parseFloat(surgeryWeight) : null,
+            anesthesia_type: surgeryAnesthesia || null,
+            pre_op_notes: surgeryPreOpNotes || null,
+          }),
+        })
+        const json = await res.json()
+        if (!res.ok) { toast.error(json.error ?? 'Error al agendar cirugía'); return }
+        toast.success('Cirugía agendada')
+        handleClose()
+        router.refresh()
+        return
+      }
 
       const selectedGroomingServices = appointmentType === 'grooming'
         ? groomingCatalog
@@ -315,36 +388,50 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Hospedaje por noche</p>
               </button>
 
+              <button
+                type="button"
+                onClick={() => { setAppointmentType('cirugia'); setShowSelector(false) }}
+                className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all group text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Syringe size={28} className="text-red-600" />
+                </div>
+                <span className="font-bold text-base">Cirugía</span>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Procedimientos quirúrgicos</p>
+              </button>
+
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
           <div className="px-6 pt-5 pb-2 space-y-6">
-            {/* Mode toggle */}
-            <div className="flex gap-1 p-1 bg-muted rounded-lg">
-              <button
-                type="button"
-                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                  mode === 'registered'
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => setMode('registered')}
-              >
-                Cliente registrado
-              </button>
-              <button
-                type="button"
-                className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
-                  mode === 'first_visit'
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-                onClick={() => setMode('first_visit')}
-              >
-                Primera visita
-              </button>
-            </div>
+            {/* Mode toggle — hidden for Cirugía (always requires a registered patient) */}
+            {appointmentType !== 'cirugia' && (
+              <div className="flex gap-1 p-1 bg-muted rounded-lg">
+                <button
+                  type="button"
+                  className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                    mode === 'registered'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setMode('registered')}
+                >
+                  Cliente registrado
+                </button>
+                <button
+                  type="button"
+                  className={`flex-1 py-1.5 px-3 rounded-md text-sm font-medium transition-colors ${
+                    mode === 'first_visit'
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setMode('first_visit')}
+                >
+                  Primera visita
+                </button>
+              </div>
+            )}
 
             {/* Patient fields */}
             <div className="space-y-4">
@@ -496,6 +583,25 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                 </div>
               </div>
 
+              {conflictWarning && (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+                >
+                  <div className="flex items-center gap-2 font-medium">
+                    <TriangleAlert className="h-4 w-4 shrink-0" />
+                    {conflictWarning.message}
+                  </div>
+                  <ul className="mt-1 space-y-0.5 pl-6 text-xs text-amber-700">
+                    {conflictWarning.appointments.map(a => (
+                      <li key={a.id}>{a.pet_name} — {a.owner_name}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-1.5 text-xs text-amber-600">Puedes continuar si tienes personal disponible.</p>
+                </div>
+              )}
+
               {appointmentType === 'boarding' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
@@ -586,6 +692,50 @@ export function NewAppointmentModal({ isOpen, onClose, team, businessHours = DEF
                       })}
                     </div>
                   )}
+                </div>
+              )}
+              {appointmentType === 'cirugia' && (
+                <div className="space-y-3">
+                  <div>
+                    <Label>Diagnóstico pre-operatorio</Label>
+                    <Input
+                      value={surgeryDiagnosis}
+                      onChange={e => setSurgeryDiagnosis(e.target.value)}
+                      placeholder="Ej. Masa abdominal, fractura tibia..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Peso del paciente (kg)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={surgeryWeight}
+                        onChange={e => setSurgeryWeight(e.target.value)}
+                        placeholder="0.0"
+                      />
+                    </div>
+                    <div>
+                      <Label>Tipo de anestesia</Label>
+                      <Select value={surgeryAnesthesia} onValueChange={v => setSurgeryAnesthesia(v as typeof surgeryAnesthesia)}>
+                        <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="local">Local</SelectItem>
+                          <SelectItem value="sedacion">Sedación</SelectItem>
+                          <SelectItem value="general">General</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Notas pre-operatorias</Label>
+                    <Input
+                      value={surgeryPreOpNotes}
+                      onChange={e => setSurgeryPreOpNotes(e.target.value)}
+                      placeholder="Ej. Ovariohisterectomía, reducción de fractura..."
+                    />
+                  </div>
                 </div>
               )}
               {team.length > 0 && (

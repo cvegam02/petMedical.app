@@ -2,7 +2,7 @@ import { Syringe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
 import { SurgeryTable } from '@/components/servicios/SurgeryTable'
-import { ScheduleSurgeryModalTrigger } from '@/components/servicios/ScheduleSurgeryModal'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 
 export default async function CirugiaPage() {
   const supabase = await createClient()
@@ -30,7 +30,12 @@ export default async function CirugiaPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ScheduleSurgeryModalTrigger team={team ?? []} businessHours={businessHours} />
+          <NewAppointmentButton
+            team={team ?? []}
+            businessHours={businessHours}
+            initialAppointmentType="cirugia"
+            label="Nueva cirugía"
+          />
         </div>
       </div>
       <SurgeryTable />
