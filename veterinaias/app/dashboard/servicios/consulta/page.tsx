@@ -1,8 +1,8 @@
 import { Stethoscope } from 'lucide-react'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { buttonVariants } from '@/components/ui/button'
-import { ConsultationList } from '@/components/servicios/ConsultationList'
+import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
+import { ConsultationsServiceView } from '@/components/servicios/ConsultationsServiceView'
+import { NewAppointmentButton } from '@/components/appointments/NewAppointmentButton'
 
 export default async function ConsultaPage() {
   const supabase = await createClient()
@@ -10,9 +10,11 @@ export default async function ConsultaPage() {
 
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('tenant_id')
+    .select('tenant_id, tenants(settings)')
     .eq('id', user!.id)
     .single() as any
+
+  const businessHours = (profile?.tenants as any)?.settings?.business_hours ?? DEFAULT_BUSINESS_HOURS
 
   const { data: team } = await supabase
     .from('user_profiles')
@@ -34,19 +36,14 @@ export default async function ConsultaPage() {
             Consultas
           </h1>
           <p className="text-sm text-muted-foreground max-w-md">
-            Historial de consultas médicas registradas en la clínica.
+            Citas agendadas y consultas médicas registradas en la clínica.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard/records/new"
-            className={buttonVariants({})}
-          >
-            + Nueva consulta
-          </Link>
+          <NewAppointmentButton team={team ?? []} businessHours={businessHours} />
         </div>
       </div>
-      <ConsultationList team={team ?? []} />
+      <ConsultationsServiceView />
     </div>
   )
 }
