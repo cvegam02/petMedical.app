@@ -100,11 +100,6 @@ export function ActiveBoardingStays() {
                     <p className="text-xs text-muted-foreground mt-1.5 truncate">
                       {subtitle || 'Sin datos del paciente'}
                     </p>
-                    {s.today_note && (
-                      <p className="text-xs text-muted-foreground/70 mt-1 truncate italic">
-                        &ldquo;{s.today_note}&rdquo;
-                      </p>
-                    )}
                   </div>
                   {s.today_fed !== null && (
                     <div className="flex items-center gap-2.5 text-xs shrink-0">

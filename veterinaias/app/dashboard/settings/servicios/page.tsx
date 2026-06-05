@@ -23,7 +23,7 @@ export default function ServiciosPage() {
             onClick={() => setTab(value)}
             className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
               tab === value
-                ? 'border-primary text-primary'
+                ? 'border-secondary-foreground text-secondary-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >

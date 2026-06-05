@@ -5,7 +5,8 @@ import { scheduleSurgerySchema } from '@/lib/validations/surgery'
 const LIST_SELECT = `
   id, started_at, ended_at, status, created_at, appointment_id,
   pet:pet_id(id, name, species:species_id(name)),
-  record:surgery_records(procedure, diagnosis),
+  owner:owner_id(id, full_name),
+  record:surgery_records(procedure, diagnosis, anesthesia_type, complications, follow_up_date),
   appointment:appointment_id(scheduled_at)
 `
 
@@ -21,8 +22,12 @@ function mapRow(row: any) {
     created_at: row.created_at,
     appointment_id: row.appointment_id,
     pet: row.pet ?? null,
+    owner: row.owner ?? null,
     procedure: record?.procedure ?? null,
     diagnosis: record?.diagnosis ?? null,
+    anesthesia_type: record?.anesthesia_type ?? null,
+    complications: record?.complications ?? null,
+    follow_up_date: record?.follow_up_date ?? null,
   }
 }
 

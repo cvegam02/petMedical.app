@@ -9,7 +9,8 @@ import {
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
-import { AppointmentPopover, type AppointmentResource } from './AppointmentPopover'
+import { type AppointmentResource } from './AppointmentPopover'
+import { AppointmentDetailDialog } from './AppointmentDetailDialog'
 import { serviceTypeConfig } from '@/lib/constants/service-type'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
@@ -32,13 +33,13 @@ interface CalendarEvent {
 function EventComponent({ event }: EventProps<CalendarEvent>) {
   const { Icon } = serviceTypeConfig(event.resource.service_type)
   return (
-    <AppointmentPopover appointment={event.resource}>
+    <span className="w-full h-full flex items-center justify-center gap-1 px-1 overflow-hidden">
       <Icon size={10} strokeWidth={2.25} className="shrink-0" />
       <span className="text-[11px] truncate leading-tight">
         {event.resource.pet?.name ?? '—'}
         {event.resource.pet?.species ? ` · ${event.resource.pet.species.name}` : ''}
       </span>
-    </AppointmentPopover>
+    </span>
   )
 }
 
@@ -62,6 +63,8 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   const [error, setError] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>(Views.WEEK)
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [selected, setSelected] = useState<AppointmentResource | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
   const lastRangeRef = useRef<{ from: Date; to: Date } | null>(null)
 
@@ -131,6 +134,16 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
     [fetchRange]
   )
 
+  const handleSelectEvent = useCallback((event: CalendarEvent) => {
+    setSelected(event.resource)
+    setDialogOpen(true)
+  }, [])
+
+  const refetchCurrent = useCallback(() => {
+    const r = lastRangeRef.current
+    if (r) fetchRange(r.from, r.to)
+  }, [fetchRange])
+
   return (
     <div className="relative">
       {loading && (
@@ -159,6 +172,7 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           culture="es"
           components={components}
           eventPropGetter={eventPropGetter}
+          onSelectEvent={handleSelectEvent}
           selectable={false}
           style={{ height: 600 }}
           messages={{
@@ -171,6 +185,13 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
           }}
         />
       </div>
+
+      <AppointmentDetailDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        appointment={selected}
+        onUpdated={refetchCurrent}
+      />
     </div>
   )
 }

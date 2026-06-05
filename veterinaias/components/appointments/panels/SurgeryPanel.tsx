@@ -86,7 +86,7 @@ export function SurgeryPanel({ appointment, onClose, onRefresh }: PanelProps) {
           href={`/dashboard/servicios/cirugia/${surgery.id}`}
           className={`${buttonVariants({})} w-full justify-center gap-2 py-3 text-base font-semibold`}
         >
-          Registrar cirugía
+          Detalles de cirugía
           <ArrowRight size={16} />
         </Link>
       ) : (

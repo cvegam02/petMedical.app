@@ -152,9 +152,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const { grooming_services, ...appointmentData } = result.data
+
   const { data, error } = await (supabase.from('appointments') as any)
     .insert({
-      ...result.data,
+      ...appointmentData,
       duration_minutes: result.data.duration_minutes ?? slotInterval,
       tenant_id: profile.tenant_id,
       created_by: user.id,
@@ -163,5 +165,19 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (appointmentData.service_type === 'grooming' && grooming_services && grooming_services.length > 0) {
+    const { error: svcError } = await (supabase.from('appointment_grooming_services') as any)
+      .insert(grooming_services.map(s => ({
+        appointment_id: data.id,
+        service_catalog_id: s.service_catalog_id ?? null,
+        service_name: s.service_name,
+      })))
+    if (svcError) {
+      await (supabase.from('appointments') as any).delete().eq('id', data.id)
+      return NextResponse.json({ error: 'Error al guardar los servicios de la cita' }, { status: 500 })
+    }
+  }
+
   return NextResponse.json({ data }, { status: 201 })
 }

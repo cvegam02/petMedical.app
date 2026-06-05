@@ -1,4 +1,3 @@
-// app/dashboard/servicios/estetica/page.tsx
 'use client'
 import { useState } from 'react'
 import { Scissors } from 'lucide-react'
@@ -15,17 +14,20 @@ export default function EsteticaPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto pb-10">
-      <div className="space-y-1 mb-8">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
-          <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Servicios</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+    <div className="max-w-5xl mx-auto pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-6 h-[1.5px] bg-secondary-foreground/20 rounded-full" />
+            <p className="text-[10px] font-mono font-bold text-secondary-foreground uppercase tracking-[0.2em]">Servicios</p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <Scissors size={22} strokeWidth={1.75} className="text-muted-foreground/60" />
             Estética
           </h1>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Sesiones de baño, corte y arreglo para los pacientes del consultorio.
+          </p>
         </div>
       </div>
 

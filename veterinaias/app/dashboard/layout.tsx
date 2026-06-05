@@ -33,7 +33,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     /* Accent rail — thin primary stripe at the very top of the entire chrome */
-    <div className="h-dvh flex flex-col border-t-[3px] border-primary bg-background overflow-hidden">
+    <div className="h-dvh flex flex-col border-t-[3px] border-secondary-foreground bg-background overflow-hidden">
       <div className="flex flex-1 min-h-0">
 
         {/* Sidebar */}

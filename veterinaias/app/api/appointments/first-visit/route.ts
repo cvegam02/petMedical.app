@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { pet_name, scheduled_at, reason, notes, assigned_to } = result.data
+  const { pet_name, scheduled_at, reason, notes, assigned_to, service_type, grooming_services, expected_check_out } = result.data
   const duration_minutes = result.data.duration_minutes ?? slotInterval
 
   // Step 1: Create stub owner (no phone, no email — marks profile as incomplete)
@@ -107,6 +107,8 @@ export async function POST(req: NextRequest) {
       reason: reason ?? null,
       notes: notes ?? null,
       assigned_to: assigned_to ?? null,
+      service_type: service_type ?? 'consultation',
+      expected_check_out: expected_check_out ?? null,
       created_by: user.id,
     })
     .select('id')
@@ -121,6 +123,17 @@ export async function POST(req: NextRequest) {
     if (petDel.error) console.error('first-visit cleanup failed (pet):', petDel.error)
     if (ownerDel.error) console.error('first-visit cleanup failed (owner):', ownerDel.error)
     return NextResponse.json({ error: 'Error al crear la cita' }, { status: 500 })
+  }
+
+  // Step 5: Persist selected grooming services (structured), if any
+  if (service_type === 'grooming' && grooming_services && grooming_services.length > 0) {
+    const { error: svcError } = await (supabase.from('appointment_grooming_services') as any)
+      .insert(grooming_services.map(s => ({
+        appointment_id: appointment.id,
+        service_catalog_id: s.service_catalog_id ?? null,
+        service_name: s.service_name,
+      })))
+    if (svcError) console.error('first-visit: failed to save grooming services:', svcError)
   }
 
   return NextResponse.json(

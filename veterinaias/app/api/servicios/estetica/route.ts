@@ -23,8 +23,9 @@ export async function GET(req: NextRequest) {
       .select(`
         id, started_at, ended_at, status, created_at, appointment_id,
         pet:pet_id(id, name, species:species_id(name)),
-        record:grooming_records(notes),
-        services:grooming_record_services(id, service_name)
+        owner:owner_id(id, full_name),
+        record:grooming_records(notes, intake_notes, services:grooming_record_services(id, service_name)),
+        appointment:appointment_id(assigned_to:assigned_to(id, full_name))
       `)
       .eq('tenant_id', tenantId)
       .eq('service_type', 'grooming')
@@ -35,11 +36,15 @@ export async function GET(req: NextRequest) {
     if (!data) return NextResponse.json({ data: null })
 
     const record = Array.isArray(data.record) ? data.record[0] : data.record
+    const appt = Array.isArray(data.appointment) ? data.appointment[0] : data.appointment
     return NextResponse.json({
       data: {
         ...data,
         session_date: data.started_at ?? data.created_at,
         notes: record?.notes ?? null,
+        intake_notes: record?.intake_notes ?? null,
+        services: record?.services ?? [],
+        owner: data.owner ?? null,
       },
     })
   }
@@ -53,8 +58,8 @@ export async function GET(req: NextRequest) {
     .select(`
       id, started_at, ended_at, status, created_at, appointment_id,
       pet:pet_id(id, name, species:species_id(name)),
-      record:grooming_records(notes),
-      services:grooming_record_services(id, service_name)
+      owner:owner_id(id, full_name),
+      record:grooming_records(notes, intake_notes, services:grooming_record_services(id, service_name))
     `, { count: 'exact' })
     .eq('tenant_id', tenantId)
     .eq('service_type', 'grooming')
@@ -69,6 +74,9 @@ export async function GET(req: NextRequest) {
       ...row,
       session_date: row.started_at ?? row.created_at,
       notes: record?.notes ?? null,
+      intake_notes: record?.intake_notes ?? null,
+      services: record?.services ?? [],
+      owner: row.owner ?? null,
     }
   })
 
@@ -145,30 +153,50 @@ export async function POST(req: NextRequest) {
   // Step 3: insert grooming_record
   const { error: recordError } = await (supabase as any)
     .from('grooming_records')
-    .insert({ visit_id: visit.id, notes: sessionData.notes ?? null })
+    .insert({
+      visit_id: visit.id,
+      notes: sessionData.notes ?? null,
+      intake_notes: sessionData.intake_notes ?? null,
+    })
 
   if (recordError) {
     await (supabase as any).from('service_visits').delete().eq('id', visit.id)
     return NextResponse.json({ error: 'Error al guardar registro' }, { status: 500 })
   }
 
-  // Step 4: insert grooming_record_services
-  if (services.length > 0) {
-    const serviceRows = services.map((s: { service_name: string; service_catalog_id?: string }) => ({
+  // Step 4: resolve services to record.
+  // When started from an appointment without explicit services, inherit the
+  // services that were selected when the appointment was booked.
+  let effectiveServices: { service_name: string; service_catalog_id?: string | null }[] = services
+  if (effectiveServices.length === 0 && sessionData.appointment_id) {
+    const { data: apptServices } = await (supabase as any)
+      .from('appointment_grooming_services')
+      .select('service_name, service_catalog_id')
+      .eq('appointment_id', sessionData.appointment_id)
+    effectiveServices = apptServices ?? []
+  }
+
+  let insertedServices: { id: string; service_name: string }[] = []
+  if (effectiveServices.length > 0) {
+    const serviceRows = effectiveServices.map((s) => ({
       record_id: visit.id,
       service_catalog_id: s.service_catalog_id ?? null,
       service_name: s.service_name,
     }))
 
-    const { error: servicesError } = await (supabase as any)
+    const { data: created, error: servicesError } = await (supabase as any)
       .from('grooming_record_services')
       .insert(serviceRows)
+      .select('id, service_name')
 
     if (servicesError) {
       await (supabase as any).from('service_visits').delete().eq('id', visit.id)
       return NextResponse.json({ error: 'Error al guardar servicios' }, { status: 500 })
     }
+    insertedServices = created ?? []
   }
 
-  return NextResponse.json({ data: visit }, { status: 201 })
+  return NextResponse.json({
+    data: { ...visit, services: insertedServices },
+  }, { status: 201 })
 }

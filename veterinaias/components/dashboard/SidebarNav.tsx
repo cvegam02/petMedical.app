@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Inicio', exact: true },
   { href: '/dashboard/owners', icon: Users, label: 'Dueños' },
   { href: '/dashboard/pets', icon: PawPrint, label: 'Mascotas' },
-  { href: '/dashboard/appointments', icon: Calendar, label: 'Citas' },
+  { href: '/dashboard/appointments', icon: Calendar, label: 'Calendario' },
 ]
 
 const SERVICES_NAV_ITEMS = [
@@ -42,11 +42,10 @@ export function SidebarNav({ role }: SidebarNavProps) {
           <Link
             key={href}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
-              isActive
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${isActive
                 ? 'bg-card text-primary font-semibold shadow-sm border border-primary/10'
                 : 'text-foreground/55 hover:text-foreground hover:bg-muted'
-            }`}
+              }`}
           >
             <Icon
               size={15}

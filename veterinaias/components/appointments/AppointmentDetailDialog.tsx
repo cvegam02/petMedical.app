@@ -129,11 +129,13 @@ export function AppointmentDetailDialog({
         </div>
 
         {/* Service panel (actions) */}
-        <Panel
-          appointment={appointment}
-          onClose={() => onOpenChange(false)}
-          onRefresh={() => router.refresh()}
-        />
+        <div className="px-6 pb-6 pt-4 border-t border-border/60">
+          <Panel
+            appointment={appointment}
+            onClose={() => onOpenChange(false)}
+            onRefresh={() => router.refresh()}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   )

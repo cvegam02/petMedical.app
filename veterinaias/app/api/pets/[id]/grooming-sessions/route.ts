@@ -24,8 +24,7 @@ export async function GET(
     .from('service_visits')
     .select(`
       id, started_at, ended_at, status, created_at,
-      record:grooming_records(notes),
-      services:grooming_record_services(id, service_name),
+      record:grooming_records(notes, intake_notes, services:grooming_record_services(id, service_name)),
       tenant:tenant_id(name)
     `)
     .eq('pet_id', petId)
@@ -42,6 +41,8 @@ export async function GET(
       ...row,
       session_date: row.started_at ?? row.created_at,
       notes: record?.notes ?? null,
+      intake_notes: record?.intake_notes ?? null,
+      services: record?.services ?? [],
     }
   })
 

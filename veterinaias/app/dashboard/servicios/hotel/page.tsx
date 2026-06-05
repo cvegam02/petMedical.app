@@ -25,17 +25,22 @@ export default async function HotelPage() {
     .order('full_name') as { data: { id: string; full_name: string }[] | null }
 
   return (
-    <div className="max-w-5xl mx-auto pb-10">
-      <div className="space-y-1 mb-8">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
-          <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Servicios</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+    <div className="max-w-5xl mx-auto pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-6 h-[1.5px] bg-secondary-foreground/20 rounded-full" />
+            <p className="text-[10px] font-mono font-bold text-secondary-foreground uppercase tracking-[0.2em]">Servicios</p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-3">
             <BedDouble size={22} strokeWidth={1.75} className="text-muted-foreground/60" />
             Hotel
           </h1>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Hospedaje y cuidado de mascotas durante su estadía en la clínica.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <NewHotelReservationButton team={team ?? []} businessHours={businessHours} />
         </div>
       </div>

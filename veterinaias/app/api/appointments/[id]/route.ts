@@ -32,7 +32,7 @@ export async function GET(
 
   const { data, error } = await (supabase.from('appointments') as any)
     .select(`
-      id, status, scheduled_at, duration_minutes, reason, notes, created_at,
+      id, status, scheduled_at, duration_minutes, reason, notes, created_at, service_type, expected_check_out,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone, email),
       assigned_to_profile:assigned_to(id, full_name),

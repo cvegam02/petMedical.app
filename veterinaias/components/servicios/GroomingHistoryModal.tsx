@@ -75,7 +75,7 @@ export function GroomingHistoryModal({ petId, petName, open, onOpenChange }: Gro
                   {sessions.map(s => (
                     <tr key={s.id}>
                       <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                        {new Date(s.session_date + 'T12:00:00').toLocaleDateString('es-MX', {
+                        {new Date(s.session_date).toLocaleDateString('es-MX', {
                           day: '2-digit', month: 'short', year: 'numeric',
                         })}
                       </td>

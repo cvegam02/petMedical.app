@@ -7,8 +7,8 @@ import { NewAppointmentButton } from '@/components/appointments/NewAppointmentBu
 import { CalendarView } from '@/components/appointments/CalendarView'
 
 const TABS = [
-  { key: 'hoy',       label: 'Hoy' },
-  { key: 'proximas',  label: 'Próximas' },
+  { key: 'hoy', label: 'Hoy' },
+  { key: 'proximas', label: 'Próximas' },
   { key: 'confirmar', label: 'Por confirmar' },
 ]
 
@@ -93,10 +93,10 @@ export default async function AppointmentsPage({
         <div className="flex items-end justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-6 h-[1.5px] bg-primary/30 rounded-full" />
-              <p className="text-[10px] font-mono font-bold text-primary uppercase tracking-[0.2em]">Agenda</p>
+              <span className="w-6 h-[1.5px] bg-secondary-foreground/20 rounded-full" />
+              <p className="text-[10px] font-mono font-bold text-secondary-foreground uppercase tracking-[0.2em]">Agenda</p>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Citas</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Calendario</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -104,22 +104,20 @@ export default async function AppointmentsPage({
             <div className="flex items-center rounded-lg border border-border overflow-hidden">
               <Link
                 href="/dashboard/appointments?vista=lista"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
-                  vista !== 'calendario'
-                    ? 'bg-primary text-primary-foreground'
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${vista !== 'calendario'
+                    ? 'bg-secondary-foreground text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
+                  }`}
               >
                 <LayoutList size={13} />
                 Lista
               </Link>
               <Link
                 href="/dashboard/appointments?vista=calendario"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-l border-border ${
-                  vista === 'calendario'
-                    ? 'bg-primary text-primary-foreground'
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-l border-border ${vista === 'calendario'
+                    ? 'bg-secondary-foreground text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
+                  }`}
               >
                 <Calendar size={13} />
                 Calendario
@@ -137,11 +135,10 @@ export default async function AppointmentsPage({
               <Link
                 key={t.key}
                 href={`/dashboard/appointments?tab=${t.key}&vista=lista`}
-                className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                  tab === t.key
-                    ? 'border-primary text-primary'
+                className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${tab === t.key
+                    ? 'border-secondary-foreground text-secondary-foreground'
                     : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                  }`}
               >
                 {t.label}
               </Link>

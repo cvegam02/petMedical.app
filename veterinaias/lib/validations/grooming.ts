@@ -26,6 +26,7 @@ export const groomingSessionSchema = z.object({
     )
     .default([]),
   notes: z.string().optional(),
+  intake_notes: z.string().optional(),
   appointment_id: z.string().uuid().optional(),
   started_at: z.string().datetime().optional(),
 })
