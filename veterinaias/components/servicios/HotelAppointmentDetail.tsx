@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -18,6 +18,7 @@ interface Props {
   owner: { id: string; full_name: string; phone: string | null; email: string | null } | null
   assignedTo: { id: string; full_name: string } | null
   scheduledAt: string
+  existingVisitId: string | null
 }
 
 export function HotelAppointmentDetail({
@@ -28,12 +29,19 @@ export function HotelAppointmentDetail({
   owner,
   assignedTo,
   scheduledAt,
+  existingVisitId,
 }: Props) {
   const router = useRouter()
   const [feeding, setFeeding] = useState('')
   const [belongings, setBelongings] = useState('')
   const [specialCare, setSpecialCare] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (existingVisitId) {
+      router.replace(`/dashboard/servicios/hotel/stay/${existingVisitId}`)
+    }
+  }, [existingVisitId, router])
 
   const statusCfg = APPOINTMENT_STATUS_CONFIG[appointmentStatus] ?? APPOINTMENT_STATUS_CONFIG.scheduled
 
