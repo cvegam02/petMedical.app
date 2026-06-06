@@ -86,7 +86,7 @@ export function ActiveBoardingStays() {
             return (
               <Link
                 key={s.id}
-                href={`/dashboard/servicios/hotel/${s.id}`}
+                href={`/dashboard/servicios/hotel/stay/${s.id}`}
                 className="group flex flex-col bg-card rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all overflow-hidden"
               >
                 <div className="flex items-center gap-4 p-4">
