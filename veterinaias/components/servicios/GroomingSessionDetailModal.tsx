@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { formatDateTime, formatDuration } from '@/lib/utils/format'
 
 export type GroomingVisitStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
 
@@ -30,19 +31,6 @@ const STATUS_CONFIG: Record<GroomingVisitStatus, { label: string; className: str
   cancelled: { label: 'Cancelada', className: 'text-muted-foreground bg-muted/40 border-border' },
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('es-MX', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
-}
-
-function formatDuration(startedAt: string, endedAt: string): string {
-  const mins = Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)
-  if (mins < 60) return `${mins} min`
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return m > 0 ? `${h}h ${m}min` : `${h}h`
-}
 
 interface Props {
   session: GroomingSessionDetail | null
@@ -67,12 +55,13 @@ export function GroomingSessionDetailModal({ session, open, onOpenChange, onFina
     return () => clearInterval(t)
   }, [open, inProgress])
 
-  // Sync the notes field to the active session (React-recommended "derive state
-  // during render" pattern — avoids an effect just to reset the textarea).
-  if (session && session.id !== syncedId) {
-    setSyncedId(session.id)
-    setFinalNotes(session.notes ?? '')
-  }
+  useEffect(() => {
+    if (session && session.id !== syncedId) {
+      setSyncedId(session.id)
+      setFinalNotes(session.notes ?? '')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.id])
 
   if (!session) return null
 

@@ -1,12 +1,13 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BedDouble, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { isCheckoutOverdue } from '@/lib/utils/boarding'
+import { isCheckoutOverdue, stayDayLabel } from '@/lib/utils/boarding'
+import { formatDate, formatDateTime } from '@/lib/utils/format'
 
 export interface BoardingStay {
   id: string
@@ -30,24 +31,6 @@ interface DailyLog {
   created_at: string
 }
 
-function formatDate(d: string | null): string {
-  if (!d) return '—'
-  return new Date(d.length === 10 ? d + 'T12:00:00' : d).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function formatDateTime(d: string | null): string {
-  if (!d) return '—'
-  return new Date(d).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
-
-function stayDayLabel(startedAt: string | null, expectedCheckOut: string | null): string {
-  if (!startedAt) return '—'
-  const day = Math.max(1, Math.floor((Date.now() - new Date(startedAt).getTime()) / 86400000) + 1)
-  if (!expectedCheckOut) return `Día ${day}`
-  const co = new Date(expectedCheckOut.length === 10 ? expectedCheckOut + 'T12:00:00' : expectedCheckOut)
-  const total = Math.max(1, Math.round((co.getTime() - new Date(startedAt).getTime()) / 86400000))
-  return `Día ${day} de ${total}`
-}
 
 interface Props {
   visitId: string | null
@@ -86,15 +69,14 @@ export function BoardingStayDetailModal({ visitId, open, onOpenChange, onChanged
     }
   }
 
-  // Cargar cuando se abre con un visitId nuevo (derive-state-during-render pattern)
-  if (open && visitId && visitId !== syncedId) {
+  useEffect(() => {
+    if (!open) { setSyncedId(null); return }
+    if (!visitId || visitId === syncedId) return
     setSyncedId(visitId)
     setLogNotes(''); setFed(false); setWalked(false); setCheckoutNotes('')
     load(visitId)
-  }
-  if (!open && syncedId !== null) {
-    setSyncedId(null)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, visitId])
 
   async function addLog() {
     if (!visitId) return

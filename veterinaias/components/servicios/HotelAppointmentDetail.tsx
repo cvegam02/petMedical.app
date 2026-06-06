@@ -316,8 +316,8 @@ export function HotelAppointmentDetail({
         </div>
       </div>
 
-      {/* Check-in form — full width, only when confirmed */}
-      {appointmentStatus === 'confirmed' && (
+      {/* Check-in form — only when confirmed and no stay exists yet (guard against redirect race) */}
+      {appointmentStatus === 'confirmed' && !existingVisitId && (
         <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-6">
           <div className="flex items-center gap-2">
             <BedDouble size={16} className="text-primary" />

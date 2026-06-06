@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { PetExpedienteModal } from '@/components/pets/PetExpedienteModal'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import { formatDuration } from '@/lib/utils/format'
 
 interface GroomingService { id: string; service_name: string }
 interface GroomingRecord {
@@ -45,13 +46,6 @@ interface Props {
   visitId?: string
 }
 
-function formatDuration(startedAt: string, endedAt: string): string {
-  const mins = Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)
-  if (mins < 60) return `${mins} min`
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return m > 0 ? `${h}h ${m}min` : `${h}h`
-}
 
 export function EsteticaDetail({ appointment, visitId: visitIdOverride }: Props) {
   const router = useRouter()

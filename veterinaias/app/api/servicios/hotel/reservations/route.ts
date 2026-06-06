@@ -34,16 +34,20 @@ export async function GET() {
 
   if (error) return NextResponse.json({ error: 'Error al obtener reservas' }, { status: 500 })
 
-  // Excluir las que ya tienen estancia (check-in hecho)
+  const apptList = appts ?? []
+  if (apptList.length === 0) return NextResponse.json({ data: [] })
+
+  // Exclude appointments that already have a service_visit (check-in done).
+  // Filter by the bounded apptIds set — avoids a full-table scan across all boarding visits.
+  const apptIds = apptList.map((a: any) => a.id)
   const { data: visits } = await (supabase as any)
     .from('service_visits')
     .select('appointment_id')
-    .eq('tenant_id', tenantId)
+    .in('appointment_id', apptIds)
     .eq('service_type', 'boarding')
-    .not('appointment_id', 'is', null)
 
   const checkedIn = new Set((visits ?? []).map((v: any) => v.appointment_id))
-  const data = (appts ?? []).filter((a: any) => !checkedIn.has(a.id))
+  const data = apptList.filter((a: any) => !checkedIn.has(a.id))
 
   return NextResponse.json({ data })
 }

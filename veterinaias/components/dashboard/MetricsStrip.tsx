@@ -15,7 +15,7 @@ export function MetricsStrip({ inService, total, completed, pendingConfirm, over
     { value: overdue, label: 'Vencidas', valueClass: 'text-orange-600', boxClass: 'bg-orange-50 border-orange-100' },
   ]
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
       {items.map(it => (
         <div key={it.label} className={`rounded-xl border p-3 text-center ${it.boxClass}`}>
           <p className={`text-xl font-bold tabular-nums ${it.valueClass}`}>{it.value}</p>

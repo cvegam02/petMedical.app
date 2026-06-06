@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { isCheckoutOverdue, stayDays, stayDayLabel } from '@/lib/utils/boarding'
+import { formatDateTime } from '@/lib/utils/format'
 
 interface Stay {
   id: string
@@ -35,13 +36,6 @@ interface DailyLog {
   walked: boolean
 }
 
-function fmtDateTime(d: string | null): string {
-  if (!d) return '—'
-  return new Date(d).toLocaleString('es-MX', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
 
 
 async function saveDailyLog(
@@ -470,17 +464,17 @@ export function HotelStayPage({ visitId }: HotelStayPageProps) {
               <div className="flex items-center gap-6 flex-wrap text-xs text-muted-foreground pt-1">
                 <div className="flex items-center gap-1.5">
                   <Clock size={12} />
-                  <span>Ingreso: {fmtDateTime(stay.started_at)}</span>
+                  <span>Ingreso: {formatDateTime(stay.started_at)}</span>
                 </div>
                 {isCompleted ? (
                   <div className="flex items-center gap-1.5">
                     <Clock size={12} />
-                    <span>Salida: {fmtDateTime(stay.ended_at)}</span>
+                    <span>Salida: {formatDateTime(stay.ended_at)}</span>
                   </div>
                 ) : (
                   <div className={`flex items-center gap-1.5 ${overdue ? 'text-orange-600 font-medium' : ''}`}>
                     <Clock size={12} />
-                    <span>Sale: {fmtDateTime(stay.expected_check_out)}</span>
+                    <span>Sale: {formatDateTime(stay.expected_check_out)}</span>
                   </div>
                 )}
                 {stay.started_at && (

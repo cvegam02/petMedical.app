@@ -98,9 +98,19 @@ export async function GET(req: NextRequest) {
   }
 
   // — Historial (service_visits — default) —
-  const vet = url.searchParams.get('vet')
-  const from = url.searchParams.get('from')
-  const to = url.searchParams.get('to')
+  const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+  const vetParam = url.searchParams.get('vet')
+  const fromParam = url.searchParams.get('from')
+  const toParam = url.searchParams.get('to')
+
+  if (fromParam && !DATE_REGEX.test(fromParam))
+    return NextResponse.json({ error: 'Parámetro from inválido (formato: YYYY-MM-DD)' }, { status: 400 })
+  if (toParam && !DATE_REGEX.test(toParam))
+    return NextResponse.json({ error: 'Parámetro to inválido (formato: YYYY-MM-DD)' }, { status: 400 })
+  if (vetParam && !UUID_REGEX.test(vetParam))
+    return NextResponse.json({ error: 'Parámetro vet inválido' }, { status: 400 })
 
   let query = (supabase as any)
     .from('service_visits')
@@ -110,14 +120,12 @@ export async function GET(req: NextRequest) {
     .order('created_at', { ascending: false })
     .limit(100)
 
-  if (from) query = query.gte('created_at', `${from}T00:00:00.000Z`)
-  if (to) query = query.lte('created_at', `${to}T23:59:59.999Z`)
+  if (fromParam) query = query.gte('created_at', `${fromParam}T00:00:00.000Z`)
+  if (toParam) query = query.lte('created_at', `${toParam}T23:59:59.999Z`)
+  if (vetParam) query = query.eq('consultation_records.attended_by', vetParam)
 
   const { data, error } = await query
   if (error) return NextResponse.json({ error: 'Error al obtener consultas' }, { status: 500 })
 
-  let rows = (data ?? []).map(mapVisitRow)
-  if (vet) rows = rows.filter((r: any) => r.attended_by === vet)
-
-  return NextResponse.json({ data: rows })
+  return NextResponse.json({ data: (data ?? []).map(mapVisitRow) })
 }

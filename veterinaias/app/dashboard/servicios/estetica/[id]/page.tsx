@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { EsteticaDetail } from '@/components/servicios/EsteticaDetail'
 
@@ -20,11 +20,20 @@ export default async function EsteticaDetailPage({ params }: { params: Promise<{
   const { id } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  const tenantId = (profile as any)?.tenant_id
+  if (!tenantId) redirect('/login')
+
   // Try appointment ID first (from AppointmentPanel "Ver detalle" link)
   const { data: byAppt } = await (supabase
     .from('appointments')
     .select(GROOMING_SELECT)
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single() as any)
 
   if (byAppt) return <EsteticaDetail appointment={byAppt} />
@@ -44,6 +53,7 @@ export default async function EsteticaDetailPage({ params }: { params: Promise<{
     .from('service_visits')
     .select(VISIT_SELECT)
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .eq('service_type', 'grooming')
     .maybeSingle() as any)
 
@@ -52,6 +62,7 @@ export default async function EsteticaDetailPage({ params }: { params: Promise<{
     .from('service_visits')
     .select(VISIT_SELECT)
     .eq('appointment_id', id)
+    .eq('tenant_id', tenantId)
     .eq('service_type', 'grooming')
     .maybeSingle() as any)
 
@@ -59,7 +70,6 @@ export default async function EsteticaDetailPage({ params }: { params: Promise<{
 
   if (!visit) notFound()
 
-  // Shape a synthetic appointment-like object for EsteticaDetail
   const syntheticAppointment = {
     id: visit.appointment_id ?? visit.id,
     status: (visit.status === 'completed' ? 'completed' : 'confirmed') as 'confirmed' | 'completed',

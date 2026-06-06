@@ -14,6 +14,11 @@ export async function GET(
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
 
+  const { data: profile } = await supabase
+    .from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  const tenantId = (profile as any)?.tenant_id
+  if (!tenantId) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
   const [petResult, regResult] = await Promise.all([
     (supabase as any)
       .from('pets')
@@ -35,12 +40,14 @@ export async function GET(
       `)
       .eq('id', id)
       .eq('service_visits.service_type', 'consultation')
+      .eq('service_visits.tenant_id', tenantId)
       .order('created_at', { referencedTable: 'service_visits', ascending: false })
       .single(),
     (supabase as any)
       .from('pet_registrations')
       .select('owner:owner_id(id, full_name, email, phone)')
       .eq('pet_id', id)
+      .eq('tenant_id', tenantId)
       .maybeSingle(),
   ])
 
@@ -64,6 +71,20 @@ export async function PATCH(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+
+  const { data: profile } = await supabase
+    .from('user_profiles').select('tenant_id').eq('id', user.id).single()
+  const tenantId = (profile as any)?.tenant_id
+  if (!tenantId) return NextResponse.json({ error: 'Sin clínica asociada' }, { status: 403 })
+
+  // Verify the pet is registered with the caller's clinic
+  const { data: reg } = await (supabase as any)
+    .from('pet_registrations')
+    .select('pet_id')
+    .eq('pet_id', id)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+  if (!reg) return NextResponse.json({ error: 'Mascota no encontrada' }, { status: 404 })
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }

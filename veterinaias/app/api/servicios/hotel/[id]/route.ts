@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { boardingCheckOutSchema } from '@/lib/validations/boarding'
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 const STAY_SELECT = `
   id, started_at, ended_at, status, created_at, appointment_id,
   pet:pet_id(id, name, species:species_id(name)),
@@ -28,6 +30,7 @@ function mapStay(row: any) {
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -63,6 +66,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  if (!UUID_REGEX.test(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -87,6 +91,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (existing.ended_at) return NextResponse.json({ error: 'La estancia ya fue concluida' }, { status: 409 })
 
   if (result.data.notes !== undefined) {
+    // Two-step write: conclude_service_visit only updates grooming_records, not boarding_records.
+    // Boarding notes must be written here before the RPC closes the visit.
     const { error: notesError } = await (supabase as any)
       .from('boarding_records').update({ notes: result.data.notes }).eq('visit_id', id)
     if (notesError) return NextResponse.json({ error: 'Error al guardar notas' }, { status: 500 })
@@ -95,7 +101,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { error: rpcError } = await (supabase as any).rpc('conclude_service_visit', {
     p_visit_id: id,
     p_ended_at: result.data.ended_at,
-    p_notes: null,
+    p_notes: null,       // RPC does not write to boarding_records — safe to pass null
     p_intake_notes: null,
   })
   if (rpcError) return NextResponse.json({ error: 'Error al hacer check-out' }, { status: 500 })

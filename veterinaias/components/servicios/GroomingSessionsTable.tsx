@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Clock, ChevronRight, Scissors, User } from 'lucide-react'
 import { getSpeciesIcon } from '@/lib/utils/species-icon'
+import { formatDuration } from '@/lib/utils/format'
 import { Button } from '@/components/ui/button'
 
 type SessionStatus = 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
@@ -31,13 +32,6 @@ const STATUS_BADGE: Record<SessionStatus, { label: string; className: string; do
   no_show:     { label: 'No se presentó', className: 'text-muted-foreground bg-muted/40 border-border' },
 }
 
-function formatDuration(startedAt: string, endedAt: string): string {
-  const mins = Math.round((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 60000)
-  if (mins < 60) return `${mins} min`
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return m > 0 ? `${h}h ${m}min` : `${h}h`
-}
 
 
 export function GroomingSessionsTable() {

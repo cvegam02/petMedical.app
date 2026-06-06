@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { TenantSettings } from '@/lib/types/database'
+
+const patchBodySchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  settings: z.object({
+    share_link_expiry_days: z.number().int().min(1).max(365).optional(),
+    business_hours: z.record(z.string(), z.unknown()).optional(),
+    appointment_duration_minutes: z.number().int().min(5).max(480).optional(),
+    allow_walk_ins: z.boolean().optional(),
+  }).optional(),
+})
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient()
@@ -18,9 +29,13 @@ export async function PATCH(req: NextRequest) {
 
   const tenantId = (profile as any).tenant_id as string
 
-  let body: { name?: string; settings?: Record<string, unknown> }
-  try { body = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
+  let rawBody: unknown
+  try { rawBody = await req.json() } catch { return NextResponse.json({ error: 'JSON inválido' }, { status: 400 }) }
 
+  const parsed = patchBodySchema.safeParse(rawBody)
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+
+  const body = parsed.data
   const updates: { name?: string; settings?: TenantSettings } = {}
 
   if (body.name !== undefined) updates.name = body.name

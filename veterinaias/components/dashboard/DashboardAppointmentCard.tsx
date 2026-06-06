@@ -14,6 +14,7 @@ export interface DashboardAppointment {
   pet: { id: string; name: string; species: { name: string } | null } | null
   owner: { id: string; full_name: string; phone: string | null } | null
   assigned_to_profile?: { full_name: string } | null
+  service_visits?: { id: string }[] | null
 }
 
 interface Props {

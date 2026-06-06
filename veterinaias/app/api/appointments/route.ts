@@ -68,7 +68,8 @@ export async function GET(req: NextRequest) {
       id, status, scheduled_at, duration_minutes, reason, notes, service_type,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name, phone),
-      assigned_to_profile:assigned_to(id, full_name)
+      assigned_to_profile:assigned_to(id, full_name),
+      service_visits(id)
     `)
     .eq('tenant_id', profile.tenant_id)
 

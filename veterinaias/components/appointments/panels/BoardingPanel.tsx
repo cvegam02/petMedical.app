@@ -31,6 +31,8 @@ export function BoardingPanel({ appointment, onClose, onRefresh }: PanelProps) {
     }
   }
 
+  const visitId = appointment.service_visits?.[0]?.id ?? null
+
   if (!isActive) {
     return (
       <div className="space-y-2">
@@ -41,7 +43,9 @@ export function BoardingPanel({ appointment, onClose, onRefresh }: PanelProps) {
         </p>
         {appointment.status === 'completed' && (
           <Link
-            href={`/dashboard/servicios/hotel/${appointment.id}`}
+            href={visitId
+              ? `/dashboard/servicios/hotel/stay/${visitId}`
+              : `/dashboard/servicios/hotel/${appointment.id}`}
             onClick={onClose}
             className={`${buttonVariants({ variant: 'outline' })} w-full justify-center gap-2`}
           >
