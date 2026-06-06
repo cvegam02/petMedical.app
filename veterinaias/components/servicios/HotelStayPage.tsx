@@ -49,6 +49,23 @@ function speciesIcon(speciesName: string | null | undefined) {
   return PawPrint
 }
 
+async function saveDailyLog(
+  visitId: string,
+  payload: { log_date: string; notes?: string; fed: boolean; walked: boolean },
+): Promise<{ data: DailyLog } | null> {
+  const res = await fetch(`/api/servicios/hotel/${visitId}/daily-logs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const json = await res.json()
+  if (!res.ok) {
+    toast.error(json.error ?? 'Error al guardar')
+    return null
+  }
+  return json
+}
+
 function TodayCard({ visitId, date, log, onSaved }: {
   visitId: string; date: string; log: DailyLog | undefined; onSaved: (l: DailyLog) => void
 }) {
@@ -64,15 +81,16 @@ function TodayCard({ visitId, date, log, onSaved }: {
   async function save() {
     setSaving(true)
     try {
-      const res = await fetch(`/api/servicios/hotel/${visitId}/daily-logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ log_date: date, notes: notes.trim() || undefined, fed, walked }),
+      const result = await saveDailyLog(visitId, {
+        log_date: date,
+        notes: notes.trim() || undefined,
+        fed,
+        walked,
       })
-      const json = await res.json()
-      if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
-      onSaved(json.data)
-      toast.success('Guardado')
+      if (result) {
+        onSaved(result.data)
+        toast.success('Guardado')
+      }
     } catch {
       toast.error('Error de red.')
     } finally {
@@ -123,15 +141,16 @@ function EditRowForm({ visitId, date, log, onSaved, onCancel }: {
   async function save() {
     setSaving(true)
     try {
-      const res = await fetch(`/api/servicios/hotel/${visitId}/daily-logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ log_date: date, notes: notes.trim() || undefined, fed, walked }),
+      const result = await saveDailyLog(visitId, {
+        log_date: date,
+        notes: notes.trim() || undefined,
+        fed,
+        walked,
       })
-      const json = await res.json()
-      if (!res.ok) { toast.error(json.error ?? 'Error al guardar'); return }
-      onSaved(json.data)
-      toast.success('Guardado')
+      if (result) {
+        onSaved(result.data)
+        toast.success('Guardado')
+      }
     } catch {
       toast.error('Error de red.')
     } finally {
