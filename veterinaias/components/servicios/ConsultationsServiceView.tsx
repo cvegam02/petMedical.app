@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ChevronRight, Cat, Dog, PawPrint, Stethoscope, Clock, User,
+  ChevronRight, Stethoscope, Clock, User,
   Calendar, AlertCircle,
 } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import Link from 'next/link'
 
 /* ── Types ─────────────────────────────────────────────── */
@@ -38,12 +39,6 @@ const STATUS_LABEL: Record<string, { label: string; className: string }> = {
   completed:  { label: 'Completada', className: 'text-green-700 bg-green-50 border-green-200' },
 }
 
-function getPetIcon(speciesName: string | null | undefined) {
-  const s = speciesName?.toLowerCase() ?? ''
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
@@ -60,7 +55,7 @@ function fmtDateShort(iso: string) {
 /* ── Appointment Card (hoy / próximas) ──────────────────── */
 
 function AppointmentCard({ row, onNavigate }: { row: AppointmentRow; onNavigate: (id: string) => void }) {
-  const PetIcon = getPetIcon(row.pet?.species?.name)
+  const PetIcon = getSpeciesIcon(row.pet?.species?.name)
   const badge = STATUS_LABEL[row.status] ?? STATUS_LABEL.scheduled
 
   return (
@@ -234,7 +229,7 @@ export function ConsultationsServiceView() {
           <AppointmentCard
             key={row.id}
             row={row}
-            onNavigate={id => router.push(`/dashboard/appointments/${id}`)}
+            onNavigate={id => router.push(`/dashboard/servicios/consulta/${id}`)}
           />
         ))}
       </Section>
@@ -264,7 +259,7 @@ export function ConsultationsServiceView() {
                 <AppointmentCard
                   key={row.id}
                   row={row}
-                  onNavigate={id => router.push(`/dashboard/appointments/${id}`)}
+                  onNavigate={id => router.push(`/dashboard/servicios/consulta/${id}`)}
                 />
               ))}
             </div>
@@ -294,7 +289,7 @@ export function ConsultationsServiceView() {
           <div className="w-8 shrink-0" />
         </div>
         {historial.map((row, i) => {
-          const PetIcon = getPetIcon(row.pet?.species?.name)
+          const PetIcon = getSpeciesIcon(row.pet?.species?.name)
           return (
             <div
               key={row.id}

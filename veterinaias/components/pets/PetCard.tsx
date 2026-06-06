@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { ChevronRight, Cat, Dog, PawPrint } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 interface PetCardProps {
   pet: {
@@ -26,8 +27,7 @@ function calcAge(dob: string) {
 export function PetCard({ pet }: PetCardProps) {
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
   
-  const speciesName = pet.species?.name?.toLowerCase() || ''
-  const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
+  const Icon = getSpeciesIcon(pet.species?.name)
 
   return (
     <Link

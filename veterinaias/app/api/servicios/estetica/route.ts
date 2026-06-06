@@ -53,30 +53,61 @@ export async function GET(req: NextRequest) {
   const limit = 20
   const offset = (page - 1) * limit
 
+  // Query appointments (not service_visits) so scheduled/confirmed appointments appear too.
+  // service_visit is an optional join — empty array means the session hasn't started yet.
   const { data, error, count } = await (supabase as any)
-    .from('service_visits')
+    .from('appointments')
     .select(`
-      id, started_at, ended_at, status, created_at, appointment_id,
+      id, status, scheduled_at, reason,
       pet:pet_id(id, name, species:species_id(name)),
       owner:owner_id(id, full_name),
-      record:grooming_records(notes, intake_notes, services:grooming_record_services(id, service_name))
+      assigned_to_profile:assigned_to(id, full_name),
+      service_visit:service_visits(
+        id, status, started_at, ended_at,
+        grooming_record:grooming_records(
+          visit_id,
+          services:grooming_record_services(id, service_name)
+        )
+      )
     `, { count: 'exact' })
     .eq('tenant_id', tenantId)
     .eq('service_type', 'grooming')
-    .order('created_at', { ascending: false })
+    .order('scheduled_at', { ascending: false })
     .range(offset, offset + limit - 1)
 
   if (error) return NextResponse.json({ error: 'Error al obtener sesiones' }, { status: 500 })
 
   const mapped = (data ?? []).map((row: any) => {
-    const record = Array.isArray(row.record) ? row.record[0] : row.record
+    const visit = Array.isArray(row.service_visit) ? row.service_visit[0] : row.service_visit
+    const record = visit
+      ? (Array.isArray(visit.grooming_record) ? visit.grooming_record[0] : visit.grooming_record)
+      : null
+
+    // Derive the display status from visit state (if any) then fall back to appointment status
+    let displayStatus: string
+    if (visit?.ended_at) displayStatus = 'completed'
+    else if (visit?.started_at) displayStatus = 'in_progress'
+    else if (row.status === 'cancelled') displayStatus = 'cancelled'
+    else if (row.status === 'no_show') displayStatus = 'no_show'
+    else if (row.status === 'confirmed') displayStatus = 'confirmed'
+    else displayStatus = 'scheduled'
+
+    // Services: from the live session record (if started) or from the appointment reason string
+    const services = record?.services?.length
+      ? record.services
+      : (row.reason ?? '').split(', ').filter(Boolean).map((s: string) => ({ id: s, service_name: s }))
+
     return {
-      ...row,
-      session_date: row.started_at ?? row.created_at,
-      notes: record?.notes ?? null,
-      intake_notes: record?.intake_notes ?? null,
-      services: record?.services ?? [],
+      id: row.id,                         // appointment.id (used for navigation)
+      visit_id: visit?.id ?? null,        // service_visit.id (used for conclude actions)
+      status: displayStatus,
+      session_date: row.scheduled_at,
+      started_at: visit?.started_at ?? null,
+      ended_at: visit?.ended_at ?? null,
+      pet: row.pet ?? null,
       owner: row.owner ?? null,
+      assigned_to_profile: row.assigned_to_profile ?? null,
+      services,
     }
   })
 

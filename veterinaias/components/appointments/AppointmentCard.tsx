@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { ChevronRight, Clock, Phone } from 'lucide-react'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
+import { serviceDetailUrl } from '@/lib/constants/service-type'
+import type { ServiceType } from '@/lib/types/database'
 
 interface AppointmentCardProps {
   appointment: {
@@ -9,6 +11,7 @@ interface AppointmentCardProps {
     scheduled_at: string
     duration_minutes: number
     reason: string | null
+    service_type?: ServiceType
     pet: { id: string; name: string; species: { name: string } | null } | null
     owner: { id: string; full_name: string; phone: string | null } | null
     assigned_to_profile: { full_name: string } | null
@@ -29,7 +32,7 @@ export function AppointmentCard({ appointment, showPhone }: AppointmentCardProps
 
   return (
     <Link
-      href={`/dashboard/appointments/${appointment.id}`}
+      href={serviceDetailUrl(appointment.service_type, appointment.id)}
       className="group flex items-center gap-4 bg-card rounded-xl border border-border px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all"
     >
       {/* Time & Date block */}

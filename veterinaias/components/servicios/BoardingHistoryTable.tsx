@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Cat, Dog, PawPrint } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 interface StayRow {
   id: string
@@ -18,12 +19,6 @@ function formatDate(d: string | null): string {
   })
 }
 
-function getPetIcon(speciesName: string | null | undefined) {
-  const s = speciesName?.toLowerCase() ?? ''
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
 export function BoardingHistoryTable() {
   const router = useRouter()
@@ -73,7 +68,7 @@ export function BoardingHistoryTable() {
 
         <div className="divide-y divide-border/40">
           {stays.map((s, index) => {
-            const PetIcon = getPetIcon(s.pet?.species?.name)
+            const PetIcon = getSpeciesIcon(s.pet?.species?.name)
             return (
               <div
                 key={s.id}

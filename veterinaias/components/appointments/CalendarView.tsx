@@ -3,15 +3,14 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar'
 import type { EventProps, View } from 'react-big-calendar'
-import {
-  format, parse, startOfWeek, endOfWeek, getDay,
-} from 'date-fns'
+import { format, parse, startOfWeek, endOfWeek, getDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
-import { type AppointmentResource } from './AppointmentPopover'
-import { AppointmentDetailDialog } from './AppointmentDetailDialog'
 import { serviceTypeConfig } from '@/lib/constants/service-type'
+import { CalendarSidePanel } from './CalendarSidePanel'
+import type { DashboardAppointment } from '@/components/dashboard/DashboardAppointmentCard'
+import type { ServiceType } from '@/lib/types/database'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
 const localizer = dateFnsLocalizer({
@@ -22,14 +21,20 @@ const localizer = dateFnsLocalizer({
   locales: { es },
 })
 
+const SERVICE_FILTERS: { type: ServiceType; label: string }[] = [
+  { type: 'consultation', label: 'Consulta' },
+  { type: 'grooming',     label: 'Estética' },
+  { type: 'boarding',     label: 'Hotel'    },
+  { type: 'surgery',      label: 'Cirugía'  },
+]
+
 interface CalendarEvent {
   title: string
   start: Date
   end: Date
-  resource: AppointmentResource
+  resource: DashboardAppointment
 }
 
-// Service type is shown by ICON; appointment status drives the color (see eventPropGetter + globals.css).
 function EventComponent({ event }: EventProps<CalendarEvent>) {
   const { Icon } = serviceTypeConfig(event.resource.service_type)
   return (
@@ -43,7 +48,6 @@ function EventComponent({ event }: EventProps<CalendarEvent>) {
   )
 }
 
-// Color the event tile by STATUS (never service type).
 function eventPropGetter(event: CalendarEvent) {
   return { className: `rbc-event--${event.resource.status}` }
 }
@@ -63,12 +67,29 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   const [error, setError] = useState<string | null>(null)
   const [currentView, setCurrentView] = useState<View>(Views.WEEK)
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selected, setSelected] = useState<AppointmentResource | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selected, setSelected] = useState<DashboardAppointment | null>(null)
+  const [activeFilters, setActiveFilters] = useState<Set<ServiceType>>(new Set())
   const abortRef = useRef<AbortController | null>(null)
   const lastRangeRef = useRef<{ from: Date; to: Date } | null>(null)
 
   const components = useMemo(() => ({ event: EventComponent }), [])
+
+  const filteredEvents = useMemo(
+    () =>
+      activeFilters.size === 0
+        ? events
+        : events.filter(e => activeFilters.has(e.resource.service_type ?? 'consultation')),
+    [events, activeFilters]
+  )
+
+  function toggleFilter(type: ServiceType) {
+    setActiveFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }
 
   const fetchRange = useCallback(async (from: Date, to: Date) => {
     lastRangeRef.current = { from, to }
@@ -81,16 +102,13 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
     try {
       const url = `/api/appointments?from=${from.toISOString()}&to=${to.toISOString()}`
       const res = await fetch(url, { signal: controller.signal })
-      if (!res.ok) {
-        setError('No se pudieron cargar las citas.')
-        return
-      }
+      if (!res.ok) { setError('No se pudieron cargar las citas.'); return }
       const json = await res.json()
-      const apts: AppointmentResource[] = json.data ?? []
+      const apts: DashboardAppointment[] = json.data ?? []
       setEvents(
         apts.map(apt => {
           const start = new Date(apt.scheduled_at)
-          const end = new Date(start.getTime() + apt.duration_minutes * 60_000)
+          const end = new Date(start.getTime() + (apt.duration_minutes ?? 30) * 60_000)
           return { title: apt.pet?.name ?? '—', start, end, resource: apt }
         })
       )
@@ -98,22 +116,18 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
       if (err instanceof DOMException && err.name === 'AbortError') return
       setError('No se pudieron cargar las citas.')
     } finally {
-      // Only clear loading if this controller is still the active one.
-      // If aborted, abortRef.current is already the newer controller.
       if (abortRef.current === controller) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    const now = new Date()
     fetchRange(
-      startOfWeek(now, { weekStartsOn: 1 }),
-      endOfWeek(now, { weekStartsOn: 1 })
+      startOfWeek(new Date(), { weekStartsOn: 1 }),
+      endOfWeek(new Date(), { weekStartsOn: 1 })
     )
     return () => { abortRef.current?.abort() }
   }, [fetchRange])
 
-  // Re-fetch when a new appointment is created elsewhere on the page
   useEffect(() => {
     function onCreated() {
       const r = lastRangeRef.current
@@ -136,7 +150,6 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
 
   const handleSelectEvent = useCallback((event: CalendarEvent) => {
     setSelected(event.resource)
-    setDialogOpen(true)
   }, [])
 
   const refetchCurrent = useCallback(() => {
@@ -145,53 +158,97 @@ export function CalendarView({ businessHours }: CalendarViewProps) {
   }, [fetchRange])
 
   return (
-    <div className="relative">
-      {loading && (
-        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-sm">
-          <div className="rbc-loading-shimmer absolute inset-0" />
-          <div className="rbc-loading-scanline" />
-        </div>
-      )}
+    <div className="space-y-3">
+      {/* Filter bar — same toggle style as the Lista/Calendario toggle in this page */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setActiveFilters(new Set())}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+            activeFilters.size === 0
+              ? 'bg-secondary-foreground text-primary-foreground border-secondary-foreground'
+              : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          Todos
+        </button>
+        {SERVICE_FILTERS.map(({ type, label }) => {
+          const { Icon } = serviceTypeConfig(type)
+          const active = activeFilters.has(type)
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => toggleFilter(type)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors cursor-pointer ${
+                active
+                  ? 'bg-secondary-foreground text-primary-foreground border-secondary-foreground'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}
+            >
+              <Icon size={11} strokeWidth={2} />
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
       {error && (
-        <div className="mb-3 px-4 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
+        <div className="px-4 py-2 rounded-lg bg-destructive/10 border border-destructive/20 text-sm text-destructive">
           {error}
         </div>
       )}
-      <div className={`rbc-wrapper transition-opacity duration-500 ${loading ? 'opacity-60' : 'opacity-100'}`}>
-        <Calendar<CalendarEvent>
-          localizer={localizer}
-          events={events}
-          date={currentDate}
-          onNavigate={setCurrentDate}
-          view={currentView}
-          onView={setCurrentView}
-          views={[Views.WEEK, Views.MONTH]}
-          onRangeChange={handleRangeChange}
-          min={parseHHMM(businessHours.start)}
-          max={parseHHMM(businessHours.end)}
-          culture="es"
-          components={components}
-          eventPropGetter={eventPropGetter}
-          onSelectEvent={handleSelectEvent}
-          selectable={false}
-          style={{ height: 600 }}
-          messages={{
-            week: 'Semana',
-            month: 'Mes',
-            today: 'Hoy',
-            previous: '‹',
-            next: '›',
-            noEventsInRange: 'Sin citas en este período.',
-          }}
-        />
-      </div>
 
-      <AppointmentDetailDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        appointment={selected}
-        onUpdated={refetchCurrent}
-      />
+      {/* Calendar + side panel */}
+      <div className="flex rounded-xl border border-border overflow-hidden" style={{ height: 640 }}>
+        {/* Calendar */}
+        <div className="relative flex-1 min-w-0">
+          {loading && (
+            <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden rounded-sm">
+              <div className="rbc-loading-shimmer absolute inset-0" />
+              <div className="rbc-loading-scanline" />
+            </div>
+          )}
+          <div className={`rbc-wrapper h-full transition-opacity duration-500 ${loading ? 'opacity-60' : 'opacity-100'}`}>
+            <Calendar<CalendarEvent>
+              localizer={localizer}
+              events={filteredEvents}
+              date={currentDate}
+              onNavigate={setCurrentDate}
+              view={currentView}
+              onView={(v) => { setCurrentView(v); setSelected(null) }}
+              views={[Views.DAY, Views.WEEK, Views.MONTH]}
+              onRangeChange={handleRangeChange}
+              min={parseHHMM(businessHours.start)}
+              max={parseHHMM(businessHours.end)}
+              culture="es"
+              components={components}
+              eventPropGetter={eventPropGetter}
+              onSelectEvent={handleSelectEvent}
+              selectable={false}
+              style={{ height: '100%' }}
+              messages={{
+                day: 'Día',
+                week: 'Semana',
+                month: 'Mes',
+                today: 'Hoy',
+                previous: '‹',
+                next: '›',
+                noEventsInRange: 'Sin citas en este período.',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Side panel — slides in from right when an appointment is selected */}
+        {selected && (
+          <CalendarSidePanel
+            appointment={selected}
+            onClose={() => setSelected(null)}
+            onRefresh={refetchCurrent}
+          />
+        )}
+      </div>
     </div>
   )
 }

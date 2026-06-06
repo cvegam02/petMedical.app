@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, Phone, Cat, Dog, PawPrint } from 'lucide-react'
+import { Calendar, Clock, Phone } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 import { serviceTypeConfig } from '@/lib/constants/service-type'
@@ -18,12 +19,6 @@ interface AppointmentDetailDialogProps {
   loadingStatus?: string | null
 }
 
-function speciesIcon(name: string | undefined) {
-  const s = (name ?? '').toLowerCase()
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
 export function AppointmentDetailDialog({
   open,
@@ -39,7 +34,7 @@ export function AppointmentDetailDialog({
   const isGrooming = serviceType === 'grooming'
   const svc = serviceTypeConfig(serviceType)
   const ServiceIcon = svc.Icon
-  const SpeciesIcon = speciesIcon(appointment.pet?.species?.name)
+  const SpeciesIcon = getSpeciesIcon(appointment.pet?.species?.name)
   const Panel = SERVICE_PANELS[serviceType] ?? SERVICE_PANELS.consultation!
 
   const dateObj = new Date(appointment.scheduled_at)

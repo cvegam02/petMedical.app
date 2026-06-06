@@ -1,14 +1,14 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, HeartPulse } from 'lucide-react'
+import { BedDouble, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button, buttonVariants } from '@/components/ui/button'
 import type { PanelProps } from './index'
 
 const ACTIVE_STATUSES = ['scheduled', 'confirmed']
 
-export function ConsultationPanel({ appointment, onClose, onRefresh }: PanelProps) {
+export function BoardingPanel({ appointment, onClose, onRefresh }: PanelProps) {
   const [loadingStatus, setLoadingStatus] = useState<string | null>(null)
   const isActive = ACTIVE_STATUSES.includes(appointment.status)
 
@@ -32,36 +32,35 @@ export function ConsultationPanel({ appointment, onClose, onRefresh }: PanelProp
   }
 
   if (!isActive) {
-    if (appointment.status === 'completed') {
-      return (
-        <div className="space-y-2">
-          <p className="text-sm text-center text-muted-foreground py-1">Esta cita ya fue completada.</p>
-          <Link
-            href={`/dashboard/servicios/hospitalizacion?fromAppt=${appointment.id}`}
-            className={`${buttonVariants({ variant: 'outline' })} w-full justify-center gap-2 text-sm`}
-          >
-            <HeartPulse size={14} />
-            Hospitalizar paciente
-          </Link>
-        </div>
-      )
-    }
     return (
-      <p className="text-sm text-center text-muted-foreground py-1">
-        {appointment.status === 'cancelled' && 'Esta cita fue cancelada.'}
-        {appointment.status === 'no_show' && 'El paciente no se presentó.'}
-      </p>
+      <div className="space-y-2">
+        <p className="text-sm text-center text-muted-foreground py-1">
+          {appointment.status === 'completed' && 'La estancia ya fue completada.'}
+          {appointment.status === 'cancelled' && 'Esta reserva fue cancelada.'}
+          {appointment.status === 'no_show' && 'El cliente no se presentó.'}
+        </p>
+        {appointment.status === 'completed' && (
+          <Link
+            href={`/dashboard/servicios/hotel/${appointment.id}`}
+            onClick={onClose}
+            className={`${buttonVariants({ variant: 'outline' })} w-full justify-center gap-2`}
+          >
+            Ver estancia <ArrowRight size={14} />
+          </Link>
+        )}
+      </div>
     )
   }
 
   return (
     <>
       <Link
-        href={`/dashboard/servicios/consulta/${appointment.id}`}
+        href={`/dashboard/servicios/hotel/${appointment.id}`}
         onClick={onClose}
         className={`${buttonVariants({})} w-full justify-center gap-2 py-3 text-base font-semibold`}
       >
-        Ver detalle de consulta
+        <BedDouble size={16} />
+        Ver detalle de hotel
         <ArrowRight size={16} />
       </Link>
 
@@ -72,7 +71,7 @@ export function ConsultationPanel({ appointment, onClose, onRefresh }: PanelProp
           onClick={() => transition('confirmed')}
           disabled={loadingStatus === 'confirmed'}
         >
-          {loadingStatus === 'confirmed' ? 'Confirmando…' : 'Confirmar cita'}
+          {loadingStatus === 'confirmed' ? 'Confirmando…' : 'Confirmar reserva'}
         </Button>
       )}
 
@@ -92,7 +91,7 @@ export function ConsultationPanel({ appointment, onClose, onRefresh }: PanelProp
           disabled={loadingStatus === 'cancelled'}
           className="text-xs text-destructive/60 hover:text-destructive transition-colors disabled:opacity-40"
         >
-          {loadingStatus === 'cancelled' ? 'Guardando…' : 'Cancelar cita'}
+          {loadingStatus === 'cancelled' ? 'Guardando…' : 'Cancelar reserva'}
         </button>
       </div>
     </>

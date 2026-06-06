@@ -49,7 +49,7 @@ export default async function EsteticaPage() {
         </div>
       </div>
 
-      <GroomingSessionsTable onNew={() => {}} />
+      <GroomingSessionsTable />
     </div>
   )
 }

@@ -3,8 +3,9 @@ import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  ChevronLeft, LogOut, Phone, Mail, Clock, Save, Cat, Dog, PawPrint, Info,
+  ChevronLeft, LogOut, Phone, Mail, Clock, Save, Info,
 } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -42,12 +43,6 @@ function fmtDateTime(d: string | null): string {
   })
 }
 
-function speciesIcon(speciesName: string | null | undefined) {
-  const n = (speciesName ?? '').toLowerCase()
-  if (n.includes('fel') || n.includes('gat')) return Cat
-  if (n.includes('can') || n.includes('perr')) return Dog
-  return PawPrint
-}
 
 async function saveDailyLog(
   visitId: string,
@@ -385,7 +380,7 @@ export function HotelStayPage({ visitId }: HotelStayPageProps) {
     ? { label: 'Salida vencida', className: 'text-orange-600 bg-orange-50 border-orange-200', stripe: 'bg-orange-500' }
     : { label: 'En curso', className: 'text-amber-700 bg-amber-50 border-amber-200', stripe: 'bg-amber-400' }
 
-  const SpeciesIcon = speciesIcon(stay.pet?.species?.name)
+  const SpeciesIcon = getSpeciesIcon(stay.pet?.species?.name)
   const hasCareInstructions = !!(stay.feeding_instructions || stay.belongings || stay.special_care)
 
   return (
@@ -410,7 +405,7 @@ export function HotelStayPage({ visitId }: HotelStayPageProps) {
             {/* Avatar */}
             <div className="relative shrink-0">
               <div className="w-20 h-20 rounded-2xl bg-muted/40 flex items-center justify-center text-muted-foreground/50">
-                <SpeciesIcon size={36} />
+                <SpeciesIcon size={36} strokeWidth={2.5} />
               </div>
               {/* Status dot */}
               <span

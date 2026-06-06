@@ -1,4 +1,5 @@
-import { PawPrint, User, Calendar, AlertCircle } from 'lucide-react'
+import { User, Calendar, AlertCircle } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 interface PetBannerProps {
   name: string
@@ -29,11 +30,13 @@ function calcAge(dob: string): string {
 }
 
 export function PetBanner({ name, species, breed, sex, dateOfBirth, notes, ownerName }: PetBannerProps) {
+  const PetIcon = getSpeciesIcon(species)
+
   return (
     <div className="bg-card border border-border rounded-xl px-5 py-4 shadow-sm">
       <div className="flex items-start gap-4">
         <div className="w-11 h-11 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center text-primary shrink-0 mt-0.5">
-          <PawPrint size={20} strokeWidth={2} />
+          <PetIcon size={20} strokeWidth={2} />
         </div>
 
         <div className="flex-1 min-w-0">

@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ChevronRight, BedDouble, Cat, Dog, PawPrint, CalendarDays } from 'lucide-react'
+import { ChevronRight, BedDouble, CalendarDays } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { isCheckoutOverdue, stayDayLabel, remainingDaysLabel } from '@/lib/utils/boarding'
 
 interface StayRow {
@@ -23,12 +24,6 @@ function formatDate(d: string | null): string {
   })
 }
 
-function getPetIcon(speciesName: string | null | undefined) {
-  const s = speciesName?.toLowerCase() ?? ''
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
 export function ActiveBoardingStays() {
   const [stays, setStays] = useState<StayRow[]>([])
@@ -82,7 +77,7 @@ export function ActiveBoardingStays() {
             const overdue = isCheckoutOverdue(s.expected_check_out, s.started_at, s.ended_at)
             const remaining = remainingDaysLabel(s.expected_check_out, s.ended_at)
             const subtitle = [s.pet?.species?.name, s.owner?.full_name].filter(Boolean).join(' · ')
-            const PetIcon = getPetIcon(s.pet?.species?.name)
+            const PetIcon = getSpeciesIcon(s.pet?.species?.name)
             return (
               <Link
                 key={s.id}

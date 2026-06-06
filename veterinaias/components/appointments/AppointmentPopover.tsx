@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
-import { serviceTypeConfig } from '@/lib/constants/service-type'
+import { serviceTypeConfig, serviceDetailUrl } from '@/lib/constants/service-type'
 import type { ServiceType } from '@/lib/types/database'
 
 export interface AppointmentResource {
@@ -97,7 +97,7 @@ export function AppointmentPopover({ appointment, children }: { appointment: App
 
           {/* CTA */}
           <Link
-            href={`/dashboard/appointments/${appointment.id}`}
+            href={serviceDetailUrl(appointment.service_type, appointment.id)}
             className="flex items-center justify-center gap-1.5 w-full text-xs font-semibold text-primary-foreground bg-primary hover:bg-primary/90 transition-colors rounded-lg py-2 mt-1"
           >
             Ver detalle

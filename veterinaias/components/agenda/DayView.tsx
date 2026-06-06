@@ -80,10 +80,12 @@ export function DayView({
         const slotAppts = appointmentsByHour[hour] ?? []
 
         return (
-          <button
+          <div
             key={hour}
-            type="button"
+            role="button"
+            tabIndex={0}
             onClick={() => onSlotClick(date, hour)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onSlotClick(date, hour) }}
             aria-label={`${hour.toString().padStart(2, '0')}:00 — agregar cita`}
             className="group relative flex w-full min-h-[64px] cursor-pointer gap-3 px-4 py-2 text-left hover:bg-muted/40"
           >
@@ -102,7 +104,7 @@ export function DayView({
                 />
               ))}
             </div>
-          </button>
+          </div>
         )
       })}
     </div>

@@ -3,7 +3,6 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
-  PawPrint,
   User,
   Clock,
   HeartPulse,
@@ -30,6 +29,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 interface PetExpedienteModalProps {
   petId: string
@@ -122,30 +122,31 @@ export function PetExpedienteModal({ petId, petName, trigger }: PetExpedienteMod
   }, [open, petId])
 
   const age = pet?.date_of_birth ? calcAge(pet.date_of_birth) : null
+  const PetIcon = getSpeciesIcon(pet?.species?.name)
   const lastVisit = pet?.service_visits?.[0] ?? null
   const lastRecord = lastVisit
     ? {
-        ...lastVisit,
-        reason: lastVisit.consultation?.reason ?? '',
-        diagnosis: lastVisit.consultation?.diagnosis ?? null,
-        treatment: lastVisit.consultation?.treatment ?? null,
-        notes: lastVisit.consultation?.notes ?? null,
-        weight_kg: lastVisit.consultation?.weight_kg ?? null,
-        temperature_celsius: lastVisit.consultation?.temperature_celsius ?? null,
-        created_by_profile: lastVisit.consultation?.attended_by_profile ?? null,
-      }
+      ...lastVisit,
+      reason: lastVisit.consultation?.reason ?? '',
+      diagnosis: lastVisit.consultation?.diagnosis ?? null,
+      treatment: lastVisit.consultation?.treatment ?? null,
+      notes: lastVisit.consultation?.notes ?? null,
+      weight_kg: lastVisit.consultation?.weight_kg ?? null,
+      temperature_celsius: lastVisit.consultation?.temperature_celsius ?? null,
+      created_by_profile: lastVisit.consultation?.attended_by_profile ?? null,
+    }
     : null
 
   const triggerElement = React.isValidElement(trigger)
     ? React.cloneElement(trigger as React.ReactElement<any>, {
-        onClick: (e: React.MouseEvent) => {
-          e.preventDefault()
-          setOpen(true)
-          if ((trigger.props as any)?.onClick) {
-            (trigger.props as any).onClick(e)
-          }
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault()
+        setOpen(true)
+        if ((trigger.props as any)?.onClick) {
+          (trigger.props as any).onClick(e)
         }
-      })
+      }
+    })
     : <span onClick={() => setOpen(true)} className="cursor-pointer">{trigger}</span>
 
   return (
@@ -156,7 +157,7 @@ export function PetExpedienteModal({ petId, petName, trigger }: PetExpedienteMod
           <DialogHeader className="p-6 bg-muted/20 border-b border-border/40">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <PawPrint size={20} />
+                <PetIcon size={20} />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">

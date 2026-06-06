@@ -1,26 +1,34 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Clock, ChevronRight, Cat, Dog, PawPrint, Plus, Scissors, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Clock, ChevronRight, Scissors, User } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { Button } from '@/components/ui/button'
-import {
-  GroomingSessionDetailModal,
-  type GroomingSessionDetail,
-  type GroomingVisitStatus,
-} from './GroomingSessionDetailModal'
 
-type SessionRow = GroomingSessionDetail
+type SessionStatus = 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
+
+interface SessionRow {
+  id: string            // appointment.id — used for navigation
+  visit_id: string | null
+  status: SessionStatus
+  session_date: string
+  started_at: string | null
+  ended_at: string | null
+  pet: { id: string; name: string; species: { name: string } | null } | null
+  owner: { id: string; full_name: string } | null
+  assigned_to_profile: { id: string; full_name: string } | null
+  services: { id: string; service_name: string }[]
+}
 
 interface Meta { total: number; page: number; limit: number }
 
-interface GroomingSessionsTableProps {
-  onNew: () => void
-}
-
-const STATUS_BADGE: Record<GroomingVisitStatus, { label: string; className: string; dot?: boolean }> = {
-  scheduled: { label: 'Programada', className: 'text-blue-700 bg-blue-50 border-blue-200' },
-  in_progress: { label: 'En curso', className: 'text-amber-700 bg-amber-50 border-amber-200', dot: true },
-  completed: { label: 'Completada', className: 'text-green-700 bg-green-50 border-green-200' },
-  cancelled: { label: 'Cancelada', className: 'text-muted-foreground bg-muted/40 border-border' },
+const STATUS_BADGE: Record<SessionStatus, { label: string; className: string; dot?: boolean }> = {
+  scheduled:   { label: 'Programada',  className: 'text-secondary-foreground bg-secondary/40 border-border' },
+  confirmed:   { label: 'Confirmada',  className: 'text-blue-700 bg-blue-50 border-blue-200' },
+  in_progress: { label: 'En curso',    className: 'text-amber-700 bg-amber-50 border-amber-200', dot: true },
+  completed:   { label: 'Completada',  className: 'text-green-700 bg-green-50 border-green-200' },
+  cancelled:   { label: 'Cancelada',   className: 'text-muted-foreground bg-muted/40 border-border' },
+  no_show:     { label: 'No se presentó', className: 'text-muted-foreground bg-muted/40 border-border' },
 }
 
 function formatDuration(startedAt: string, endedAt: string): string {
@@ -31,19 +39,12 @@ function formatDuration(startedAt: string, endedAt: string): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`
 }
 
-function getPetIcon(speciesName: string | null | undefined) {
-  const s = speciesName?.toLowerCase() ?? ''
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
-export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
+export function GroomingSessionsTable() {
+  const router = useRouter()
   const [sessions, setSessions] = useState<SessionRow[]>([])
   const [meta, setMeta] = useState<Meta>({ total: 0, page: 1, limit: 20 })
   const [loading, setLoading] = useState(true)
-  const [detailSession, setDetailSession] = useState<SessionRow | null>(null)
-  const [detailOpen, setDetailOpen] = useState(false)
 
   async function load(page = 1) {
     setLoading(true)
@@ -57,8 +58,7 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
   useEffect(() => { load(1) }, [])
 
   function openDetail(s: SessionRow) {
-    setDetailSession(s)
-    setDetailOpen(true)
+    router.push(`/dashboard/servicios/estetica/${s.id}`)
   }
 
   const totalPages = Math.ceil(meta.total / meta.limit)
@@ -94,20 +94,14 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
         </div>
       )}
 
-      {/* Header: count + action */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Sesiones</p>
-          {!loading && (
-            <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[12px] font-mono px-2 py-0.5 rounded-md border border-border/50">
-              {meta.total}
-            </span>
-          )}
-        </div>
-        <Button size="sm" onClick={onNew} className="shadow-sm shadow-primary/20">
-          <Plus size={15} strokeWidth={2.5} />
-          Nueva sesión
-        </Button>
+      {/* Header: count */}
+      <div className="flex items-center gap-2 mb-6">
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Sesiones</p>
+        {!loading && (
+          <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[12px] font-mono px-2 py-0.5 rounded-md border border-border/50">
+            {meta.total}
+          </span>
+        )}
       </div>
 
       {loading ? (
@@ -119,9 +113,7 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
                 <div className="h-4 w-1/4 bg-muted/40 animate-pulse rounded" />
                 <div className="h-3 w-1/6 bg-muted/20 animate-pulse rounded" />
               </div>
-              <div className="w-1/3 space-y-1">
-                <div className="h-5 w-20 bg-muted/30 animate-pulse rounded-full" />
-              </div>
+              <div className="w-20 h-5 bg-muted/30 animate-pulse rounded-full" />
               <div className="w-28 h-3 bg-muted/20 animate-pulse rounded" />
             </div>
           ))}
@@ -136,12 +128,8 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
           </div>
           <p className="font-bold text-foreground text-xl tracking-tight">Sin sesiones registradas</p>
           <p className="text-sm text-muted-foreground mt-2 max-w-[280px] mx-auto leading-relaxed">
-            Inicia una sesión desde el detalle de una cita de estética.
+            Agenda una cita de estética desde el calendario o usa el botón de arriba.
           </p>
-          <Button size="lg" className="mt-8 shadow-md shadow-primary/10" onClick={onNew}>
-            <Plus size={16} strokeWidth={2.5} />
-            Nueva sesión manual
-          </Button>
         </div>
       ) : (
         <>
@@ -158,8 +146,8 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
 
             <div className="divide-y divide-border/40">
               {sessions.map((s, index) => {
-                const badge = STATUS_BADGE[s.status] ?? STATUS_BADGE.completed
-                const PetIcon = getPetIcon(s.pet?.species?.name)
+                const badge = STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled
+                const PetIcon = getSpeciesIcon(s.pet?.species?.name)
                 return (
                   <div
                     key={s.id}
@@ -172,7 +160,7 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
                     >
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary rounded-r-full group-hover:h-8 transition-all duration-300" />
 
-                      {/* Pet identity */}
+                      {/* Pet */}
                       <div className="flex items-center gap-4 w-52 min-w-0">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted/50 to-muted border border-border/60 flex items-center justify-center group-hover:border-primary/30 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500 shadow-sm shrink-0">
                           <PetIcon size={22} strokeWidth={1.5} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
@@ -201,7 +189,14 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
 
                       {/* Responsable */}
                       <div className="w-36 shrink-0 min-w-0">
-                        {s.owner ? (
+                        {s.assigned_to_profile ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
+                              <User size={12} className="text-muted-foreground" />
+                            </div>
+                            <p className="text-[12px] font-medium text-foreground truncate">{s.assigned_to_profile.full_name}</p>
+                          </div>
+                        ) : s.owner ? (
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
                               <User size={12} className="text-muted-foreground" />
@@ -274,13 +269,6 @@ export function GroomingSessionsTable({ onNew }: GroomingSessionsTableProps) {
           )}
         </>
       )}
-
-      <GroomingSessionDetailModal
-        session={detailSession}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        onFinalized={() => load(meta.page)}
-      />
     </div>
   )
 }

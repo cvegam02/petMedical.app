@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight, Cat, Dog, PawPrint, Syringe, AlertTriangle, CalendarCheck, User } from 'lucide-react'
+import { ChevronRight, Syringe, AlertTriangle, CalendarCheck, User } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 interface SurgeryRow {
   id: string
@@ -37,12 +38,6 @@ function formatDate(d: string | null, opts?: Intl.DateTimeFormatOptions): string
   return new Date(base).toLocaleDateString('es-MX', opts ?? { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function getPetIcon(speciesName: string | null | undefined) {
-  const s = speciesName?.toLowerCase() ?? ''
-  if (s.includes('fel') || s.includes('gat')) return Cat
-  if (s.includes('can') || s.includes('perr')) return Dog
-  return PawPrint
-}
 
 export function SurgeryTable() {
   const router = useRouter()
@@ -114,7 +109,7 @@ export function SurgeryTable() {
 
           <div className="divide-y divide-border/40">
             {rows.map((r, index) => {
-              const PetIcon = getPetIcon(r.pet?.species?.name)
+              const PetIcon = getSpeciesIcon(r.pet?.species?.name)
               const status = derivedStatus(r)
               const badge = STATUS_BADGE[status]
               const primaryDate = r.ended_at ?? r.started_at ?? r.scheduled_at

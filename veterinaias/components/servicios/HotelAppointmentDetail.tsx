@@ -3,11 +3,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ChevronLeft, BedDouble, Clock, Phone, User, Calendar } from 'lucide-react'
+import { ChevronLeft, BedDouble, Clock, Phone, Mail, User, Calendar, Info } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Separator } from '@/components/ui/separator'
+import { PetExpedienteModal } from '@/components/pets/PetExpedienteModal'
 import { APPOINTMENT_STATUS_CONFIG } from '@/lib/constants/appointment-status'
 
 interface Props {
@@ -42,6 +45,8 @@ export function HotelAppointmentDetail({
       router.replace(`/dashboard/servicios/hotel/stay/${existingVisitId}`)
     }
   }, [existingVisitId, router])
+
+  const PetIcon = getSpeciesIcon(pet?.species?.name)
 
   const statusCfg = APPOINTMENT_STATUS_CONFIG[appointmentStatus] ?? APPOINTMENT_STATUS_CONFIG.scheduled
 
@@ -98,9 +103,9 @@ export function HotelAppointmentDetail({
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-      {/* Header */}
+      {/* Navigation & Header */}
       <div className="space-y-4">
         <Link
           href="/dashboard/servicios/hotel"
@@ -121,8 +126,10 @@ export function HotelAppointmentDetail({
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {pet?.name ?? '—'}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
               <span className="font-medium text-foreground">{owner?.full_name ?? '—'}</span>
+              <span>•</span>
+              <span className="capitalize">{dateStr}</span>
             </p>
           </div>
 
@@ -137,109 +144,189 @@ export function HotelAppointmentDetail({
         </div>
       </div>
 
-      {/* Appointment info card */}
-      <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-6">
-        <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-          Información de la reserva
-        </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
-          {/* Check-in date */}
-          <div className="space-y-1.5">
-            <p className="label-overline text-muted-foreground/50">Fecha de entrada</p>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-foreground font-medium">
-                <Calendar size={16} className="text-muted-foreground/40" />
-                <span className="capitalize">{dateStr}</span>
+        {/* Main Content Column */}
+        <div className="lg:col-span-2 space-y-8">
+
+          {/* Reservation info card */}
+          <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-8">
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Info size={16} className="text-primary" />
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Información de la reserva</h3>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock size={14} className="text-muted-foreground/40" />
-                <span>{timeStr}</span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
+                <div className="space-y-1.5">
+                  <p className="label-overline text-muted-foreground/50">Fecha de entrada</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-foreground font-medium">
+                      <Calendar size={16} className="text-muted-foreground/40" />
+                      <span className="capitalize">{dateStr}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Clock size={14} className="text-muted-foreground/40" />
+                      <span>{timeStr}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {checkOutStr && (
+                  <div className="space-y-1.5">
+                    <p className="label-overline text-muted-foreground/50">Salida esperada</p>
+                    <div className="flex items-center gap-2 text-foreground font-medium">
+                      <Calendar size={16} className="text-muted-foreground/40" />
+                      <span className="capitalize">{checkOutStr}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <p className="label-overline text-muted-foreground/50">Atendido por</p>
+                  <div className="flex items-center gap-2 text-foreground font-medium">
+                    <User size={16} className="text-muted-foreground/40" />
+                    <span>{assignedTo?.full_name ?? 'Sin asignar'}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Expected check-out */}
-          {checkOutStr && (
-            <div className="space-y-1.5">
-              <p className="label-overline text-muted-foreground/50">Salida esperada</p>
-              <div className="flex items-center gap-2 text-foreground font-medium">
-                <Calendar size={16} className="text-muted-foreground/40" />
-                <span className="capitalize">{checkOutStr}</span>
+            {/* Actions area */}
+            <div className="pt-8 border-t border-border/40">
+              <p className="label-overline text-muted-foreground/50 mb-4">Acciones disponibles</p>
+
+              {appointmentStatus === 'scheduled' && (
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={() => handleTransition('confirmed')} disabled={actionLoading !== null}>
+                    {actionLoading === 'confirmed' ? 'Confirmando...' : 'Confirmar reserva'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleTransition('no_show')}
+                    disabled={actionLoading !== null}
+                  >
+                    {actionLoading === 'no_show' ? '...' : 'No se presentó'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleTransition('cancelled')}
+                    disabled={actionLoading !== null}
+                    className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                  >
+                    {actionLoading === 'cancelled' ? 'Cancelando...' : 'Cancelar reserva'}
+                  </Button>
+                </div>
+              )}
+
+              {appointmentStatus === 'confirmed' && (
+                <p className="text-sm text-muted-foreground">
+                  Reserva confirmada — completa el check-in a continuación cuando llegue la mascota.
+                </p>
+              )}
+
+              {(appointmentStatus === 'cancelled' || appointmentStatus === 'no_show') && (
+                <p className="text-sm text-muted-foreground">
+                  {appointmentStatus === 'cancelled'
+                    ? 'Esta reserva fue cancelada.'
+                    : 'El dueño no se presentó a esta reserva.'}
+                </p>
+              )}
+            </div>
+          </section>
+
+        </div>
+
+        {/* Sidebar Column */}
+        <div className="space-y-6">
+          {/* Owner card */}
+          <section className="bg-card rounded-2xl border border-border/60 p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="label-overline text-muted-foreground/50 font-mono">Responsable</p>
+              {owner?.id && (
+                <Link
+                  href={`/dashboard/owners/${owner.id}`}
+                  className="text-[10px] text-primary hover:underline font-bold uppercase tracking-tighter"
+                >
+                  Ver perfil
+                </Link>
+              )}
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-base font-bold text-foreground leading-tight">{owner?.full_name ?? '—'}</h4>
+              <div className="space-y-2.5">
+                {owner?.phone && (
+                  <a href={`tel:${owner.phone}`} className="flex items-center gap-3 text-xs text-muted-foreground group">
+                    <div className="w-7 h-7 rounded-full bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <Phone size={12} />
+                    </div>
+                    <span>{owner.phone}</span>
+                  </a>
+                )}
+                {owner?.email && (
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground group">
+                    <div className="w-7 h-7 rounded-full bg-muted/60 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <Mail size={12} />
+                    </div>
+                    <span className="truncate">{owner.email}</span>
+                  </div>
+                )}
               </div>
             </div>
+          </section>
+
+          {/* Pet card */}
+          {pet && (
+            <section className="bg-card rounded-2xl border border-border/60 p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="label-overline text-muted-foreground/50 font-mono">Paciente</p>
+                <PetExpedienteModal
+                  petId={pet.id}
+                  petName={pet.name}
+                  trigger={
+                    <button className="text-[10px] text-primary hover:underline font-bold uppercase tracking-tighter cursor-pointer">
+                      Ver expediente
+                    </button>
+                  }
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary/40">
+                  <PetIcon size={24} />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-base font-bold text-foreground leading-none">{pet.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    {pet.species?.name ?? 'Especie no definida'}
+                  </p>
+                </div>
+              </div>
+            </section>
           )}
 
-          {/* Owner contact */}
-          <div className="space-y-1.5">
-            <p className="label-overline text-muted-foreground/50">Responsable</p>
-            <div className="flex items-center gap-2 text-foreground font-medium">
-              <User size={16} className="text-muted-foreground/40" />
-              <span>{owner?.full_name ?? '—'}</span>
-            </div>
-            {owner?.phone && (
-              <a
-                href={`tel:${owner.phone}`}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                <Phone size={14} className="text-muted-foreground/40" />
-                <span>{owner.phone}</span>
-              </a>
-            )}
-          </div>
-
-          {/* Assigned to */}
-          <div className="space-y-1.5">
-            <p className="label-overline text-muted-foreground/50">Atendido por</p>
-            <div className="flex items-center gap-2 text-foreground font-medium">
-              <User size={16} className="text-muted-foreground/40" />
-              <span>{assignedTo?.full_name ?? 'Sin asignar'}</span>
+          {/* Admin Metadata */}
+          <div className="px-2 space-y-2">
+            <Separator className="bg-border/40" />
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground/40 font-mono">
+              <span>ID: {appointmentId.split('-')[0]}...</span>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Actions by status */}
-      {appointmentStatus === 'scheduled' && (
-        <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-4">
-          <p className="text-sm text-muted-foreground">
-            La reserva está programada. Confirma la asistencia del dueño antes del check-in.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={() => handleTransition('confirmed')}
-              disabled={actionLoading !== null}
-            >
-              {actionLoading === 'confirmed' ? 'Confirmando...' : 'Confirmar reserva'}
-            </Button>
-            <button
-              onClick={() => handleTransition('no_show')}
-              disabled={actionLoading !== null}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors disabled:opacity-50"
-            >
-              No se presentó
-            </button>
-            <button
-              onClick={() => handleTransition('cancelled')}
-              disabled={actionLoading !== null}
-              className="text-xs text-destructive/70 hover:text-destructive underline underline-offset-2 transition-colors disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-          </div>
-        </section>
-      )}
-
+      {/* Check-in form — full width, only when confirmed */}
       {appointmentStatus === 'confirmed' && (
         <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-6">
           <div className="flex items-center gap-2">
             <BedDouble size={16} className="text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
               Registrar check-in
-            </h2>
+            </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="feeding">Instrucciones de alimentación</Label>
               <Textarea
@@ -262,7 +349,7 @@ export function HotelAppointmentDetail({
               />
             </div>
 
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-1.5">
               <Label htmlFor="specialCare">Cuidados especiales / medicación</Label>
               <Textarea
                 id="specialCare"
@@ -274,40 +361,29 @@ export function HotelAppointmentDetail({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-border/40">
-            <Button
-              onClick={handleCheckIn}
-              disabled={actionLoading !== null}
-              className="gap-2"
-            >
+          <div className="flex gap-2 flex-wrap pt-2 border-t border-border/40">
+            <Button size="sm" onClick={handleCheckIn} disabled={actionLoading !== null} className="gap-2">
               <BedDouble size={14} />
               {actionLoading === 'checkin' ? 'Registrando...' : 'Registrar check-in'}
             </Button>
-            <button
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => handleTransition('no_show')}
               disabled={actionLoading !== null}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors disabled:opacity-50"
             >
-              No se presentó
-            </button>
-            <button
+              {actionLoading === 'no_show' ? '...' : 'No se presentó'}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => handleTransition('cancelled')}
               disabled={actionLoading !== null}
-              className="text-xs text-destructive/70 hover:text-destructive underline underline-offset-2 transition-colors disabled:opacity-50"
+              className="text-destructive border-destructive/30 hover:bg-destructive/5"
             >
-              Cancelar reserva
-            </button>
+              {actionLoading === 'cancelled' ? 'Cancelando...' : 'Cancelar reserva'}
+            </Button>
           </div>
-        </section>
-      )}
-
-      {(appointmentStatus === 'cancelled' || appointmentStatus === 'no_show') && (
-        <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm">
-          <p className="text-sm text-muted-foreground">
-            {appointmentStatus === 'cancelled'
-              ? 'Esta reserva fue cancelada.'
-              : 'El dueño no se presentó a esta reserva.'}
-          </p>
         </section>
       )}
     </div>
