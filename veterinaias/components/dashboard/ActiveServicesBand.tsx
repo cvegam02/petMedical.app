@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Timer } from 'lucide-react'
-import { serviceTypeConfig } from '@/lib/constants/service-type'
+import { serviceTypeConfig, serviceDetailUrl } from '@/lib/constants/service-type'
 import type { ServiceType } from '@/lib/types/database'
 import {
   GroomingSessionDetailModal,
@@ -36,11 +37,11 @@ function boardingDayLabel(startedAt: string | null, expectedCheckOut: string | n
 
 interface Props {
   initial: ActiveServiceItem[]
-  /** Called after a service is finalized so the parent can refresh (metrics/citas). */
   onChanged?: () => void
 }
 
 export function ActiveServicesBand({ initial, onChanged }: Props) {
+  const router = useRouter()
   const [items, setItems] = useState<ActiveServiceItem[]>(initial)
   const [now, setNow] = useState(() => Date.now())
   const [selected, setSelected] = useState<ActiveServiceItem | null>(null)
@@ -48,13 +49,11 @@ export function ActiveServicesBand({ initial, onChanged }: Props) {
   const [hospDetailId, setHospDetailId] = useState<string | null>(null)
   const [hospDetailOpen, setHospDetailOpen] = useState(false)
 
-  // Live elapsed counter.
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30_000)
     return () => clearInterval(t)
   }, [])
 
-  // Light poll to catch new/finished services without a full reload.
   async function refresh() {
     try {
       const res = await fetch('/api/service-visits/active')
@@ -75,6 +74,10 @@ export function ActiveServicesBand({ initial, onChanged }: Props) {
     if (item.service_type === 'hospitalization') {
       setHospDetailId(item.id)
       setHospDetailOpen(true)
+    } else if (item.service_type === 'consultation' || item.service_type === 'surgery') {
+      if (item.appointment_id) {
+        router.push(serviceDetailUrl(item.service_type, item.appointment_id))
+      }
     } else {
       setSelected(item)
       setDetailOpen(true)
@@ -84,62 +87,76 @@ export function ActiveServicesBand({ initial, onChanged }: Props) {
   if (items.length === 0) {
     return (
       <section>
-        <p className="label-overline text-muted-foreground/50 mb-3">Servicios activos</p>
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-border/60 bg-muted/10">
-          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
-          <p className="text-xs text-muted-foreground">Sin servicios en curso</p>
+        <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#73808C] mb-3">Servicios activos</p>
+        <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[#E7EBEF] bg-[#FAFBFC]">
+          <span className="w-2 h-2 rounded-full bg-[#D0D8E0] shrink-0" />
+          <p className="text-xs text-[#73808C]">Sin servicios en curso · La clínica está libre</p>
         </div>
       </section>
     )
   }
 
   return (
-    <section className="rounded-2xl border border-amber-200/70 bg-amber-50/40 p-4">
+    <section className="rounded-2xl border border-[#E7EBEF] bg-white p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-[0.1em]">Servicios activos</p>
-        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{items.length}</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#35C48B] shrink-0" />
+          <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-[#55616C]">Servicios activos</p>
+        </div>
+        <span className="text-[9px] font-bold uppercase tracking-[0.05em] px-2 py-0.5 rounded-md bg-[#F1FCF7] border border-[#DCF8EB] text-[#1D865C]">
+          {items.length} en curso
+        </span>
       </div>
 
       <div className="space-y-2">
         {items.map(item => {
           const svc = serviceTypeConfig(item.service_type)
           const SvcIcon = svc.Icon
+          const isOverdue = item.service_type === 'boarding' &&
+            isCheckoutOverdue(item.expected_check_out, item.started_at, item.ended_at, now)
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => openDetail(item)}
-              className="w-full text-left flex items-center gap-3 rounded-xl border border-amber-200 bg-card px-4 py-3 hover:shadow-sm hover:border-amber-300 transition-all"
+              className={`w-full text-left flex items-center gap-3 rounded-xl border px-4 py-3 hover:opacity-90 transition-opacity ${
+                isOverdue ? 'border-[#FECACA] bg-[#FAFBFC]' : 'border-[#E7EBEF] bg-[#FAFBFC]'
+              }`}
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" aria-hidden />
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${isOverdue ? 'bg-[#DC2626]' : 'bg-[#35C48B]'}`}
+                aria-hidden
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-foreground leading-none">
+                  <p className="text-sm font-semibold text-[#161D24] leading-none">
                     {item.pet?.name ?? '—'}
                     {item.pet?.species && (
-                      <span className="font-normal text-muted-foreground ml-1.5 text-[11px]">{item.pet.species.name}</span>
+                      <span className="font-normal text-[#73808C] ml-1.5 text-[11px]">{item.pet.species.name}</span>
                     )}
                   </p>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border border-border bg-muted/40 text-foreground/70">
+                  <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-[#E7EBEF] bg-[#F3F5F7] text-[#55616C] uppercase tracking-[0.05em]">
                     <SvcIcon size={9} strokeWidth={2.25} />
                     {svc.label}
                   </span>
                   {item.services.slice(0, 3).map(s => (
-                    <span key={s.id} className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <span key={s.id} className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#F3F8FC] border border-[#E7EBEF] text-[#337DB9]">
                       {s.service_name}
                     </span>
                   ))}
                 </div>
               </div>
-              {item.service_type === 'boarding' && isCheckoutOverdue(item.expected_check_out, item.started_at, item.ended_at, now) ? (
-                <span className="flex items-center gap-1 text-xs font-semibold text-orange-600 whitespace-nowrap shrink-0">
+              {isOverdue ? (
+                <span className="flex items-center gap-1 text-xs font-bold text-[#DC2626] whitespace-nowrap shrink-0">
                   <Timer size={12} />
                   Salida vencida
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-xs font-medium text-amber-700 whitespace-nowrap shrink-0">
+                <span className="flex items-center gap-1 text-xs font-medium text-[#F59E0B] whitespace-nowrap shrink-0">
                   <Timer size={12} />
-                  {(item.service_type === 'boarding' || item.service_type === 'hospitalization') ? boardingDayLabel(item.started_at, item.expected_check_out, now) : elapsedLabel(item.started_at, now)}
+                  {(item.service_type === 'boarding' || item.service_type === 'hospitalization')
+                    ? boardingDayLabel(item.started_at, item.expected_check_out, now)
+                    : elapsedLabel(item.started_at, now)}
                 </span>
               )}
             </button>
