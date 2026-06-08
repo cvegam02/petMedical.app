@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { DEFAULT_BUSINESS_HOURS } from '@/lib/utils/time-slots'
-import { AgendaScreen } from '@/components/agenda/AgendaScreen'
-import type { AgendaAppointment } from '@/components/agenda/DayView'
+import { isCheckoutOverdue } from '@/lib/utils/boarding'
+import { OperationsDashboard } from '@/components/dashboard/OperationsDashboard'
 import type { ActiveServiceItem } from '@/components/dashboard/ActiveServicesBand'
+import type { Alert } from '@/components/dashboard/AlertBanner'
+import type { DashboardAppointment } from '@/components/dashboard/DashboardAppointmentCard'
 
-// Request-time rendering: metrics derive from the current time.
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
@@ -46,19 +47,16 @@ export default async function DashboardPage() {
     `)
     .eq('tenant_id', profile.tenant_id)
     .gte('scheduled_at', todayStart.toISOString())
+    .lt('scheduled_at', tomorrowStart.toISOString())
     .order('scheduled_at', { ascending: true })
 
   if (!showAll && profile?.role === 'doctor') {
     appointmentsQuery = appointmentsQuery.eq('assigned_to', user!.id)
   }
 
-  const { data: appointments } = await appointmentsQuery as { data: any[] | null }
+  const { data: appointments } = await appointmentsQuery as { data: DashboardAppointment[] | null }
 
-  const todayAppointments = appointments?.filter(a =>
-    new Date(a.scheduled_at) < tomorrowStart
-  ) ?? []
-
-  // Active services (in_progress service_visits, any type)
+  // Active service visits
   const { data: activeRaw } = await (supabase as any)
     .from('service_visits')
     .select(`
@@ -73,6 +71,7 @@ export default async function DashboardPage() {
 
   const initialActiveServices: ActiveServiceItem[] = (activeRaw ?? []).map((row: any) => {
     const record = Array.isArray(row.record) ? row.record[0] : row.record
+    const boarding = Array.isArray(row.boarding) ? row.boarding[0] : row.boarding
     return {
       id: row.id,
       service_type: row.service_type,
@@ -85,20 +84,59 @@ export default async function DashboardPage() {
       services: record?.services ?? [],
       pet: row.pet ?? null,
       appointment_id: row.appointment_id,
-      expected_check_out: (Array.isArray(row.boarding) ? row.boarding[0] : row.boarding)?.expected_check_out ?? null,
+      expected_check_out: boarding?.expected_check_out ?? null,
     }
   })
 
+  // Calculate alerts
+  const nowMs = now.getTime()
+
+  const checkoutOverdueAlerts: Alert[] = initialActiveServices
+    .filter(s =>
+      s.service_type === 'boarding' &&
+      isCheckoutOverdue(s.expected_check_out, s.started_at, s.ended_at ?? null, nowMs)
+    )
+    .map(s => {
+      const overdueMs = nowMs - new Date(s.expected_check_out!).getTime()
+      return {
+        type: 'checkout_overdue' as const,
+        visitId: s.id,
+        petName: s.pet?.name ?? '—',
+        overdueMinutes: Math.round(overdueMs / 60000),
+      }
+    })
+
+  const urgentUnconfirmedAlerts: Alert[] = (appointments ?? [])
+    .filter(a => {
+      const apptMs = new Date(a.scheduled_at).getTime()
+      return a.status === 'scheduled' && apptMs > nowMs && apptMs - nowMs <= 60 * 60 * 1000
+    })
+    .map(a => {
+      const minutesUntil = Math.round((new Date(a.scheduled_at).getTime() - nowMs) / 60000)
+      return {
+        type: 'urgent_unconfirmed' as const,
+        appointmentId: a.id,
+        petName: a.pet?.name ?? '—',
+        serviceType: a.service_type ?? 'consultation',
+        minutesUntil,
+      }
+    })
+
+  const alerts: Alert[] = [...checkoutOverdueAlerts, ...urgentUnconfirmedAlerts]
+
+  // Derive metrics
+  const inService = initialActiveServices.filter(s => s.service_type !== 'boarding').length
+  const hotelActive = initialActiveServices.filter(s => s.service_type === 'boarding').length
+  const total = (appointments ?? []).length
+  const pendingConfirm = (appointments ?? []).filter(a => a.status === 'scheduled').length
+
   return (
-    <AgendaScreen
+    <OperationsDashboard
       date={todayStart}
-      appointments={(appointments ?? []) as AgendaAppointment[]}
-      metrics={{
-        total: todayAppointments.length,
-        inService: initialActiveServices.filter((s: any) => s.service_type !== 'boarding').length,
-        hotelActive: initialActiveServices.filter((s: any) => s.service_type === 'boarding').length,
-        pendingConfirm: todayAppointments.filter((a: any) => a.status === 'scheduled').length,
-      }}
+      appointments={(appointments ?? []) as DashboardAppointment[]}
+      metrics={{ inService, hotelActive, total, pendingConfirm, alerts: alerts.length }}
+      alerts={alerts}
+      initialActiveServices={initialActiveServices}
       team={team ?? []}
       businessHours={businessHours}
     />
