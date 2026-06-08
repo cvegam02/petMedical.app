@@ -9,9 +9,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm shadow-primary/20",
+          "bg-[#35C48B] text-white font-bold hover:bg-[#27A673]",
         outline:
-          "border-border bg-background text-foreground hover:bg-secondary hover:border-border/80 aria-expanded:bg-secondary dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-[#E7EBEF] bg-[#F3F8FC] text-[#0F4C81] font-semibold hover:bg-[#DCF8EB] hover:text-[#1D865C] aria-expanded:bg-[#DCF8EB]",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/70 aria-expanded:bg-secondary",
         ghost:
@@ -21,9 +21,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 gap-1.5 px-3.5 rounded-lg",
-        xs: "h-7 gap-1 px-2.5 text-xs rounded-md [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 px-3 text-[0.8rem] rounded-lg [&_svg:not([class*='size-'])]:size-3.5",
+        default: "h-9 gap-1.5 px-3.5 rounded-[10px]",
+        xs: "h-7 gap-1 px-2.5 text-xs rounded-[8px] [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 gap-1.5 px-3 text-[0.8rem] rounded-[10px] [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-11 gap-2 px-6 rounded-xl",
         icon: "size-9 rounded-xl",
         "icon-xs": "size-7 rounded-lg [&_svg:not([class*='size-'])]:size-3",
