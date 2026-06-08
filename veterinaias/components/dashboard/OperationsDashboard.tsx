@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
 import { MetricsStrip } from './MetricsStrip'
 import { AlertBanner, type Alert } from './AlertBanner'
@@ -55,20 +56,12 @@ export function OperationsDashboard({
           <h1 className="text-2xl font-extrabold tracking-tight text-[#161D24]">{dateFormatted}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="rounded-[10px] border border-[#E7EBEF] bg-[#F3F8FC] px-4 py-2 text-sm font-semibold text-[#0F4C81] hover:bg-[#DCF8EB] hover:text-[#1D865C] transition-all duration-150"
-          >
+          <Button variant="outline" onClick={() => setModalOpen(true)}>
             + Nueva cita
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/servicios/consulta/new')}
-            className="rounded-[10px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all duration-150"
-          >
+          </Button>
+          <Button onClick={() => router.push('/dashboard/servicios/consulta/new')}>
             Atender ahora
-          </button>
+          </Button>
         </div>
       </div>
 
