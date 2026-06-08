@@ -57,7 +57,7 @@ export function HotelUpcomingReservations() {
         {/* Column headers */}
         <div className="flex items-center gap-4 px-6 py-[9px] bg-[#f3f5f7] border-b border-[#e7ebef]">
           <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[150px] shrink-0">Mascota</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[130px] shrink-0">Responsable</span>
+          <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[160px] shrink-0">Responsable</span>
           <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[90px] shrink-0">Entrada</span>
           <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 flex-1">Salida</span>
           <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[100px] shrink-0">Estado</span>
@@ -92,7 +92,7 @@ export function HotelUpcomingReservations() {
                   </div>
 
                   {/* Owner */}
-                  <div className="w-[130px] shrink-0 min-w-0">
+                  <div className="w-[160px] shrink-0 min-w-0">
                     {r.owner ? (
                       <div className="flex items-center gap-1.5">
                         <div className="w-5 h-5 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">

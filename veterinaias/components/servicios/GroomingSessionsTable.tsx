@@ -1,15 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock, ChevronRight, Scissors, User } from 'lucide-react'
+import { ChevronRight, Scissors, User } from 'lucide-react'
 import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { formatDuration } from '@/lib/utils/format'
 import { Button } from '@/components/ui/button'
+import { ListSkeleton, ListFooter, SectionHeader } from '@/components/ui/list-primitives'
 
 type SessionStatus = 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
 
 interface SessionRow {
-  id: string            // appointment.id — used for navigation
+  id: string
   visit_id: string | null
   status: SessionStatus
   session_date: string
@@ -24,14 +25,34 @@ interface SessionRow {
 interface Meta { total: number; page: number; limit: number }
 
 const STATUS_BADGE: Record<SessionStatus, { label: string; className: string; dot?: boolean }> = {
-  scheduled:   { label: 'Programada',  className: 'text-secondary-foreground bg-secondary/40 border-border' },
-  confirmed:   { label: 'Confirmada',  className: 'text-blue-700 bg-blue-50 border-blue-200' },
-  in_progress: { label: 'En curso',    className: 'text-amber-700 bg-amber-50 border-amber-200', dot: true },
-  completed:   { label: 'Completada',  className: 'text-green-700 bg-green-50 border-green-200' },
-  cancelled:   { label: 'Cancelada',   className: 'text-muted-foreground bg-muted/40 border-border' },
-  no_show:     { label: 'No se presentó', className: 'text-muted-foreground bg-muted/40 border-border' },
+  scheduled:   { label: 'Programada',       className: 'text-secondary-foreground bg-secondary/40 border-border' },
+  confirmed:   { label: 'Confirmada',        className: 'text-blue-700 bg-blue-50 border-blue-200' },
+  in_progress: { label: 'En curso',          className: 'text-amber-700 bg-amber-50 border-amber-200', dot: true },
+  completed:   { label: 'Completada',        className: 'text-green-700 bg-green-50 border-green-200' },
+  cancelled:   { label: 'Cancelada',         className: 'text-muted-foreground bg-muted/40 border-border' },
+  no_show:     { label: 'No se presentó',    className: 'text-muted-foreground bg-muted/40 border-border' },
 }
 
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function isToday(dateStr: string): boolean {
+  return (dateStr.length === 10 ? dateStr : dateStr.slice(0, 10)) === todayStr()
+}
+
+function isFutureDate(dateStr: string): boolean {
+  return (dateStr.length === 10 ? dateStr : dateStr.slice(0, 10)) > todayStr()
+}
+
+function fmtTime(dateStr: string | null): string {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+}
+
+function fmtDateCompact(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+}
 
 
 export function GroomingSessionsTable() {
@@ -42,11 +63,17 @@ export function GroomingSessionsTable() {
 
   async function load(page = 1) {
     setLoading(true)
-    const res = await fetch(`/api/servicios/estetica?page=${page}`)
-    const json = await res.json()
-    setSessions(json.data ?? [])
-    setMeta(json.meta ?? { total: 0, page, limit: 20 })
-    setLoading(false)
+    try {
+      const res = await fetch(`/api/servicios/estetica?page=${page}`)
+      const json = await res.json()
+      setSessions(json.data ?? [])
+      setMeta(json.meta ?? { total: 0, page, limit: 20 })
+    } catch {
+      setSessions([])
+      setMeta({ total: 0, page, limit: 20 })
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load(1) }, [])
@@ -55,32 +82,155 @@ export function GroomingSessionsTable() {
     router.push(`/dashboard/servicios/estetica/${s.id}`)
   }
 
+  if (loading) return <ListSkeleton />
+
   const totalPages = Math.ceil(meta.total / meta.limit)
-  const inProgress = sessions.filter(s => s.status === 'in_progress')
+  const active = sessions.filter(s => s.status === 'in_progress')
+  const pending = sessions.filter(s => s.status === 'scheduled' || s.status === 'confirmed')
+  const hoy = pending.filter(s => isToday(s.session_date))
+  const proximas = pending.filter(s => isFutureDate(s.session_date))
+  const historial = sessions.filter(s =>
+    s.status === 'completed' || s.status === 'cancelled' || s.status === 'no_show' ||
+    (pending.includes(s) && !isToday(s.session_date) && !isFutureDate(s.session_date))
+  )
+
+  const proximasSorted = [...proximas].sort((a, b) => a.session_date.localeCompare(b.session_date))
+
+  if (sessions.length === 0) {
+    return (
+      <div className="bg-card rounded-[1.5rem] border border-border overflow-hidden text-center py-20">
+        <div className="text-4xl opacity-20 rotate-6 mb-4 inline-block">
+          <Scissors size={40} />
+        </div>
+        <p className="text-sm font-semibold text-muted-foreground">Sin sesiones registradas</p>
+        <p className="text-xs text-muted-foreground/60 mt-1 max-w-[260px] mx-auto">
+          Agenda una cita de estética desde el calendario o usa el botón de arriba.
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div>
-      {/* In-progress banner */}
-      {inProgress.length > 0 && (
-        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">En curso</p>
-          <div className="space-y-2">
-            {inProgress.map(s => {
+    <div className="space-y-6">
+
+      {/* ── En curso (active) ── */}
+      {active.length > 0 && (
+        <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
+          <SectionHeader variant="amber" title="En curso" count={active.length} />
+          <div className="grid grid-cols-2 gap-2 p-3 bg-[#fffbeb] border-b border-[#fde68a]">
+            {active.slice(0, 2).map(s => {
+              const PetIcon = getSpeciesIcon(s.pet?.species?.name)
               const elapsedMins = s.started_at
                 ? Math.round((Date.now() - new Date(s.started_at).getTime()) / 60000)
                 : 0
               return (
-                <div key={s.id} className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                    <span className="text-sm font-medium text-foreground">{s.pet?.name ?? '—'}</span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock size={11} />{elapsedMins} min transcurridos
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => openDetail(s)}
+                  className="bg-white border border-[#fde68a] rounded-[8px] p-[11px] text-left hover:shadow-sm transition-shadow"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#fef9c3] to-[#fde68a] border border-[#fcd34d] flex items-center justify-center shrink-0">
+                      <PetIcon size={16} strokeWidth={1.5} className="text-[#92400e]" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-[13px] text-foreground leading-tight truncate">{s.pet?.name ?? '—'}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {s.pet?.species?.name ?? '—'}{s.owner ? ` · ${s.owner.full_name}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-1 min-w-0">
+                      {s.services.slice(0, 2).map(sv => (
+                        <span key={sv.id} className="text-[9px] font-medium px-1.5 py-[1px] rounded-full bg-primary/10 text-primary border border-primary/20 truncate max-w-[80px]">
+                          {sv.service_name}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-[2px] bg-[#fef3c7] text-[#92400e] rounded-[20px] border border-[#fde68a] shrink-0 whitespace-nowrap">
+                      {elapsedMins} min
                     </span>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => openDetail(s)}>
-                    Finalizar
-                  </Button>
+                </button>
+              )
+            })}
+          </div>
+          {active.length > 2 && (
+            <p className="text-center text-[11px] text-primary font-semibold py-2 bg-[#fffbeb] border-b border-[#fde68a]">
+              + {active.length - 2} más en curso
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── Hoy ── */}
+      {hoy.length > 0 && (
+        <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
+          <SectionHeader variant="blue" title="Hoy" count={hoy.length} />
+          <div className="flex items-center gap-4 px-6 py-[9px] bg-[#f3f5f7] border-b border-[#e7ebef]">
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[150px] shrink-0">Mascota</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 flex-1">Servicios</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[160px] shrink-0">Responsable</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[60px] shrink-0">Hora</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[100px] shrink-0">Estado</span>
+            <span className="w-9 shrink-0" />
+          </div>
+          <div className="divide-y divide-[#f3f5f7]">
+            {hoy.map((s, index) => {
+              const PetIcon = getSpeciesIcon(s.pet?.species?.name)
+              const badge = STATUS_BADGE[s.status]
+              const responsible = s.assigned_to_profile ?? s.owner
+              return (
+                <div
+                  key={s.id}
+                  className="animate-in fade-in slide-in-from-bottom-1 duration-200 fill-mode-both"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div
+                    className="group relative flex items-center gap-4 px-6 py-3 hover:bg-primary/[0.01] transition-colors duration-200 cursor-pointer"
+                    onClick={() => openDetail(s)}
+                  >
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[28px] bg-primary rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-3 w-[150px] min-w-0 shrink-0">
+                      <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#f3f5f7] to-[#e7ebef] border border-[#d0d8e0] flex items-center justify-center group-hover:border-primary/30 transition-colors shrink-0">
+                        <PetIcon size={16} strokeWidth={1.5} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[13px] text-foreground leading-tight truncate group-hover:text-primary transition-colors">{s.pet?.name ?? '—'}</p>
+                        {s.pet?.species?.name && <p className="text-[10px] text-muted-foreground truncate">{s.pet.species.name}</p>}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-wrap gap-1">
+                      {s.services.length > 0
+                        ? s.services.slice(0, 2).map(sv => (
+                            <span key={sv.id} className="text-[10px] font-medium px-2 py-[1px] rounded-full bg-primary/10 text-primary border border-primary/20">{sv.service_name}</span>
+                          ))
+                        : <span className="text-[11px] text-muted-foreground">—</span>
+                      }
+                    </div>
+                    <div className="w-[160px] shrink-0 min-w-0">
+                      {responsible ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
+                            <User size={10} className="text-muted-foreground" />
+                          </div>
+                          <p className="text-[11px] font-medium text-foreground truncate">{responsible.full_name}</p>
+                        </div>
+                      ) : <span className="text-[11px] text-muted-foreground/40">—</span>}
+                    </div>
+                    <p className="w-[60px] text-[12px] font-semibold tabular-nums text-foreground shrink-0">{fmtTime(s.session_date)}</p>
+                    <div className="w-[100px] shrink-0">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
+                        {badge.dot && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div className="w-9 h-9 rounded-[9px] bg-[#fafbfc] border border-transparent flex items-center justify-center text-muted-foreground/40 group-hover:text-primary group-hover:border-[#e7ebef] group-hover:shadow-sm transition-all shrink-0">
+                      <ChevronRight size={15} strokeWidth={2.5} />
+                    </div>
+                  </div>
                 </div>
               )
             })}
@@ -88,170 +238,160 @@ export function GroomingSessionsTable() {
         </div>
       )}
 
-      {/* Header: count */}
-      <div className="flex items-center gap-2 mb-6">
-        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">Sesiones</p>
-        {!loading && (
-          <span className="inline-flex items-center justify-center bg-muted text-muted-foreground text-[12px] font-mono px-2 py-0.5 rounded-md border border-border/50">
-            {meta.total}
-          </span>
-        )}
-      </div>
-
-      {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-20 rounded-2xl bg-card border border-border/50 flex items-center px-6 gap-6">
-              <div className="w-12 h-12 rounded-2xl bg-muted/40 animate-pulse shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-1/4 bg-muted/40 animate-pulse rounded" />
-                <div className="h-3 w-1/6 bg-muted/20 animate-pulse rounded" />
-              </div>
-              <div className="w-20 h-5 bg-muted/30 animate-pulse rounded-full" />
-              <div className="w-28 h-3 bg-muted/20 animate-pulse rounded" />
-            </div>
-          ))}
-        </div>
-      ) : sessions.length === 0 ? (
-        <div className="text-center py-24 rounded-[2rem] border-2 border-dashed border-border/60 bg-muted/[0.02]">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 bg-primary/5 rounded-2xl rotate-6 animate-pulse" />
-            <div className="absolute inset-0 bg-card border border-border shadow-sm rounded-2xl flex items-center justify-center">
-              <Scissors size={32} className="text-muted-foreground/20" />
-            </div>
+      {/* ── Próximas ── */}
+      {proximasSorted.length > 0 && (
+        <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
+          <SectionHeader variant="muted" title="Próximas citas" count={proximasSorted.length} />
+          <div className="flex items-center gap-4 px-6 py-[9px] bg-[#f3f5f7] border-b border-[#e7ebef]">
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[150px] shrink-0">Mascota</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 flex-1">Servicios</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[160px] shrink-0">Responsable</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[80px] shrink-0">Fecha / Hora</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[100px] shrink-0">Estado</span>
+            <span className="w-9 shrink-0" />
           </div>
-          <p className="font-bold text-foreground text-xl tracking-tight">Sin sesiones registradas</p>
-          <p className="text-sm text-muted-foreground mt-2 max-w-[280px] mx-auto leading-relaxed">
-            Agenda una cita de estética desde el calendario o usa el botón de arriba.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
-            {/* Column headers */}
-            <div className="flex items-center gap-6 px-6 py-5 bg-muted/20 border-b border-border/60">
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-52">Mascota</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] flex-1">Servicios</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-36">Responsable</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-28">Fecha</p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-24">Estado</p>
-              <div className="w-9" />
-            </div>
-
-            <div className="divide-y divide-border/40">
-              {sessions.map((s, index) => {
-                const badge = STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled
-                const PetIcon = getSpeciesIcon(s.pet?.species?.name)
-                return (
+          <div className="divide-y divide-[#f3f5f7]">
+            {proximasSorted.map((s, index) => {
+              const PetIcon = getSpeciesIcon(s.pet?.species?.name)
+              const badge = STATUS_BADGE[s.status]
+              const responsible = s.assigned_to_profile ?? s.owner
+              return (
+                <div
+                  key={s.id}
+                  className="animate-in fade-in slide-in-from-bottom-1 duration-200 fill-mode-both"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
                   <div
-                    key={s.id}
-                    className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                    style={{ animationDelay: `${index * 35}ms` }}
+                    className="group relative flex items-center gap-4 px-6 py-3 opacity-85 hover:opacity-100 hover:bg-primary/[0.01] transition-all duration-200 cursor-pointer"
+                    onClick={() => openDetail(s)}
                   >
-                    <div
-                      className="group relative flex items-center gap-6 py-5 px-6 hover:bg-primary/[0.01] active:scale-[0.998] transition-all duration-300 cursor-pointer"
-                      onClick={() => openDetail(s)}
-                    >
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary rounded-r-full group-hover:h-8 transition-all duration-300" />
-
-                      {/* Pet */}
-                      <div className="flex items-center gap-4 w-52 min-w-0">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-muted/50 to-muted border border-border/60 flex items-center justify-center group-hover:border-primary/30 group-hover:from-primary/5 group-hover:to-primary/10 transition-all duration-500 shadow-sm shrink-0">
-                          <PetIcon size={22} strokeWidth={1.5} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-foreground text-[15px] leading-tight tracking-tight truncate group-hover:text-primary transition-colors">
-                            {s.pet?.name ?? '—'}
-                          </p>
-                          {s.pet?.species?.name && (
-                            <p className="text-[12px] text-muted-foreground mt-0.5 truncate">{s.pet.species.name}</p>
-                          )}
-                        </div>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[28px] bg-primary rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-3 w-[150px] min-w-0 shrink-0">
+                      <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#f3f5f7] to-[#e7ebef] border border-[#d0d8e0] flex items-center justify-center group-hover:border-primary/30 transition-colors shrink-0">
+                        <PetIcon size={16} strokeWidth={1.5} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
                       </div>
-
-                      {/* Services */}
-                      <div className="flex-1 min-w-0 flex flex-wrap gap-1">
-                        {s.services.length > 0
-                          ? s.services.map(sv => (
-                              <span key={sv.id} className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                                {sv.service_name}
-                              </span>
-                            ))
-                          : <span className="text-xs text-muted-foreground">—</span>
-                        }
-                      </div>
-
-                      {/* Responsable */}
-                      <div className="w-36 shrink-0 min-w-0">
-                        {s.assigned_to_profile ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
-                              <User size={12} className="text-muted-foreground" />
-                            </div>
-                            <p className="text-[12px] font-medium text-foreground truncate">{s.assigned_to_profile.full_name}</p>
-                          </div>
-                        ) : s.owner ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
-                              <User size={12} className="text-muted-foreground" />
-                            </div>
-                            <p className="text-[12px] font-medium text-foreground truncate">{s.owner.full_name}</p>
-                          </div>
-                        ) : (
-                          <span className="text-[12px] text-muted-foreground/40">—</span>
-                        )}
-                      </div>
-
-                      {/* Date */}
-                      <div className="w-28 shrink-0">
-                        <p className="text-[13px] font-medium text-foreground">
-                          {new Date(s.session_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </p>
-                        {s.started_at && s.ended_at && (
-                          <p className="text-[11px] text-muted-foreground mt-0.5">{formatDuration(s.started_at, s.ended_at)}</p>
-                        )}
-                      </div>
-
-                      {/* Status */}
-                      <div className="w-24 shrink-0">
-                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${badge.className}`}>
-                          {badge.dot && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
-                          {badge.label}
-                        </span>
-                      </div>
-
-                      {/* Action */}
-                      <div className="shrink-0 flex items-center" onClick={e => e.stopPropagation()}>
-                        {s.status === 'in_progress' ? (
-                          <Button size="sm" variant="outline" onClick={() => openDetail(s)} className="text-amber-600 border-amber-200 hover:bg-amber-50 text-xs">
-                            Finalizar
-                          </Button>
-                        ) : (
-                          <div className="w-9 h-9 rounded-xl bg-muted/20 border border-transparent flex items-center justify-center text-muted-foreground/30 group-hover:text-primary group-hover:bg-white group-hover:border-border group-hover:shadow-sm transition-all duration-300">
-                            <ChevronRight size={16} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
-                          </div>
-                        )}
+                      <div className="min-w-0">
+                        <p className="font-bold text-[13px] text-foreground leading-tight truncate group-hover:text-primary transition-colors">{s.pet?.name ?? '—'}</p>
+                        {s.pet?.species?.name && <p className="text-[10px] text-muted-foreground truncate">{s.pet.species.name}</p>}
                       </div>
                     </div>
+                    <div className="flex-1 min-w-0 flex flex-wrap gap-1">
+                      {s.services.length > 0
+                        ? s.services.slice(0, 2).map(sv => (
+                            <span key={sv.id} className="text-[10px] font-medium px-2 py-[1px] rounded-full bg-primary/10 text-primary border border-primary/20">{sv.service_name}</span>
+                          ))
+                        : <span className="text-[11px] text-muted-foreground">—</span>
+                      }
+                    </div>
+                    <div className="w-[160px] shrink-0 min-w-0">
+                      {responsible ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
+                            <User size={10} className="text-muted-foreground" />
+                          </div>
+                          <p className="text-[11px] font-medium text-foreground truncate">{responsible.full_name}</p>
+                        </div>
+                      ) : <span className="text-[11px] text-muted-foreground/40">—</span>}
+                    </div>
+                    <div className="w-[80px] shrink-0 space-y-[1px]">
+                      <p className="text-[10px] text-muted-foreground">{fmtDateCompact(s.session_date)}</p>
+                      <p className="text-[12px] font-semibold tabular-nums text-foreground">{fmtTime(s.session_date)}</p>
+                    </div>
+                    <div className="w-[100px] shrink-0">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div className="w-9 h-9 rounded-[9px] bg-[#fafbfc] border border-transparent flex items-center justify-center text-muted-foreground/40 group-hover:text-primary group-hover:border-[#e7ebef] group-hover:shadow-sm transition-all shrink-0">
+                      <ChevronRight size={15} strokeWidth={2.5} />
+                    </div>
                   </div>
-                )
-              })}
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-5 bg-muted/5 border-t border-border/40 flex items-center justify-between">
-              <p className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">
-                {meta.total} {meta.total === 1 ? 'sesión registrada' : 'sesiones registradas'}
-              </p>
-              <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-                <span className="text-[10px] font-bold text-primary/60 uppercase tracking-tighter">Registros actualizados</span>
-              </div>
-            </div>
+                </div>
+              )
+            })}
           </div>
+        </div>
+      )}
 
+      {/* ── Historial ── */}
+      {historial.length > 0 && (
+        <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
+          <SectionHeader variant="muted" title="Historial" count={meta.total} />
+          <div className="flex items-center gap-4 px-6 py-[9px] bg-[#f3f5f7] border-b border-[#e7ebef]">
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[140px]">Mascota</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 flex-1">Servicios</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[160px]">Responsable</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[90px]">Fecha</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 w-[80px]">Estado</span>
+            <span className="w-9" />
+          </div>
+          <div className="divide-y divide-[#f3f5f7]">
+            {historial.map((s, index) => {
+              const badge = STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled
+              const PetIcon = getSpeciesIcon(s.pet?.species?.name)
+              const responsible = s.assigned_to_profile ?? s.owner
+              return (
+                <div
+                  key={s.id}
+                  className="animate-in fade-in slide-in-from-bottom-1 duration-200 fill-mode-both"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <div
+                    className="group relative flex items-center gap-4 py-3 px-6 hover:bg-primary/[0.01] transition-colors duration-200 cursor-pointer"
+                    onClick={() => openDetail(s)}
+                  >
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[28px] bg-primary rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-3 w-[140px] min-w-0">
+                      <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#f3f5f7] to-[#e7ebef] border border-[#d0d8e0] flex items-center justify-center group-hover:border-primary/30 transition-colors shrink-0">
+                        <PetIcon size={16} strokeWidth={1.5} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[13px] text-foreground leading-tight truncate group-hover:text-primary transition-colors">{s.pet?.name ?? '—'}</p>
+                        {s.pet?.species?.name && <p className="text-[10px] text-muted-foreground truncate">{s.pet.species.name}</p>}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-wrap gap-1">
+                      {s.services.length > 0
+                        ? s.services.map(sv => (
+                            <span key={sv.id} className="text-[10px] font-medium px-2 py-[1px] rounded-full bg-primary/10 text-primary border border-primary/20">{sv.service_name}</span>
+                          ))
+                        : <span className="text-[11px] text-muted-foreground">—</span>
+                      }
+                    </div>
+                    <div className="w-[160px] shrink-0 min-w-0">
+                      {responsible ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-muted/50 border border-border/60 flex items-center justify-center shrink-0">
+                            <User size={10} className="text-muted-foreground" />
+                          </div>
+                          <p className="text-[11px] font-medium text-foreground truncate">{responsible.full_name}</p>
+                        </div>
+                      ) : <span className="text-[11px] text-muted-foreground/40">—</span>}
+                    </div>
+                    <div className="w-[90px] shrink-0 space-y-0.5">
+                      <p className="text-[12px] font-medium text-foreground">
+                        {new Date(s.session_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
+                      {s.started_at && s.ended_at && (
+                        <p className="text-[10px] text-muted-foreground">{formatDuration(s.started_at, s.ended_at)}</p>
+                      )}
+                    </div>
+                    <div className="w-[80px] shrink-0">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${badge.className}`}>
+                        {badge.dot && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+                        {badge.label}
+                      </span>
+                    </div>
+                    <div className="w-9 h-9 rounded-[9px] bg-[#fafbfc] border border-transparent flex items-center justify-center text-muted-foreground/40 group-hover:text-primary group-hover:border-[#e7ebef] group-hover:shadow-sm transition-all shrink-0">
+                      <ChevronRight size={15} strokeWidth={2.5} />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+            <div className="px-6 py-3 bg-[#fafbfc] border-t border-[#f3f5f7] flex items-center justify-between text-sm text-muted-foreground">
               <Button variant="outline" size="sm" disabled={meta.page <= 1} onClick={() => load(meta.page - 1)}>
                 Anterior
               </Button>
@@ -261,8 +401,10 @@ export function GroomingSessionsTable() {
               </Button>
             </div>
           )}
-        </>
+          <ListFooter count={meta.total} label={meta.total === 1 ? 'sesión registrada' : 'sesiones registradas'} />
+        </div>
       )}
+
     </div>
   )
 }
