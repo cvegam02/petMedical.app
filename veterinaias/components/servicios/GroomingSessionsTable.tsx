@@ -94,7 +94,9 @@ export function GroomingSessionsTable() {
     (pending.includes(s) && !isToday(s.session_date) && !isFutureDate(s.session_date))
   )
 
+  const hoySorted = [...hoy].sort((a, b) => a.session_date.localeCompare(b.session_date))
   const proximasSorted = [...proximas].sort((a, b) => a.session_date.localeCompare(b.session_date))
+  const historialSorted = [...historial].sort((a, b) => b.session_date.localeCompare(a.session_date))
 
   if (sessions.length === 0) {
     return (
@@ -178,7 +180,7 @@ export function GroomingSessionsTable() {
             <span className="w-9 shrink-0" />
           </div>
           <div className="divide-y divide-[#f3f5f7]">
-            {hoy.map((s, index) => {
+            {hoySorted.map((s, index) => {
               const PetIcon = getSpeciesIcon(s.pet?.species?.name)
               const badge = STATUS_BADGE[s.status]
               const responsible = s.assigned_to_profile ?? s.owner
@@ -326,7 +328,7 @@ export function GroomingSessionsTable() {
             <span className="w-9" />
           </div>
           <div className="divide-y divide-[#f3f5f7]">
-            {historial.map((s, index) => {
+            {historialSorted.map((s, index) => {
               const badge = STATUS_BADGE[s.status] ?? STATUS_BADGE.scheduled
               const PetIcon = getSpeciesIcon(s.pet?.species?.name)
               const responsible = s.assigned_to_profile ?? s.owner

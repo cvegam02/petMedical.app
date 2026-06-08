@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     `, { count: 'exact' })
     .eq('tenant_id', tenantId)
     .eq('service_type', 'grooming')
-    .order('scheduled_at', { ascending: false })
+    .order('scheduled_at', { ascending: true })
     .range(offset, offset + limit - 1)
 
   if (error) return NextResponse.json({ error: 'Error al obtener sesiones' }, { status: 500 })

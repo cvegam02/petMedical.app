@@ -102,9 +102,17 @@ export function SurgeryTable() {
     derivedStatus(r) === 'scheduled' && !isToday(r.scheduled_at) && !isFutureDate(r.scheduled_at)
   ))
 
+  const hoySorted = [...hoy].sort(
+    (a, b) => new Date(a.scheduled_at ?? '').getTime() - new Date(b.scheduled_at ?? '').getTime()
+  )
   const proximasSorted = [...proximas].sort(
     (a, b) => new Date(a.scheduled_at ?? '').getTime() - new Date(b.scheduled_at ?? '').getTime()
   )
+  const historialSorted = [...historial].sort((a, b) => {
+    const da = new Date(a.ended_at ?? a.started_at ?? a.scheduled_at ?? '').getTime()
+    const db = new Date(b.ended_at ?? b.started_at ?? b.scheduled_at ?? '').getTime()
+    return db - da
+  })
 
   if (rows.length === 0) {
     return (
@@ -181,7 +189,7 @@ export function SurgeryTable() {
             <span className="w-9 shrink-0" />
           </div>
           <div className="divide-y divide-[#f3f5f7]">
-            {hoy.map((r, index) => {
+            {hoySorted.map((r, index) => {
               const PetIcon = getSpeciesIcon(r.pet?.species?.name)
               const badge = STATUS_BADGE[derivedStatus(r)]
               return (
@@ -292,7 +300,7 @@ export function SurgeryTable() {
             <span className="w-9" />
           </div>
           <div className="divide-y divide-[#f3f5f7]">
-            {historial.map((r, index) => {
+            {historialSorted.map((r, index) => {
               const PetIcon = getSpeciesIcon(r.pet?.species?.name)
               const status = derivedStatus(r)
               const badge = STATUS_BADGE[status]
