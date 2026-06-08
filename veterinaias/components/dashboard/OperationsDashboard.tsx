@@ -58,14 +58,14 @@ export function OperationsDashboard({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="rounded-[10px] border border-[#E7EBEF] bg-[#F3F8FC] px-4 py-2 text-sm font-semibold text-[#0F4C81] hover:bg-[#DCF8EB] hover:text-[#1D865C] transition-colors"
+            className="rounded-[10px] border border-[#E7EBEF] bg-[#F3F8FC] px-4 py-2 text-sm font-semibold text-[#0F4C81] hover:bg-[#DCF8EB] hover:text-[#1D865C] transition-all duration-150"
           >
             + Nueva cita
           </button>
           <button
             type="button"
             onClick={() => router.push('/dashboard/servicios/consulta/new')}
-            className="rounded-[10px] bg-[#35C48B] px-4 py-2 text-sm font-bold text-white hover:bg-[#27A673] transition-colors"
+            className="rounded-[10px] bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-all duration-150"
           >
             Atender ahora
           </button>
