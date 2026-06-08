@@ -83,6 +83,7 @@ export default async function DashboardPage() {
       intake_notes: record?.intake_notes ?? null,
       services: record?.services ?? [],
       pet: row.pet ?? null,
+      owner: null,
       appointment_id: row.appointment_id,
       expected_check_out: boarding?.expected_check_out ?? null,
     }
@@ -132,7 +133,7 @@ export default async function DashboardPage() {
 
   return (
     <OperationsDashboard
-      date={todayStart}
+      dateIso={todayStart.toISOString()}
       appointments={(appointments ?? []) as DashboardAppointment[]}
       metrics={{ inService, hotelActive, total, pendingConfirm, alerts: alerts.length }}
       alerts={alerts}

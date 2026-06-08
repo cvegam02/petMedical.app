@@ -18,7 +18,7 @@ interface Metrics {
 }
 
 interface Props {
-  date: Date
+  dateIso: string
   appointments: DashboardAppointment[]
   metrics: Metrics
   alerts: Alert[]
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function OperationsDashboard({
-  date,
+  dateIso,
   appointments,
   metrics,
   alerts,
@@ -39,7 +39,7 @@ export function OperationsDashboard({
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
 
-  const dateLabel = date.toLocaleDateString('es-MX', {
+  const dateLabel = new Date(dateIso).toLocaleDateString('es-MX', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -84,8 +84,11 @@ export function OperationsDashboard({
       {/* Alertas (condicional) */}
       {alerts.length > 0 && (
         <div className="space-y-2">
-          {alerts.map((alert, i) => (
-            <AlertBanner key={i} alert={alert} />
+          {alerts.map((alert) => (
+            <AlertBanner
+              key={alert.type === 'checkout_overdue' ? alert.visitId : alert.appointmentId}
+              alert={alert}
+            />
           ))}
         </div>
       )}
