@@ -52,7 +52,7 @@ export function OperationsDashboard({
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#73808C] mb-1">Agenda</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#73808C] mb-1">Inicio</p>
           <h1 className="text-2xl font-extrabold tracking-tight text-[#161D24]">{dateFormatted}</h1>
         </div>
         <div className="flex items-center gap-2">

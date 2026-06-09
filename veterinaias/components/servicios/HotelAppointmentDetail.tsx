@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -21,7 +21,6 @@ interface Props {
   owner: { id: string; full_name: string; phone: string | null; email: string | null } | null
   assignedTo: { id: string; full_name: string } | null
   scheduledAt: string
-  existingVisitId: string | null
 }
 
 export function HotelAppointmentDetail({
@@ -32,19 +31,12 @@ export function HotelAppointmentDetail({
   owner,
   assignedTo,
   scheduledAt,
-  existingVisitId,
 }: Props) {
   const router = useRouter()
   const [feeding, setFeeding] = useState('')
   const [belongings, setBelongings] = useState('')
   const [specialCare, setSpecialCare] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (existingVisitId) {
-      router.replace(`/dashboard/servicios/hotel/stay/${existingVisitId}`)
-    }
-  }, [existingVisitId, router])
 
   const PetIcon = getSpeciesIcon(pet?.species?.name)
 
@@ -316,8 +308,7 @@ export function HotelAppointmentDetail({
         </div>
       </div>
 
-      {/* Check-in form — only when confirmed and no stay exists yet (guard against redirect race) */}
-      {appointmentStatus === 'confirmed' && !existingVisitId && (
+      {appointmentStatus === 'confirmed' && (
         <section className="bg-card rounded-2xl border border-border/60 p-8 shadow-sm space-y-6">
           <div className="flex items-center gap-2">
             <BedDouble size={16} className="text-primary" />

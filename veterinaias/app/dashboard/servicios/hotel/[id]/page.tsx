@@ -34,6 +34,8 @@ export default async function HotelAppointmentPage({ params }: { params: Promise
     ? (appointment.service_visit[0] ?? null)
     : appointment.service_visit
 
+  if (visit?.id) redirect(`/dashboard/servicios/hotel/stay/${visit.id}`)
+
   return (
     <HotelAppointmentDetail
       appointmentId={appointment.id}
@@ -43,7 +45,6 @@ export default async function HotelAppointmentPage({ params }: { params: Promise
       owner={appointment.owner}
       assignedTo={appointment.assigned_to_profile}
       scheduledAt={appointment.scheduled_at}
-      existingVisitId={visit?.id ?? null}
     />
   )
 }

@@ -34,8 +34,7 @@ export function AlertBanner({ alert }: Props) {
       title: `${alert.petName} — ${SERVICE_LABELS[alert.serviceType] ?? alert.serviceType} · Sin confirmar`,
       description: `Cita en ${alert.minutesUntil} min · Llama al dueño para confirmar`,
       href: `/dashboard/appointments`,
-      cta: 'Ver agenda →',
-    }
+      cta: 'Ver calendario →',    }
   })()
 
   return (

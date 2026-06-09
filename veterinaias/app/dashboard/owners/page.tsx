@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { OwnerSearch } from '@/components/owners/OwnerSearch'
 import { OwnerCard } from '@/components/owners/OwnerCard'
+import { ListFooter, ListSkeleton } from '@/components/ui/list-primitives'
 import { buttonVariants } from '@/components/ui/button'
-import { Plus, Users, Search, Filter } from 'lucide-react'
+import { Plus, Users, Filter } from 'lucide-react'
 import type { Owner } from '@/lib/types/owner'
 
 export default function OwnersPage() {
@@ -70,21 +71,7 @@ export default function OwnersPage() {
           </div>
         </div>
       ) : loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-20 rounded-2xl bg-card border border-border/50 flex items-center px-6 gap-6">
-              <div className="w-12 h-12 rounded-xl bg-muted/40 animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-1/4 bg-muted/40 animate-pulse rounded" />
-                <div className="h-3 w-1/6 bg-muted/20 animate-pulse rounded" />
-              </div>
-              <div className="w-1/4 space-y-2">
-                <div className="h-3 w-full bg-muted/30 animate-pulse rounded" />
-                <div className="h-3 w-2/3 bg-muted/10 animate-pulse rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListSkeleton rows={6} />
       ) : owners.length === 0 ? (
         <div className="text-center py-24 rounded-[2rem] border-2 border-dashed border-border/60 bg-muted/[0.02]">
           <div className="relative w-20 h-20 mx-auto mb-6">
@@ -107,11 +94,11 @@ export default function OwnersPage() {
         </div>
       ) : (
         <div className="bg-card rounded-[1.5rem] border border-border shadow-xl shadow-primary/[0.01] overflow-hidden">
-          {/* Table Header Labels - More spaced and legible */}
-          <div className="flex items-center gap-6 px-10 py-5 bg-muted/20 border-b border-border/60">
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-1/3">Información del Dueño</p>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-1/4">Contacto</p>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] flex-1">Pacientes Vinculados</p>
+          {/* Table Header Labels */}
+          <div className="flex items-center gap-6 px-6 py-[9px] bg-[#f3f5f7] border-b border-[#e7ebef]">
+            <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-1/3">Información del Dueño</p>
+            <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] w-1/4">Contacto</p>
+            <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] flex-1">Pacientes Vinculados</p>
             <div className="w-9" />
           </div>
 
@@ -120,23 +107,14 @@ export default function OwnersPage() {
               <div 
                 key={owner.id} 
                 className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both"
-                style={{ animationDelay: `${index * 40}ms` }}
+                style={{ animationDelay: `${index * 30}ms` }}
               >
                 <OwnerCard owner={owner} />
               </div>
             ))}
           </div>
 
-          {/* Table Footer - Clean clinical info */}
-          <div className="px-10 py-5 bg-muted/5 border-t border-border/40 flex items-center justify-between">
-            <p className="text-[10px] font-mono text-muted-foreground/50 uppercase tracking-widest">
-              Mostrando {owners.length} registros activos
-            </p>
-            <div className="flex items-center gap-1">
-               <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-               <span className="text-[10px] font-bold text-primary/60 uppercase tracking-tighter">Base de datos sincronizada</span>
-            </div>
-          </div>
+          <ListFooter count={owners.length} label={owners.length === 1 ? 'dueño' : 'dueños'} />
         </div>
       )}
     </div>
