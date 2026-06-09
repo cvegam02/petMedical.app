@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       .eq('service_type', 'consultation')
       .gte('scheduled_at', todayStart)
       .lt('scheduled_at', tomorrowStart)
-      .not('status', 'in', '("cancelled","no_show")')
+      .not('status', 'in', '("cancelled","no_show","completed")')
       .order('scheduled_at', { ascending: true })
     if (error) return NextResponse.json({ error: 'Error al obtener citas' }, { status: 500 })
     return NextResponse.json({ data: (data ?? []).map(mapApptRow) })
@@ -90,42 +90,24 @@ export async function GET(req: NextRequest) {
       .eq('tenant_id', tenantId)
       .eq('service_type', 'consultation')
       .gte('scheduled_at', tomorrowStart)
-      .not('status', 'in', '("cancelled","no_show")')
+      .not('status', 'in', '("cancelled","no_show","completed")')
       .order('scheduled_at', { ascending: true })
       .limit(50)
     if (error) return NextResponse.json({ error: 'Error al obtener citas' }, { status: 500 })
     return NextResponse.json({ data: (data ?? []).map(mapApptRow) })
   }
 
-  // — Historial (service_visits — default) —
-  const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
-  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-  const vetParam = url.searchParams.get('vet')
-  const fromParam = url.searchParams.get('from')
-  const toParam = url.searchParams.get('to')
-
-  if (fromParam && !DATE_REGEX.test(fromParam))
-    return NextResponse.json({ error: 'Parámetro from inválido (formato: YYYY-MM-DD)' }, { status: 400 })
-  if (toParam && !DATE_REGEX.test(toParam))
-    return NextResponse.json({ error: 'Parámetro to inválido (formato: YYYY-MM-DD)' }, { status: 400 })
-  if (vetParam && !UUID_REGEX.test(vetParam))
-    return NextResponse.json({ error: 'Parámetro vet inválido' }, { status: 400 })
-
-  let query = (supabase as any)
-    .from('service_visits')
-    .select(VISIT_SELECT)
+  // — Historial (completed/cancelled/no_show appointments) —
+  const { data, error } = await (supabase as any)
+    .from('appointments')
+    .select(APPT_SELECT)
     .eq('tenant_id', tenantId)
     .eq('service_type', 'consultation')
-    .order('created_at', { ascending: false })
+    .in('status', ['completed', 'cancelled', 'no_show'])
+    .order('scheduled_at', { ascending: false })
     .limit(100)
 
-  if (fromParam) query = query.gte('created_at', `${fromParam}T00:00:00.000Z`)
-  if (toParam) query = query.lte('created_at', `${toParam}T23:59:59.999Z`)
-  if (vetParam) query = query.eq('consultation_records.attended_by', vetParam)
+  if (error) return NextResponse.json({ error: 'Error al obtener historial' }, { status: 500 })
 
-  const { data, error } = await query
-  if (error) return NextResponse.json({ error: 'Error al obtener consultas' }, { status: 500 })
-
-  return NextResponse.json({ data: (data ?? []).map(mapVisitRow) })
+  return NextResponse.json({ data: (data ?? []).map(mapApptRow) })
 }
