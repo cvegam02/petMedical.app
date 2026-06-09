@@ -1,0 +1,264 @@
+<h2>3 Enfoques para Unificar los Listados</h2>
+<p class="subtitle">Mismos tokens de diseño en los tres. La diferencia está en cuánta estructura se comparte.</p>
+
+<div class="options" style="display: flex; flex-direction: column; gap: 24px; margin-top: 24px;">
+
+  <!-- APPROACH A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div style="padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start;">
+      <div class="letter">A</div>
+      <div class="content" style="flex: 1; min-width: 0;">
+        <h3>Un sistema, 3 plantillas</h3>
+        <p style="margin-bottom: 4px;">Cada familia tiene su propia plantilla, pero todas comparten el mismo sistema de tokens: colores, tipografía, avatar size (36px), skeleton, empty state, hover. La diferencia es estructural, no visual.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px;">
+
+          <!-- Operacional -->
+          <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: #f1fcf7; border-bottom: 1px solid #b6edda;">
+              <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #27A673;">Operacional</p>
+              <p style="font-size: 10px; color: #55616C;">Estética · Cirugía · Hosp.</p>
+            </div>
+            <!-- Active cards mini -->
+            <div style="padding: 8px; border-bottom: 1px solid #e7ebef;">
+              <p style="font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #92400e; margin-bottom: 5px;">En curso</p>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <div style="background: white; border: 1px solid #fde68a; border-radius: 6px; padding: 6px;">
+                  <p style="font-size: 10px; font-weight: 700; color: #161D24;">Rocky</p>
+                  <p style="font-size: 9px; color: #92400e;">Día 3</p>
+                </div>
+                <div style="background: white; border: 1px solid #fde68a; border-radius: 6px; padding: 6px;">
+                  <p style="font-size: 10px; font-weight: 700; color: #161D24;">Luna</p>
+                  <p style="font-size: 9px; color: #92400e;">Día 1</p>
+                </div>
+              </div>
+            </div>
+            <!-- History rows mini -->
+            <div style="padding: 8px;">
+              <p style="font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c; margin-bottom: 5px;">Historial</p>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 600; color: #161D24;">Milo</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">Ins. renal</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #DCF8EB; color: #1D865C; border-radius: 10px;">Alta</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 600; color: #161D24;">Canela</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">Fractura</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #DCF8EB; color: #1D865C; border-radius: 10px;">Alta</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agenda -->
+          <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: #F3F8FC; border-bottom: 1px solid #5C99CA40;">
+              <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #0F4C81;">Agenda</p>
+              <p style="font-size: 10px; color: #55616C;">Consultas</p>
+            </div>
+            <!-- Today group -->
+            <div style="padding: 8px; border-bottom: 1px solid #e7ebef;">
+              <p style="font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #0F4C81; margin-bottom: 5px;">Hoy · 4</p>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 700; color: #161D24;">Rocky</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">10:00</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #DCF8EB; color: #1D865C; border-radius: 10px;">Conf.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 700; color: #161D24;">Luna</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">11:30</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #f3f5f7; color: #55616C; border-radius: 10px;">Prog.</span>
+              </div>
+            </div>
+            <!-- Future group -->
+            <div style="padding: 8px;">
+              <p style="font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c; margin-bottom: 5px;">Próximas · 12</p>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 600; color: #55616C;">Milo</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">mañana</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #f3f5f7; color: #55616C; border-radius: 10px;">Prog.</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0;">
+                <div style="width: 20px; height: 20px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; font-weight: 600; color: #55616C;">Canela</p>
+                <p style="font-size: 9px; color: #73808c; flex: 1;">8 jun</p>
+                <span style="font-size: 8px; padding: 1px 5px; background: #f3f5f7; color: #55616C; border-radius: 10px;">Prog.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Directorio -->
+          <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: #f3f5f7; border-bottom: 1px solid #e7ebef;">
+              <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #55616C;">Directorio</p>
+              <p style="font-size: 10px; color: #55616C;">Dueños · Mascotas</p>
+            </div>
+            <div style="padding: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #f3f5f7; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px;">🐕</div>
+                <div style="flex: 1; min-width: 0;">
+                  <p style="font-size: 11px; font-weight: 700; color: #161D24;">Rocky</p>
+                  <p style="font-size: 9px; color: #73808c;">Canino · Golden</p>
+                </div>
+                <p style="font-size: 9px; color: #73808c;">Carlos P.</p>
+                <span style="font-size: 13px; color: #73808c;">›</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #f3f5f7; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px;">🐈</div>
+                <div style="flex: 1; min-width: 0;">
+                  <p style="font-size: 11px; font-weight: 700; color: #161D24;">Luna</p>
+                  <p style="font-size: 9px; color: #73808c;">Felino · Siamés</p>
+                </div>
+                <p style="font-size: 9px; color: #73808c;">Ana M.</p>
+                <span style="font-size: 13px; color: #73808c;">›</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 0;">
+                <div style="width: 24px; height: 24px; border-radius: 6px; background: #f3f5f7; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px;">🐕</div>
+                <div style="flex: 1; min-width: 0;">
+                  <p style="font-size: 11px; font-weight: 700; color: #161D24;">Milo</p>
+                  <p style="font-size: 9px; color: #73808c;">Canino · Labrador</p>
+                </div>
+                <p style="font-size: 9px; color: #73808c;">Luis R.</p>
+                <span style="font-size: 13px; color: #73808c;">›</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="pros-cons" style="margin-top: 12px;">
+          <div class="pros"><h4>Ventajas</h4><ul><li>Cada familia hace exactamente lo que necesita</li><li>Riesgo mínimo al implementar — cambios aislados</li><li>El sistema de diseño se aprecia en los detalles compartidos</li></ul></div>
+          <div class="cons"><h4>Trade-offs</h4><ul><li>3 plantillas distintas a mantener</li><li>Más código total</li></ul></div>
+        </div>
+        <p style="font-size: 11px; color: #35C48B; font-weight: 700; margin-top: 8px;">★ Mi recomendación</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div style="padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start;">
+      <div class="letter">B</div>
+      <div class="content" style="flex: 1; min-width: 0;">
+        <h3>Dos plantillas: "Con estado" y "Directorio"</h3>
+        <p>Operacional y Agenda se fusionan en una sola plantilla "con estado" que maneja tanto cards activos como agrupación por fecha. Directorio queda aparte. Menos plantillas, algo más rígido contextualmente.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
+          <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: #f1fcf7; border-bottom: 1px solid #b6edda;">
+              <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #27A673;">Con estado</p>
+              <p style="font-size: 10px; color: #55616C;">Estética · Cirugía · Hosp. · Consultas</p>
+            </div>
+            <div style="padding: 8px;">
+              <p style="font-size: 8px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px;">Activo / Hoy</p>
+              <div style="background: white; border: 1px solid #fde68a; border-radius: 6px; padding: 7px; margin-bottom: 6px;">
+                <p style="font-size: 10px; font-weight: 700; color: #161D24;">Rocky — 10:00</p>
+                <p style="font-size: 9px; color: #92400e;">Día 3 · En curso</p>
+              </div>
+              <p style="font-size: 8px; font-weight: 700; color: #73808c; text-transform: uppercase; letter-spacing: 0.1em; margin: 6px 0 4px;">Historial / Próximas</p>
+              <div style="display: flex; gap: 6px; padding: 4px 0; border-bottom: 1px solid #f3f5f7; align-items: center;">
+                <div style="width: 18px; height: 18px; border-radius: 4px; background: #f3f5f7; flex-shrink: 0;"></div>
+                <p style="font-size: 10px; color: #161D24; flex: 1;">Milo</p>
+                <span style="font-size: 8px; color: #73808c;">mañana</span>
+              </div>
+            </div>
+          </div>
+          <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+            <div style="padding: 8px 12px; background: #f3f5f7; border-bottom: 1px solid #e7ebef;">
+              <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #55616C;">Directorio</p>
+              <p style="font-size: 10px; color: #55616C;">Dueños · Mascotas</p>
+            </div>
+            <div style="padding: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f3f5f7;">
+                <div style="width: 22px; height: 22px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0; font-size: 11px; display: flex; align-items: center; justify-content: center;">🐕</div>
+                <p style="font-size: 11px; font-weight: 700; color: #161D24; flex: 1;">Rocky</p>
+                <p style="font-size: 9px; color: #73808c;">Carlos P.</p>
+                <span style="font-size: 13px; color: #73808c;">›</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; padding: 5px 0;">
+                <div style="width: 22px; height: 22px; border-radius: 5px; background: #f3f5f7; flex-shrink: 0; font-size: 11px; display: flex; align-items: center; justify-content: center;">🐈</div>
+                <p style="font-size: 11px; font-weight: 700; color: #161D24; flex: 1;">Luna</p>
+                <p style="font-size: 9px; color: #73808c;">Ana M.</p>
+                <span style="font-size: 13px; color: #73808c;">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 12px;">
+          <div class="pros"><h4>Ventajas</h4><ul><li>Solo 2 plantillas a mantener</li><li>Consultas y servicios comparten más código</li></ul></div>
+          <div class="cons"><h4>Trade-offs</h4><ul><li>Consultas necesita cards activos pero también agrupación por fecha — la plantilla puede quedar forzada</li><li>Menos natural para el vet al cambiar entre vistas</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPROACH C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)" style="padding: 0; overflow: hidden;">
+    <div style="padding: 18px 22px; display: flex; gap: 16px; align-items: flex-start;">
+      <div class="letter">C</div>
+      <div class="content" style="flex: 1; min-width: 0;">
+        <h3>Una sola fila universal, todo en el mismo componente</h3>
+        <p>Un componente <code>DataRow</code> único con props opcionales para el badge, fecha, estado, etc. Todos los listados usan exactamente el mismo row. La diferencia es solo en los datos que se pasan.</p>
+
+        <div style="background: white; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden; font-size: 12px; margin-top: 14px;">
+          <div style="display: flex; gap: 10px; padding: 8px 14px; background: #f3f5f7; border-bottom: 1px solid #e7ebef;">
+            <span style="width: 110px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c;">Paciente</span>
+            <span style="flex: 1; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c;">Detalle</span>
+            <span style="width: 70px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c;">Estado</span>
+            <span style="width: 60px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #73808c;">Fecha</span>
+            <span style="width: 18px;"></span>
+          </div>
+          <!-- Row: surgery -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f3f5f7;">
+            <div style="display: flex; align-items: center; gap: 6px; width: 110px;">
+              <div style="width: 28px; height: 28px; border-radius: 7px; background: #f3f5f7; display: flex; align-items: center; justify-content: center; font-size: 13px;">🐕</div>
+              <div><p style="font-weight: 700; font-size: 11px; color: #161D24;">Rocky</p><p style="font-size: 9px; color: #73808c;">Canino</p></div>
+            </div>
+            <p style="flex: 1; font-size: 11px; color: #161D24;">Castración</p>
+            <span style="width: 70px; font-size: 9px; padding: 2px 7px; background: #DCF8EB; color: #1D865C; border-radius: 20px; border: 1px solid #b6edda; font-weight: 600; display: block; text-align: center;">Completada</span>
+            <p style="width: 60px; font-size: 10px; color: #55616C;">12 may</p>
+            <span style="width: 18px; font-size: 13px; color: #73808c; text-align: center;">›</span>
+          </div>
+          <!-- Row: consulta -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f3f5f7;">
+            <div style="display: flex; align-items: center; gap: 6px; width: 110px;">
+              <div style="width: 28px; height: 28px; border-radius: 7px; background: #f3f5f7; display: flex; align-items: center; justify-content: center; font-size: 13px;">🐈</div>
+              <div><p style="font-weight: 700; font-size: 11px; color: #161D24;">Luna</p><p style="font-size: 9px; color: #73808c;">Felino</p></div>
+            </div>
+            <p style="flex: 1; font-size: 11px; color: #161D24;">Consulta general</p>
+            <span style="width: 70px; font-size: 9px; padding: 2px 7px; background: #F3F8FC; color: #0F4C81; border-radius: 20px; border: 1px solid #5C99CA40; font-weight: 600; display: block; text-align: center;">Confirmada</span>
+            <p style="width: 60px; font-size: 10px; color: #55616C;">hoy 11:30</p>
+            <span style="width: 18px; font-size: 13px; color: #73808c; text-align: center;">›</span>
+          </div>
+          <!-- Row: directorio -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
+            <div style="display: flex; align-items: center; gap: 6px; width: 110px;">
+              <div style="width: 28px; height: 28px; border-radius: 7px; background: #f3f5f7; display: flex; align-items: center; justify-content: center; font-size: 13px;">🐕</div>
+              <div><p style="font-weight: 700; font-size: 11px; color: #161D24;">Milo</p><p style="font-size: 9px; color: #73808c;">Canino</p></div>
+            </div>
+            <p style="flex: 1; font-size: 11px; color: #55616C;">Labrador · Carlos Ramírez</p>
+            <span style="width: 70px; font-size: 9px; color: #73808c; display: block; text-align: center;">—</span>
+            <p style="width: 60px; font-size: 10px; color: #73808c;">—</p>
+            <span style="width: 18px; font-size: 13px; color: #73808c; text-align: center;">›</span>
+          </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 12px;">
+          <div class="pros"><h4>Ventajas</h4><ul><li>Un solo componente a mantener</li><li>Máxima consistencia visual en toda la app</li></ul></div>
+          <div class="cons"><h4>Trade-offs</h4><ul><li>Las filas de directorio y servicios tienen necesidades muy distintas — el componente universal se vuelve genérico y pierde legibilidad</li><li>Las columnas fijas no encajan bien para Dueños (que muestra mascotas vinculadas) ni para Mascotas (que muestra especie/raza)</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 20px; padding: 14px 16px; background: #f1fcf7; border: 1px solid #b6edda; border-radius: 10px; font-size: 12px;">
+  <p style="font-weight: 700; color: #1D865C; margin-bottom: 4px;">¿Por qué recomiendo A?</p>
+  <p style="color: #55616C; line-height: 1.6;">Las 3 familias tienen necesidades UX genuinamente distintas. Forzarlas en una sola plantilla (C) o en dos (B) produce componentes que hacen demasiado o filas que se sienten forzadas para alguna familia. Con A, cada plantilla hace exactamente lo que necesita — y el sistema de diseño es lo que las une visualmente.</p>
+</div>

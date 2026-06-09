@@ -1,0 +1,203 @@
+<h2>Sección 1 — Tokens Compartidos</h2>
+<p class="subtitle">Lo que todos los listados tienen exactamente igual, sin excepción.</p>
+
+<div style="display: flex; flex-direction: column; gap: 20px; margin-top: 24px;">
+
+  <!-- Row anatomy -->
+  <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 12px; padding: 18px;">
+    <p class="label" style="margin-bottom: 14px;">Anatomía de fila — aplicada a todos</p>
+
+    <!-- The row itself, annotated -->
+    <div style="position: relative;">
+      <div style="background: white; border: 1px solid #e7ebef; border-radius: 10px; overflow: hidden;">
+        <!-- Column header -->
+        <div style="display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: #f3f5f7; border-bottom: 1px solid #e7ebef;">
+          <span style="width: 140px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #73808c;">Mascota</span>
+          <span style="flex: 1; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #73808c;">Detalle principal</span>
+          <span style="width: 100px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #73808c;">Estado / Fecha</span>
+          <span style="width: 36px;"></span>
+        </div>
+
+        <!-- The row -->
+        <div style="display: flex; align-items: center; gap: 16px; padding: 14px 20px; position: relative;">
+          <!-- Left accent -->
+          <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 28px; background: #35C48B; border-radius: 0 3px 3px 0;"></div>
+
+          <!-- Avatar 36px -->
+          <div style="display: flex; align-items: center; gap: 10px; width: 140px; min-width: 0;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #f3f5f7, #e7ebef); border: 1px solid #d0d8e0; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;">🐕</div>
+            <div style="min-width: 0;">
+              <p style="font-weight: 700; font-size: 14px; color: #35C48B; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rocky</p>
+              <p style="font-size: 11px; color: #73808c; margin-top: 1px;">Canino</p>
+            </div>
+          </div>
+
+          <!-- Detail -->
+          <p style="flex: 1; font-size: 13px; font-weight: 500; color: #161D24;">Castración electiva</p>
+
+          <!-- Badge + date -->
+          <div style="width: 100px; display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 10px; padding: 3px 10px; background: #DCF8EB; color: #1D865C; border-radius: 20px; border: 1px solid #b6edda; font-weight: 600; display: inline-block;">Completada</span>
+            <p style="font-size: 11px; color: #73808c;">12 may 2026</p>
+          </div>
+
+          <!-- Chevron -->
+          <div style="width: 36px; height: 36px; border-radius: 9px; background: white; border: 1px solid #e7ebef; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(15,76,129,0.06);">
+            <span style="color: #35C48B; font-size: 15px; font-weight: 700;">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annotations -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px;">
+        <div style="background: #f1fcf7; border: 1px solid #b6edda; border-radius: 6px; padding: 8px; text-align: center;">
+          <p style="font-size: 10px; font-weight: 700; color: #1D865C;">Avatar</p>
+          <p style="font-size: 9px; color: #55616C;">36×36px · rounded-[10px]<br>Gradiente muted → muted</p>
+        </div>
+        <div style="background: #f1fcf7; border: 1px solid #b6edda; border-radius: 6px; padding: 8px; text-align: center;">
+          <p style="font-size: 10px; font-weight: 700; color: #1D865C;">Nombre</p>
+          <p style="font-size: 9px; color: #55616C;">14px · 700 · color primario<br>Subtítulo 11px muted</p>
+        </div>
+        <div style="background: #f1fcf7; border: 1px solid #b6edda; border-radius: 6px; padding: 8px; text-align: center;">
+          <p style="font-size: 10px; font-weight: 700; color: #1D865C;">Col. header</p>
+          <p style="font-size: 9px; color: #55616C;">9px · 700 · uppercase<br>tracking-[0.15em] muted/60</p>
+        </div>
+        <div style="background: #f1fcf7; border: 1px solid #b6edda; border-radius: 6px; padding: 8px; text-align: center;">
+          <p style="font-size: 10px; font-weight: 700; color: #1D865C;">Chevron</p>
+          <p style="font-size: 9px; color: #55616C;">36×36px · rounded-[9px]<br>border + shadow on hover</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared states row -->
+  <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 12px; padding: 18px;">
+    <p class="label" style="margin-bottom: 14px;">Estados de fila compartidos</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+
+      <!-- Default -->
+      <div>
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #73808c; letter-spacing: 0.1em; margin-bottom: 6px;">Default</p>
+        <div style="background: white; border: 1px solid #e7ebef; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; position: relative; overflow: hidden;">
+          <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: #35C48B; border-radius: 0 2px 2px 0;"></div>
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: #f3f5f7; border: 1px solid #e7ebef; flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <p style="font-size: 11px; font-weight: 700; color: #161D24;">Rocky</p>
+            <p style="font-size: 9px; color: #73808c;">Canino</p>
+          </div>
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: #fafbfc; border: 1px solid transparent; display: flex; align-items: center; justify-content: center;">
+            <span style="color: #73808c; opacity: 0.4; font-size: 13px;">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hover -->
+      <div>
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #73808c; letter-spacing: 0.1em; margin-bottom: 6px;">Hover</p>
+        <div style="background: rgba(53,196,139,0.015); border: 1px solid #e7ebef; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; position: relative; overflow: hidden;">
+          <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 28px; background: #35C48B; border-radius: 0 2px 2px 0;"></div>
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, rgba(53,196,139,0.05), rgba(53,196,139,0.1)); border: 1px solid rgba(53,196,139,0.3); flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <p style="font-size: 11px; font-weight: 700; color: #35C48B;">Rocky</p>
+            <p style="font-size: 9px; color: #73808c;">Canino</p>
+          </div>
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: white; border: 1px solid #e7ebef; box-shadow: 0 1px 3px rgba(15,76,129,0.08); display: flex; align-items: center; justify-content: center;">
+            <span style="color: #35C48B; font-size: 13px;">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div>
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #73808c; letter-spacing: 0.1em; margin-bottom: 6px;">Skeleton (carga)</p>
+        <div style="background: white; border: 1px solid #e7ebef; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;">
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(90deg, #f3f5f7 25%, #e7ebef 50%, #f3f5f7 75%); background-size: 200% 100%; flex-shrink: 0;"></div>
+          <div style="flex: 1;">
+            <div style="height: 10px; width: 45%; background: linear-gradient(90deg, #f3f5f7 25%, #e7ebef 50%, #f3f5f7 75%); border-radius: 4px; margin-bottom: 5px;"></div>
+            <div style="height: 8px; width: 25%; background: linear-gradient(90deg, #f3f5f7 25%, #e7ebef 50%, #f3f5f7 75%); border-radius: 4px;"></div>
+          </div>
+          <div style="width: 50px; height: 18px; background: linear-gradient(90deg, #f3f5f7 25%, #e7ebef 50%, #f3f5f7 75%); border-radius: 10px;"></div>
+          <div style="width: 28px; height: 28px; border-radius: 7px; background: #f3f5f7;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section headers -->
+  <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 12px; padding: 18px;">
+    <p class="label" style="margin-bottom: 14px;">Section headers — el mismo patrón en todas las familias</p>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+
+      <!-- Active / En curso -->
+      <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 9px 16px; display: flex; align-items: center; gap: 8px;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; flex-shrink: 0;"></span>
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #92400e; flex: 1;">En curso</p>
+        <span style="font-size: 10px; font-family: monospace; padding: 1px 7px; background: #fde68a; color: #92400e; border-radius: 4px; font-weight: 700;">3</span>
+        <p style="font-size: 9px; color: #73808c; font-style: italic;">Cirugías · Estética · Hospitalización</p>
+      </div>
+
+      <!-- Hoy -->
+      <div style="background: #F3F8FC; border: 1px solid rgba(15,76,129,0.15); border-radius: 8px; padding: 9px 16px; display: flex; align-items: center; gap: 8px;">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: #337DB9; flex-shrink: 0;"></span>
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #0F4C81; flex: 1;">Hoy — martes 7 jun</p>
+        <span style="font-size: 10px; font-family: monospace; padding: 1px 7px; background: rgba(15,76,129,0.1); color: #0F4C81; border-radius: 4px; font-weight: 700;">4</span>
+        <p style="font-size: 9px; color: #73808c; font-style: italic;">Consultas</p>
+      </div>
+
+      <!-- Historial / Próximas -->
+      <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 8px; padding: 9px 16px; display: flex; align-items: center; gap: 8px;">
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #73808c; flex: 1;">Historial</p>
+        <span style="font-size: 10px; font-family: monospace; padding: 1px 7px; background: #f3f5f7; color: #73808c; border-radius: 4px; font-weight: 700;">27</span>
+        <p style="font-size: 9px; color: #73808c; font-style: italic;">Cirugías · Estética · Hospitalización · Hotel</p>
+      </div>
+
+      <!-- Próximas -->
+      <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 8px; padding: 9px 16px; display: flex; align-items: center; gap: 8px;">
+        <p style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #73808c; flex: 1;">Próximas</p>
+        <span style="font-size: 10px; font-family: monospace; padding: 1px 7px; background: #f3f5f7; color: #73808c; border-radius: 4px; font-weight: 700;">12</span>
+        <p style="font-size: 9px; color: #73808c; font-style: italic;">Consultas</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Empty states + footer -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+
+    <!-- Empty state -->
+    <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 12px; padding: 16px;">
+      <p class="label" style="margin-bottom: 12px;">Empty state — mismo patrón</p>
+      <div style="text-align: center; padding: 24px 16px; border: 2px dashed #e7ebef; border-radius: 10px; background: white;">
+        <div style="position: relative; width: 48px; height: 48px; margin: 0 auto 12px;">
+          <div style="position: absolute; inset: 0; background: rgba(53,196,139,0.06); border-radius: 10px; transform: rotate(6deg);"></div>
+          <div style="position: absolute; inset: 0; background: white; border: 1px solid #e7ebef; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">⚕</div>
+        </div>
+        <p style="font-size: 13px; font-weight: 700; color: #161D24;">Sin registros</p>
+        <p style="font-size: 11px; color: #73808c; margin-top: 4px;">Texto contextual por lista</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #fafbfc; border: 1px solid #e7ebef; border-radius: 12px; padding: 16px;">
+      <p class="label" style="margin-bottom: 12px;">Footer de tabla — mismo patrón</p>
+      <div style="background: white; border: 1px solid #e7ebef; border-radius: 8px; overflow: hidden;">
+        <div style="padding: 10px 16px; background: #fafbfc; border-top: 1px solid #f3f5f7; display: flex; align-items: center; justify-content: space-between;">
+          <p style="font-size: 9px; font-family: monospace; color: #73808c; text-transform: uppercase; letter-spacing: 0.1em;">27 registros</p>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background: #35C48B;"></span>
+            <p style="font-size: 9px; font-weight: 700; color: #35C48B; text-transform: uppercase; letter-spacing: 0.05em;">Actualizado</p>
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 10px; color: #73808c; margin-top: 8px;">Todos los listados tendrán footer — actualmente solo algunos lo tienen.</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 18px; padding: 14px 16px; background: #f1fcf7; border: 1px solid #b6edda; border-radius: 10px; font-size: 12px; color: #55616C; line-height: 1.7;">
+  <p style="font-weight: 700; color: #1D865C; margin-bottom: 4px;">Cambios unificadores clave vs. hoy</p>
+  <p>• Avatar: <strong>36px</strong> uniforme (hoy: 44px / 48px / 56px) &nbsp;·&nbsp; Padding header: <strong>px-6</strong> en todos (hoy: px-6 / px-10)  &nbsp;·&nbsp; Skeleton: <strong>mismo componente</strong> en todos (hoy: algunos solo texto) &nbsp;·&nbsp; Footer: <strong>todos lo tienen</strong> (hoy: solo 4 de 6) &nbsp;·&nbsp; Section headers: <strong>patrón único</strong> para En curso / Hoy / Historial / Próximas</p>
+</div>
+
+<p style="margin-top: 14px; font-size: 12px; color: #73808c; text-align: center;">¿Esta base de tokens se ve bien? Respóndeme en el terminal para continuar con las 3 plantillas.</p>

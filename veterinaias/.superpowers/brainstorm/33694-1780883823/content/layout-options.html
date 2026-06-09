@@ -1,0 +1,222 @@
+<h2>¿Cuál estructura de dashboard te convence más?</h2>
+<p class="subtitle">Las 3 propuestas asumen: foco en "¿qué pasa ahora?", acciones globales, franja compacta de citas</p>
+
+<div class="cards" style="grid-template-columns: repeat(3, 1fr); gap: 20px;">
+
+  <!-- OPCIÓN A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8faf8; border-radius: 10px 10px 0 0;">
+      <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;">A — Operations First</div>
+
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="font-size: 11px; font-weight: 700; color: #1a1a1a;">Sábado 7 Jun</div>
+        <div style="display:flex; gap:4px;">
+          <div style="background:#1a1a1a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px; font-weight:600;">+ Nueva cita</div>
+          <div style="background:#2d7a3a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px; font-weight:600;">Atender ahora</div>
+        </div>
+      </div>
+
+      <!-- Métricas strip -->
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <div style="flex:1; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:5px 6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#d97706;">3</div>
+          <div style="font-size:8px; color:#9ca3af;">En curso</div>
+        </div>
+        <div style="flex:1; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:5px 6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#1a1a1a;">2</div>
+          <div style="font-size:8px; color:#9ca3af;">Hotel</div>
+        </div>
+        <div style="flex:1; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:5px 6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#1a1a1a;">8</div>
+          <div style="font-size:8px; color:#9ca3af;">Citas hoy</div>
+        </div>
+        <div style="flex:1; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:5px 6px; text-align:center;">
+          <div style="font-size:14px; font-weight:800; color:#ea580c;">1</div>
+          <div style="font-size:8px; color:#9ca3af;">Alerta</div>
+        </div>
+      </div>
+
+      <!-- Servicios activos (GRANDE) -->
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:8px; margin-bottom:8px;">
+        <div style="font-size:9px; font-weight:700; color:#92400e; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px;">● Servicios activos · 3</div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="background:#fff; border:1px solid #fde68a; border-radius:7px; padding:5px 8px; font-size:10px; display:flex; justify-content:space-between;">
+            <span><strong>Luna</strong> <span style="color:#9ca3af;">Estética</span></span>
+            <span style="color:#d97706; font-size:9px;">24 min</span>
+          </div>
+          <div style="background:#fff; border:1px solid #fde68a; border-radius:7px; padding:5px 8px; font-size:10px; display:flex; justify-content:space-between;">
+            <span><strong>Rex</strong> <span style="color:#9ca3af;">Hospitalización</span></span>
+            <span style="color:#d97706; font-size:9px;">Día 2</span>
+          </div>
+          <div style="background:#fff; border:1px solid #fed7aa; border-radius:7px; padding:5px 8px; font-size:10px; display:flex; justify-content:space-between; border-color:#fed7aa;">
+            <span><strong>Milo</strong> <span style="color:#9ca3af;">Hotel</span></span>
+            <span style="color:#ea580c; font-size:9px; font-weight:700;">⚠ Salida vencida</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Franja compacta citas -->
+      <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px 8px;">
+        <div style="font-size:9px; font-weight:600; color:#9ca3af; text-transform:uppercase; margin-bottom:4px;">Próximas citas</div>
+        <div style="display:flex; gap:4px; overflow:hidden;">
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:3px 6px; font-size:9px; white-space:nowrap;"><strong>10:00</strong> Max</div>
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:3px 6px; font-size:9px; white-space:nowrap;"><strong>10:30</strong> Coco</div>
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:5px; padding:3px 6px; font-size:9px; white-space:nowrap;"><strong>11:00</strong> Nina</div>
+          <div style="color:#9ca3af; font-size:9px; padding:3px; align-self:center;">+5</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Operations First</h3>
+      <p>Todo vertical, una sección después de otra. Métricas arriba, servicios activos dominan la pantalla, citas abajo. Limpio y directo.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8faf8; border-radius: 10px 10px 0 0;">
+      <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;">B — Split Screen</div>
+
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div>
+          <div style="font-size:11px; font-weight:700; color:#1a1a1a;">Sábado 7 Jun</div>
+          <div style="font-size:9px; color:#9ca3af;">3 en curso · 2 hotel · 8 citas</div>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <div style="background:#1a1a1a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px;">+ Nueva cita</div>
+          <div style="background:#2d7a3a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px;">Atender ahora</div>
+        </div>
+      </div>
+
+      <!-- Split layout -->
+      <div style="display:grid; grid-template-columns: 58% 42%; gap:6px;">
+        <!-- Left: Activos -->
+        <div>
+          <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:7px;">
+            <div style="font-size:9px; font-weight:700; color:#92400e; text-transform:uppercase; margin-bottom:5px;">● Activos · 3</div>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <div style="background:#fff; border:1px solid #fde68a; border-radius:6px; padding:4px 7px; font-size:9px; display:flex; justify-content:space-between;">
+                <span><strong>Luna</strong> <span style="color:#9ca3af; font-size:8px;">Estética</span></span>
+                <span style="color:#d97706; font-size:8px;">24 min</span>
+              </div>
+              <div style="background:#fff; border:1px solid #fde68a; border-radius:6px; padding:4px 7px; font-size:9px; display:flex; justify-content:space-between;">
+                <span><strong>Rex</strong> <span style="color:#9ca3af; font-size:8px;">Hosp.</span></span>
+                <span style="color:#d97706; font-size:8px;">Día 2</span>
+              </div>
+              <div style="background:#fff; border:1px solid #fed7aa; border-radius:6px; padding:4px 7px; font-size:9px; display:flex; justify-content:space-between;">
+                <span><strong>Milo</strong> <span style="color:#9ca3af; font-size:8px;">Hotel</span></span>
+                <span style="color:#ea580c; font-size:8px; font-weight:700;">⚠ Vencido</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerta banner -->
+          <div style="margin-top:5px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:5px 8px; font-size:9px; color:#c2410c;">
+            <strong>1 alerta:</strong> Milo (Hotel) — salida vencida 2h
+          </div>
+        </div>
+
+        <!-- Right: Citas + mini métricas -->
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <!-- Mini métricas vertical -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">
+            <div style="background:#fff; border:1px solid #e5e7eb; border-radius:7px; padding:4px; text-align:center;">
+              <div style="font-size:13px; font-weight:800; color:#1a1a1a;">8</div>
+              <div style="font-size:7px; color:#9ca3af;">Hoy</div>
+            </div>
+            <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:7px; padding:4px; text-align:center;">
+              <div style="font-size:13px; font-weight:800; color:#ea580c;">2</div>
+              <div style="font-size:7px; color:#9ca3af;">Confirmar</div>
+            </div>
+          </div>
+          <!-- Próximas citas lista -->
+          <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:6px; flex:1;">
+            <div style="font-size:8px; font-weight:600; color:#9ca3af; text-transform:uppercase; margin-bottom:4px;">Hoy</div>
+            <div style="display:flex; flex-direction:column; gap:3px;">
+              <div style="font-size:9px; display:flex; justify-content:space-between;"><span style="color:#2563eb; font-weight:600;">10:00</span><span>Max · Consulta</span></div>
+              <div style="font-size:9px; display:flex; justify-content:space-between;"><span style="color:#2563eb; font-weight:600;">10:30</span><span>Coco · Estética</span></div>
+              <div style="font-size:9px; display:flex; justify-content:space-between;"><span style="color:#2563eb; font-weight:600;">11:00</span><span>Nina · Cirugía</span></div>
+              <div style="font-size:8px; color:#9ca3af; margin-top:2px;">+5 más hoy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Split Screen</h3>
+      <p>Dos columnas: servicios activos + alertas a la izquierda, métricas + lista de citas a la derecha. Más información de un vistazo, algo más denso.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #f8faf8; border-radius: 10px 10px 0 0;">
+      <div style="font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;">C — Command Center</div>
+
+      <!-- Header con métricas inline -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="display:flex; align-items:baseline; gap:10px;">
+          <div style="font-size:11px; font-weight:700; color:#1a1a1a;">Sáb 7 Jun</div>
+          <div style="display:flex; gap:5px; align-items:center;">
+            <span style="font-size:10px; font-weight:700; color:#d97706;">3 activos</span>
+            <span style="color:#d1d5db;">·</span>
+            <span style="font-size:10px; color:#1a1a1a; font-weight:600;">8 citas</span>
+            <span style="color:#d1d5db;">·</span>
+            <span style="font-size:10px; font-weight:700; color:#ea580c;">1 alerta</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <div style="background:#1a1a1a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px;">+ Cita</div>
+          <div style="background:#2d7a3a; color:#fff; font-size:9px; padding:3px 7px; border-radius:5px;">Walk-in</div>
+        </div>
+      </div>
+
+      <!-- Alert banner -->
+      <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:5px 10px; font-size:9px; color:#c2410c; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+        <span style="font-size:12px;">⚠</span>
+        <span><strong>Milo</strong> — Hotel · Salida vencida hace 2h · </span>
+        <span style="margin-left:auto; font-weight:700; text-decoration:underline; cursor:pointer;">Ver →</span>
+      </div>
+
+      <!-- Grid de activos por tipo (2×N) -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:8px;">
+        <div style="background:#fff; border:1px solid #fde68a; border-radius:8px; padding:6px 8px;">
+          <div style="font-size:8px; color:#92400e; font-weight:700; text-transform:uppercase; margin-bottom:3px;">🐾 Estética</div>
+          <div style="font-size:10px; font-weight:600;">Luna</div>
+          <div style="font-size:8px; color:#d97706;">24 min en curso</div>
+        </div>
+        <div style="background:#fff; border:1px solid #fde68a; border-radius:8px; padding:6px 8px;">
+          <div style="font-size:8px; color:#92400e; font-weight:700; text-transform:uppercase; margin-bottom:3px;">🏥 Hospitalización</div>
+          <div style="font-size:10px; font-weight:600;">Rex</div>
+          <div style="font-size:8px; color:#d97706;">Día 2</div>
+        </div>
+        <div style="background:#fff; border:1px solid #fed7aa; border-radius:8px; padding:6px 8px; border-color:#fed7aa;">
+          <div style="font-size:8px; color:#c2410c; font-weight:700; text-transform:uppercase; margin-bottom:3px;">🏨 Hotel ⚠</div>
+          <div style="font-size:10px; font-weight:600;">Milo</div>
+          <div style="font-size:8px; color:#ea580c; font-weight:700;">Salida vencida</div>
+        </div>
+        <div style="background:#f9fafb; border:1px dashed #d1d5db; border-radius:8px; padding:6px 8px; display:flex; align-items:center; justify-content:center;">
+          <span style="font-size:9px; color:#d1d5db;">Sin consultas activas</span>
+        </div>
+      </div>
+
+      <!-- Franja citas compacta -->
+      <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:5px 8px;">
+        <div style="display:flex; gap:5px; align-items:center; overflow:hidden;">
+          <span style="font-size:8px; color:#9ca3af; font-weight:600; text-transform:uppercase; white-space:nowrap;">Próximas →</span>
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:2px 6px; font-size:9px; white-space:nowrap;"><strong>10:00</strong> Max</div>
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:5px; padding:2px 6px; font-size:9px; white-space:nowrap;"><strong>10:30</strong> Coco</div>
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:5px; padding:2px 6px; font-size:9px; white-space:nowrap;"><strong>11:00</strong> Nina</div>
+          <span style="font-size:8px; color:#9ca3af; margin-left:2px;">+5</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Command Center</h3>
+      <p>Métricas en el header (1 línea), banner de alertas urgentes, grid de activos por tipo de servicio, franja de citas al final. Máxima densidad sin columnas.</p>
+    </div>
+  </div>
+
+</div>
