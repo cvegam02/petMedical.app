@@ -1,0 +1,105 @@
+<h2>¿Cómo agrupamos las secciones en el sidebar?</h2>
+<p class="subtitle">Tenemos 7 tabs actuales — 3 de ellos muy delgados. ¿Los fusionamos o los dejamos individuales?</p>
+
+<div class="cards">
+
+  <!-- OPCIÓN A: Fusionar delgados en Clínica -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 14px; background: #f8fafc; border-radius: 8px; font-family: system-ui;">
+      <div style="display: flex; gap: 10px; height: 230px;">
+        <div style="width: 155px; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 10px; flex-shrink: 0; overflow: hidden;">
+          <div style="font-size: 9px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding: 0 4px;">Configuración</div>
+
+          <!-- Mi Clínica group -->
+          <div style="font-size: 9px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; padding: 4px 4px 2px; letter-spacing: 0.08em;">Mi Clínica</div>
+          <div style="font-size: 11px; font-weight: 700; color: #1D865C; background: #DCF8EB; padding: 5px 8px; border-radius: 6px; margin-bottom: 1px;">Información</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">General</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 8px;">Recetas</div>
+
+          <!-- Catálogos group -->
+          <div style="font-size: 9px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; padding: 4px 4px 2px; letter-spacing: 0.08em;">Catálogos</div>
+          <div style="font-size: 11px; color: #73808C; padding: 4px 8px 4px 16px; margin-bottom: 1px;">Vacunas</div>
+          <div style="font-size: 11px; color: #73808C; padding: 4px 8px 4px 16px; margin-bottom: 1px;">Medicamentos</div>
+          <div style="font-size: 11px; color: #73808C; padding: 4px 8px 4px 16px; margin-bottom: 8px;">Estética</div>
+
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">🔌 Integraciones</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px;">👥 Equipo</div>
+        </div>
+        <div style="flex: 1; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 10px; font-weight: 700; color: #1D865C; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Mi Clínica</div>
+          <div style="font-size: 13px; font-weight: 700; color: #161D24; margin-bottom: 10px;">Información</div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 70%; margin-bottom: 6px;"></div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 50%; margin-bottom: 6px;"></div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 60%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Agrupado (3 grupos)</h3>
+      <p>Agrupa en "Mi Clínica" (Información + General + Recetas) y "Catálogos" (Vacunas + Medicamentos + Estética). 6 secciones de navegación en total. Estético y limpio.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B: Todo plano, sin sub-grupos -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 14px; background: #f8fafc; border-radius: 8px; font-family: system-ui;">
+      <div style="display: flex; gap: 10px; height: 230px;">
+        <div style="width: 155px; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 10px; flex-shrink: 0; overflow: hidden;">
+          <div style="font-size: 9px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding: 0 4px;">Configuración</div>
+          <div style="font-size: 11px; font-weight: 700; color: #1D865C; background: #DCF8EB; padding: 5px 8px; border-radius: 6px; margin-bottom: 1px;">🏥 Clínica</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">⚙️ General</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">📋 Catálogos</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">✂️ Servicios</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">💊 Recetas</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">🔌 Integraciones</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px;">👥 Equipo</div>
+        </div>
+        <div style="flex: 1; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 13px; font-weight: 700; color: #161D24; margin-bottom: 10px;">Clínica</div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 70%; margin-bottom: 6px;"></div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 50%;"></div>
+          <div style="font-size: 10px; color: #9CA3AF; margin-top: 14px;">= mismas 7 secciones, en sidebar</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Plano (7 items)</h3>
+      <p>Migración directa: los mismos 7 tabs ahora son 7 items en el sidebar. Sin fusiones. Más simple de implementar, pero no resuelve el problema de las secciones delgadas.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C: Fusionar todo, solo 4 items -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 14px; background: #f8fafc; border-radius: 8px; font-family: system-ui;">
+      <div style="display: flex; gap: 10px; height: 230px;">
+        <div style="width: 155px; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 10px; flex-shrink: 0; overflow: hidden;">
+          <div style="font-size: 9px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding: 0 4px;">Configuración</div>
+          <div style="font-size: 11px; font-weight: 700; color: #1D865C; background: #DCF8EB; padding: 5px 8px; border-radius: 6px; margin-bottom: 1px;">🏥 Clínica</div>
+          <div style="font-size: 10px; color: #9CA3AF; padding: 2px 8px 2px 20px; margin-bottom: 1px;">Información · General · Recetas</div>
+          <div style="height: 1px; background: #f1f5f9; margin: 6px 0;"></div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">📋 Catálogos</div>
+          <div style="font-size: 10px; color: #9CA3AF; padding: 2px 8px 2px 20px; margin-bottom: 1px;">Vacunas · Medicamentos · Estética</div>
+          <div style="height: 1px; background: #f1f5f9; margin: 6px 0;"></div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px; margin-bottom: 1px;">🔌 Integraciones</div>
+          <div style="font-size: 11px; color: #73808C; padding: 5px 8px;">👥 Equipo</div>
+        </div>
+        <div style="flex: 1; background: white; border: 1px solid #e7ebef; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 13px; font-weight: 700; color: #161D24; margin-bottom: 4px;">Clínica</div>
+          <!-- Sub-tabs dentro de Clínica -->
+          <div style="display: flex; gap: 1px; margin-bottom: 12px; background: #f3f5f7; border-radius: 7px; padding: 2px;">
+            <div style="font-size: 9px; font-weight: 600; background: white; border-radius: 5px; padding: 4px 10px; color: #161D24; box-shadow: 0 1px 2px rgba(0,0,0,.06);">Info</div>
+            <div style="font-size: 9px; color: #73808C; padding: 4px 10px;">General</div>
+            <div style="font-size: 9px; color: #73808C; padding: 4px 10px;">Recetas</div>
+          </div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 70%; margin-bottom: 6px;"></div>
+          <div style="height: 7px; background: #f1f5f9; border-radius: 3px; width: 50%;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Consolidado (4 items + sub-tabs)</h3>
+      <p>Solo 4 items en sidebar. Clínica y Catálogos tienen sub-tabs internos. Máxima limpieza visual. Pero más niveles de navegación al hacer clic.</p>
+    </div>
+  </div>
+
+</div>
