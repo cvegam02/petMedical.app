@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UserMenu } from '@/components/dashboard/UserMenu'
 import { Toaster } from 'sonner'
-import { SidebarNav } from '@/components/dashboard/SidebarNav'
+import { AppSidebar } from '@/components/dashboard/AppSidebar'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -36,31 +36,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="h-dvh flex flex-col border-t-[3px] border-secondary-foreground bg-background overflow-hidden">
       <div className="flex flex-1 min-h-0">
 
-        {/* Sidebar */}
-        <aside className="w-56 h-full flex flex-col bg-secondary border-r border-border shrink-0">
-
-          {/* Brand */}
-          <div className="px-4 h-14 flex items-center shrink-0">
-            <Link href="/dashboard">
-              <Image
-                src="/mundeopet.png"
-                alt="MundoPet"
-                width={180}
-                height={75}
-                className="object-contain"
-                priority
-              />
-            </Link>
-          </div>
-
-          {/* Divider */}
-          <div className="mx-4 border-t border-border" />
-
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto px-3 py-3">
-            <SidebarNav role={profile?.role ?? ''} />
-          </nav>
-        </aside>
+        {/* Sidebar — conmuta entre principal y settings */}
+        <AppSidebar role={profile?.role ?? ''} />
 
         {/* Content column */}
         <div className="flex-1 flex flex-col min-h-0">
