@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { SettingsNav } from '@/components/settings/SettingsNav'
 
 export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,17 +15,5 @@ export default async function SettingsLayout({ children }: { children: React.Rea
 
   if ((profile as any)?.role !== 'admin') redirect('/dashboard')
 
-  return (
-    <div>
-      <div className="space-y-1 mb-6">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-[1.5px] bg-secondary-foreground/20 rounded-full" />
-          <p className="text-[10px] font-mono font-bold text-secondary-foreground uppercase tracking-[0.2em]">Administración</p>
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Configuración</h1>
-      </div>
-      <SettingsNav />
-      {children}
-    </div>
-  )
+  return <>{children}</>
 }
