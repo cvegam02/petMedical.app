@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { PawPrint, Cat, Dog, ChevronRight, User, Filter } from 'lucide-react'
+import { PawPrint, ChevronRight, User, Filter } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { SearchInput } from '@/components/ui/search-input'
 import { ListSkeleton, ListFooter } from '@/components/ui/list-primitives'
 
@@ -138,10 +139,7 @@ export default function PetsPage() {
 }
 
 function PetRow({ pet }: { pet: Pet }) {
-  const speciesName = pet.species?.name?.toLowerCase() ?? ''
-  const isCat = speciesName.includes('fel') || speciesName.includes('gat')
-  const isDog = speciesName.includes('can') || speciesName.includes('perr')
-  const Icon = isCat ? Cat : isDog ? Dog : PawPrint
+  const Icon = getSpeciesIcon(pet.species?.name)
 
   return (
     <Link

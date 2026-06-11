@@ -1,29 +1,16 @@
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UserMenu } from '@/components/dashboard/UserMenu'
 import { Toaster } from 'sonner'
 import { AppSidebar } from '@/components/dashboard/AppSidebar'
+import { getUser, getCachedProfile } from '@/lib/queries/profile'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  interface DashboardProfile {
-    full_name: string
-    role: string
-    tenant_id: string | null
-    tenants: { name: string; settings: { logo_url?: string | null } | null } | null
-  }
-
-  const { data: profile } = (await supabase
-    .from('user_profiles')
-    .select('full_name, role, tenant_id, tenants(name, settings)')
-    .eq('id', user!.id)
-    .single()) as { data: DashboardProfile | null; error: unknown }
+  const user = await getUser()
+  const profile = user ? await getCachedProfile(user.id) : null
 
   const tenantName = profile?.tenants?.name ?? ''
-  const tenantLogoUrl = (profile?.tenants?.settings as any)?.logo_url ?? null
+  const tenantLogoUrl = profile?.tenants?.settings?.logo_url ?? null
   const initials = profile?.full_name
     ?.split(' ')
     .map(w => w[0])

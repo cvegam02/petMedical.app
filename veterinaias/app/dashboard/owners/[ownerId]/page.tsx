@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { PetCard } from '@/components/pets/PetCard'
 import { buttonVariants } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, Plus, Cat, Dog, PawPrint, CalendarDays, Stethoscope } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Phone, Mail, MapPin, Plus, PawPrint, CalendarDays, Stethoscope } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 
 function getInitials(name: string) {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -187,8 +188,7 @@ function calcAge(dob?: string) {
 }
 
 function PetPatientCard({ pet, lastVisit }: { pet: any; lastVisit?: string }) {
-  const speciesName = pet.species?.name?.toLowerCase() || ''
-  const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
+  const Icon = getSpeciesIcon(pet.species?.name)
   const age = calcAge(pet.date_of_birth)
   const sex = pet.sex === 'male' ? 'Macho' : pet.sex === 'female' ? 'Hembra' : null
   const consultas = pet.service_visits?.length ?? 0

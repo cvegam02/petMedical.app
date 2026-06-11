@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import { MedicalRecordCard } from '@/components/medical-records/MedicalRecordCard'
 import { buttonVariants } from '@/components/ui/button'
-import { ChevronLeft, Plus, Cat, Dog, PawPrint, CalendarDays, Cpu, User, ExternalLink, Home, Utensils, ShieldCheck, Users, StickyNote } from 'lucide-react'
+import { ChevronLeft, Plus, CalendarDays, Cpu, User, ExternalLink, Home, Utensils, ShieldCheck, Users, StickyNote } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import Link from 'next/link'
 import { PetCartillaButtons } from '@/components/pets/PetCartillaButtons'
 import { PetServiceCTAs } from '@/components/pets/PetServiceCTAs'
@@ -98,8 +99,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ petI
   }))
   const age = pet.date_of_birth ? calcAge(pet.date_of_birth) : null
 
-  const speciesName = species?.name?.toLowerCase() || ''
-  const Icon = speciesName.includes('fel') ? Cat : speciesName.includes('can') || speciesName.includes('perr') ? Dog : PawPrint
+  const Icon = getSpeciesIcon(species?.name)
 
   return (
     <div className="max-w-4xl mx-auto pb-10">

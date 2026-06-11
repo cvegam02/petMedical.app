@@ -194,6 +194,35 @@
   }
 }
 
+/* ── Sidebar swap transitions ───────────────────────────── */
+@keyframes sidebar-enter-from-right {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes sidebar-enter-from-left {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes sidebar-fade-only {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sidebar-enter-settings {
+  animation: sidebar-enter-from-right 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+.sidebar-enter-main {
+  animation: sidebar-enter-from-left 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-enter-settings,
+  .sidebar-enter-main {
+    animation: sidebar-fade-only 150ms ease-out both;
+  }
+}
+
 /* Calendar loading animation */
 @keyframes rbc-shimmer-x {
   from { transform: translateX(-100%); }

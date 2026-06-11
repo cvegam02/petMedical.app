@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { revalidateTag } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { TenantSettings } from '@/lib/types/database'
 
 const patchBodySchema = z.object({
   name: z.string().min(1).max(100).optional(),
   settings: z.object({
+    address: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    confirmation_reminder_days: z.number().int().min(1).max(30).optional(),
     share_link_expiry_days: z.number().int().min(1).max(365).optional(),
+    prescription_footer_note: z.string().nullable().optional(),
+    prescription_validity_days: z.number().int().min(1).max(365).nullable().optional(),
     business_hours: z.record(z.string(), z.unknown()).optional(),
     appointment_duration_minutes: z.number().int().min(5).max(480).optional(),
     allow_walk_ins: z.boolean().optional(),
@@ -61,5 +67,8 @@ export async function PATCH(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: 'Error al guardar' }, { status: 500 })
+
+  revalidateTag('profiles', 'max')
+
   return NextResponse.json({ data })
 }

@@ -18,8 +18,13 @@ export interface TenantSettings {
   confirmation_reminder_days: number
   share_link_expiry_days: number
   business_hours: BusinessHoursConfig
-  prescription_footer_note?: string
-  prescription_validity_days?: number
+  prescription_footer_note?: string | null
+  prescription_validity_days?: number | null
+  address?: string | null
+  phone?: string | null
+  logo_url?: string | null
+  appointment_duration_minutes?: number
+  allow_walk_ins?: boolean
 }
 
 export interface Tenant {

@@ -398,8 +398,8 @@ export function HotelStayPage({ visitId }: HotelStayPageProps) {
           <div className="flex items-start gap-6">
             {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-2xl bg-muted/40 flex items-center justify-center text-muted-foreground/50">
-                <SpeciesIcon size={36} strokeWidth={2.5} />
+              <div className="w-20 h-20 rounded-2xl bg-muted/40 border border-border/40 flex items-center justify-center">
+                <SpeciesIcon size={34} strokeWidth={1.5} className="text-muted-foreground/70" />
               </div>
               {/* Status dot */}
               <span

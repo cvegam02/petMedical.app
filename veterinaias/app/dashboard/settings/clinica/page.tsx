@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { getUser, getCachedProfile } from '@/lib/queries/profile'
+import type { TenantSettings } from '@/lib/types/database'
 import { ClinicaForm } from '@/components/settings/ClinicaForm'
 import { ConfiguracionForm } from '@/components/settings/ConfiguracionForm'
 import { PrescriptionConfigForm } from '@/components/settings/PrescriptionConfigForm'
@@ -15,25 +16,20 @@ const TABS: { value: ClinicaTab; label: string; href: string }[] = [
 export default async function SettingsClinicaPage({
   searchParams,
 }: {
-  searchParams: { tab?: string }
+  searchParams: Promise<{ tab?: string }>
 }) {
+  const { tab: rawTab } = await searchParams
   const tab: ClinicaTab =
-    searchParams.tab === 'general' ? 'general'
-    : searchParams.tab === 'recetas' ? 'recetas'
+    rawTab === 'general' ? 'general'
+    : rawTab === 'recetas' ? 'recetas'
     : 'info'
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
   if (!user) return null
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('tenant_id, tenants(name, settings)')
-    .eq('id', user.id)
-    .single() as any
-
+  const profile = await getCachedProfile(user.id)
   const tenant   = profile?.tenants
-  const settings = tenant?.settings ?? {}
+  const settings: Partial<TenantSettings> = tenant?.settings ?? {}
 
   return (
     <div className="space-y-6">

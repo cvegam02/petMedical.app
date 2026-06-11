@@ -95,29 +95,32 @@ export function ClinicaForm({ name, address, phone, logoUrl: initialLogoUrl }: C
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
+    <form onSubmit={handleSubmit} className="divide-y divide-border">
+
       {/* Logo */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Logo de la clínica</label>
-        <p className="text-xs text-muted-foreground">Aparece en PDFs y documentos. PNG, JPG o WebP, máx. 2 MB.</p>
-        <div className="flex items-center gap-4">
+      <div className="flex items-start justify-between gap-8 py-5">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground">Logo</p>
+          <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG o WebP · máx. 2 MB · aparece en PDFs</p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
           {logoUrl ? (
-            <div className="relative w-16 h-16 rounded-xl border border-border bg-muted/30 overflow-hidden shrink-0">
+            <div className="relative w-12 h-12 rounded-lg border border-border bg-muted/30 overflow-hidden">
               <Image src={logoUrl} alt="Logo" fill className="object-contain p-1" unoptimized />
             </div>
           ) : (
-            <div className="w-16 h-16 rounded-xl border-2 border-dashed border-border bg-muted/20 flex items-center justify-center shrink-0">
-              <Upload size={18} className="text-muted-foreground/40" />
+            <div className="w-12 h-12 rounded-lg border-2 border-dashed border-border bg-muted/20 flex items-center justify-center">
+              <Upload size={16} className="text-muted-foreground/40" />
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1">
             <button
               type="button"
               disabled={uploading}
               onClick={() => fileRef.current?.click()}
               className="text-sm font-medium text-primary hover:underline disabled:opacity-50 text-left"
             >
-              {uploading ? 'Subiendo...' : logoUrl ? 'Cambiar logo' : 'Subir logo'}
+              {uploading ? 'Subiendo...' : logoUrl ? 'Cambiar' : 'Subir'}
             </button>
             {logoUrl && (
               <button
@@ -140,23 +143,54 @@ export function ClinicaForm({ name, address, phone, logoUrl: initialLogoUrl }: C
         />
       </div>
 
-      <div className="border-t border-border" />
+      {/* Nombre */}
+      <div className="flex items-center justify-between gap-8 py-5">
+        <label htmlFor="nombre" className="text-sm font-medium text-foreground flex-1 min-w-0">
+          Nombre de la clínica
+        </label>
+        <Input
+          id="nombre"
+          value={form.name}
+          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          required
+          className="w-56 shrink-0"
+        />
+      </div>
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Nombre de la clínica</label>
-        <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+      {/* Dirección */}
+      <div className="flex items-center justify-between gap-8 py-5">
+        <label htmlFor="direccion" className="text-sm font-medium text-foreground flex-1 min-w-0">
+          Dirección
+        </label>
+        <Input
+          id="direccion"
+          value={form.address}
+          onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+          placeholder="Calle, número, ciudad"
+          className="w-56 shrink-0"
+        />
       </div>
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Dirección</label>
-        <Input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="Calle, número, ciudad" />
+
+      {/* Teléfono */}
+      <div className="flex items-center justify-between gap-8 py-5">
+        <label htmlFor="telefono" className="text-sm font-medium text-foreground flex-1 min-w-0">
+          Teléfono de contacto
+        </label>
+        <Input
+          id="telefono"
+          value={form.phone}
+          onChange={handlePhoneChange}
+          placeholder="555 123 4567"
+          className="w-56 shrink-0"
+        />
       </div>
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Teléfono de contacto</label>
-        <Input value={form.phone} onChange={handlePhoneChange} placeholder="555 123 4567" />
+
+      {/* Save */}
+      <div className="flex justify-end pt-4 pb-2">
+        <Button type="submit" disabled={saving} size="sm">
+          {saving ? 'Guardando...' : 'Guardar cambios'}
+        </Button>
       </div>
-      <Button type="submit" disabled={saving} size="sm">
-        {saving ? 'Guardando...' : 'Guardar cambios'}
-      </Button>
     </form>
   )
 }

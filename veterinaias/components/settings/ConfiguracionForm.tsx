@@ -34,27 +34,35 @@ export function ConfiguracionForm({ confirmationReminderDays, shareLinkExpiryDay
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-md">
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Anticipación para confirmar citas</label>
-        <p className="text-xs text-muted-foreground">Las citas dentro de este período aparecen en "Por confirmar".</p>
+    <form onSubmit={handleSubmit} className="divide-y divide-border">
+
+      {/* Anticipación */}
+      <div className="flex items-start justify-between gap-8 py-5">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground">Anticipación para confirmar citas</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Las citas dentro de este período aparecen en "Por confirmar".</p>
+        </div>
         <select
           value={form.confirmation_reminder_days}
           onChange={e => setForm(f => ({ ...f, confirmation_reminder_days: Number(e.target.value) }))}
-          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+          className="w-44 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
         >
           <option value={1}>1 día antes</option>
           <option value={2}>2 días antes</option>
           <option value={3}>3 días antes</option>
         </select>
       </div>
-      <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground">Expiración de links compartidos</label>
-        <p className="text-xs text-muted-foreground">Tiempo antes de que un link compartido deje de funcionar.</p>
+
+      {/* Expiración */}
+      <div className="flex items-start justify-between gap-8 py-5">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground">Expiración de links compartidos</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Tiempo antes de que un link compartido deje de funcionar.</p>
+        </div>
         <select
           value={form.share_link_expiry_days}
           onChange={e => setForm(f => ({ ...f, share_link_expiry_days: Number(e.target.value) }))}
-          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
+          className="w-44 shrink-0 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/30"
         >
           <option value={3}>3 días</option>
           <option value={7}>7 días</option>
@@ -62,9 +70,13 @@ export function ConfiguracionForm({ confirmationReminderDays, shareLinkExpiryDay
           <option value={30}>30 días</option>
         </select>
       </div>
-      <Button type="submit" disabled={saving} size="sm">
-        {saving ? 'Guardando...' : 'Guardar cambios'}
-      </Button>
+
+      {/* Save */}
+      <div className="flex justify-end pt-4 pb-2">
+        <Button type="submit" disabled={saving} size="sm">
+          {saving ? 'Guardando...' : 'Guardar cambios'}
+        </Button>
+      </div>
     </form>
   )
 }

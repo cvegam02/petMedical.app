@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { Building2, BookOpen, Plug, Users, ChevronLeft } from 'lucide-react'
+import { Building2, Package, Scissors, Plug, Users, ChevronLeft } from 'lucide-react'
 
 interface SubItem {
   label: string
@@ -28,13 +28,20 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    label: 'Catálogos',
-    icon: BookOpen,
-    href: '/dashboard/settings/catalogos',
+    label: 'Insumos',
+    icon: Package,
+    href: '/dashboard/settings/insumos',
     items: [
-      { label: 'Vacunas',       href: '/dashboard/settings/catalogos' },
-      { label: 'Medicamentos',  href: '/dashboard/settings/catalogos', tab: 'medicamentos' },
-      { label: 'Estética',      href: '/dashboard/settings/catalogos', tab: 'estetica' },
+      { label: 'Vacunas',      href: '/dashboard/settings/insumos' },
+      { label: 'Medicamentos', href: '/dashboard/settings/insumos', tab: 'medicamentos' },
+    ],
+  },
+  {
+    label: 'Servicios',
+    icon: Scissors,
+    href: '/dashboard/settings/servicios',
+    items: [
+      { label: 'Estética', href: '/dashboard/settings/servicios' },
     ],
   },
   { label: 'Integraciones', icon: Plug,  href: '/dashboard/settings/integraciones' },

@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Scissors } from 'lucide-react'
+import { Scissors, BedDouble } from 'lucide-react'
 import { NewAppointmentModal } from '@/components/appointments/NewAppointmentModal'
 import type { BusinessHoursConfig } from '@/lib/utils/time-slots'
 
@@ -15,7 +15,7 @@ interface PetServiceCTAsProps {
   businessHours?: BusinessHoursConfig
 }
 
-type ServiceType = 'consultation' | 'grooming'
+type ServiceType = 'consultation' | 'grooming' | 'boarding'
 
 const SERVICES: { type: ServiceType; label: string; icon: typeof Scissors; description: string }[] = [
   {
@@ -24,7 +24,12 @@ const SERVICES: { type: ServiceType; label: string; icon: typeof Scissors; descr
     icon: Scissors,
     description: 'Baño, corte y cuidado',
   },
-  // Plans 9–11 will add: Estadía, Cirugía, Hospitalización
+  {
+    type: 'boarding',
+    label: 'Hotel',
+    icon: BedDouble,
+    description: 'Estadía y hospedaje',
+  },
 ]
 
 export function PetServiceCTAs({ petId, petName, ownerId, ownerName, team, businessHours }: PetServiceCTAsProps) {
@@ -64,7 +69,7 @@ export function PetServiceCTAs({ petId, petName, ownerId, ownerName, team, busin
         onClose={() => setOpen(false)}
         team={team}
         businessHours={businessHours}
-        initialAppointmentType={selectedType}
+        initialAppointmentType={selectedType as 'consultation' | 'grooming' | 'boarding' | 'cirugia'}
         initialPet={{ petId, petName, ownerId, ownerName }}
       />
     </>

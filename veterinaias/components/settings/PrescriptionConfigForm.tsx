@@ -28,7 +28,6 @@ export function PrescriptionConfigForm({ footerNote, validityDays }: Prescriptio
     buildPreviewUrl(footerNote ?? '', validityDays != null ? String(validityDays) : '', false),
   )
 
-  // Actualiza la vista previa en vivo (con debounce) cuando cambian los campos
   useEffect(() => {
     const t = setTimeout(() => {
       setPreviewUrl(buildPreviewUrl(form.prescription_footer_note, form.prescription_validity_days, true))
@@ -62,39 +61,53 @@ export function PrescriptionConfigForm({ footerNote, validityDays }: Prescriptio
 
   return (
     <div className="space-y-8">
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
-        <div className="space-y-1">
-          <Label htmlFor="footer_note">Nota de pie de página</Label>
+      <form onSubmit={handleSubmit} className="divide-y divide-border">
+
+        {/* Nota de pie */}
+        <div className="flex items-start justify-between gap-8 py-5">
+          <div className="flex-1 min-w-0">
+            <label htmlFor="footer_note" className="text-sm font-medium text-foreground">Nota de pie de página</label>
+            <p className="text-xs text-muted-foreground mt-0.5">Aparece debajo de la leyenda obligatoria en la receta.</p>
+          </div>
           <Input
             id="footer_note"
             value={form.prescription_footer_note}
             onChange={e => setForm(f => ({ ...f, prescription_footer_note: e.target.value }))}
-            placeholder="Ej. Conserve esta receta para su próxima visita"
+            placeholder="Ej. Conserve esta receta..."
+            className="w-64 shrink-0"
           />
-          <p className="text-xs text-muted-foreground">Aparece debajo de la leyenda obligatoria en la receta.</p>
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="validity_days">Vigencia de la receta (días)</Label>
+
+        {/* Vigencia */}
+        <div className="flex items-start justify-between gap-8 py-5">
+          <div className="flex-1 min-w-0">
+            <label htmlFor="validity_days" className="text-sm font-medium text-foreground">Vigencia (días)</label>
+            <p className="text-xs text-muted-foreground mt-0.5">Opcional. Si se define, la receta muestra "Vigencia: X días".</p>
+          </div>
           <Input
             id="validity_days"
             type="number"
             min={1}
             value={form.prescription_validity_days}
             onChange={e => setForm(f => ({ ...f, prescription_validity_days: e.target.value }))}
-            placeholder="Ej. 30"
+            placeholder="30"
+            className="w-64 shrink-0"
           />
-          <p className="text-xs text-muted-foreground">Opcional. Si se define, la receta muestra "Vigencia: X días".</p>
         </div>
-        <Button type="submit" disabled={saving}>
-          {saving ? 'Guardando...' : 'Guardar'}
-        </Button>
+
+        {/* Save */}
+        <div className="flex justify-end pt-4 pb-2">
+          <Button type="submit" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar'}
+          </Button>
+        </div>
       </form>
 
-      {/* Vista previa del documento (tamaño carta, datos de muestra) */}
+      {/* Vista previa */}
       <div>
         <Label>Vista previa</Label>
         <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-          Documento de muestra con los datos de tu clínica, en tamaño carta. Así se verá impreso.
+          Documento de muestra con los datos de tu clínica, en tamaño carta.
         </p>
         <div className="w-full max-w-[640px] aspect-[8.5/11] border border-border rounded-lg overflow-hidden bg-white shadow-sm">
           <iframe src={previewUrl} className="w-full h-full" title="Vista previa de receta" />

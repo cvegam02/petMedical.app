@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Clock, User, Info, FileText, Phone, Mail, PawPrint } from 'lucide-react'
+import { ChevronLeft, Clock, User, Info, FileText, Phone, Mail } from 'lucide-react'
+import { getSpeciesIcon } from '@/lib/utils/species-icon'
 import { createClient } from '@/lib/supabase/server'
 import { StatusActions } from '@/components/appointments/StatusActions'
 import { Badge } from '@/components/ui/badge'
@@ -40,6 +41,7 @@ export default async function ConsultaDetailPage({ params }: { params: Promise<{
   })
 
   const status = APPOINTMENT_STATUS_CONFIG[appointment.status] ?? APPOINTMENT_STATUS_CONFIG.scheduled
+  const PetIcon = getSpeciesIcon(pet?.species?.name)
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -190,7 +192,7 @@ export default async function ConsultaDetailPage({ params }: { params: Promise<{
 
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary/40">
-                <PawPrint size={24} />
+                <PetIcon size={24} />
               </div>
               <div className="min-w-0">
                 <h4 className="text-base font-bold text-foreground leading-none">{pet?.name}</h4>
